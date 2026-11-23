@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Painel de preços · TV</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;800;900&display=swap" rel="stylesheet">
+<style>
+  html,body{margin:0;height:100%;background:#000;overflow:hidden}
+  #tela{position:fixed;inset:0}
+  #cheia{position:fixed;right:14px;bottom:14px;z-index:9;opacity:0;transition:opacity .3s;background:rgba(0,0,0,.6);color:#fff;border:1px solid #555;border-radius:10px;padding:10px 14px;font:600 15px system-ui;cursor:pointer}
+  body:hover #cheia,#cheia:focus{opacity:1}
+  #aviso{position:fixed;inset:0;display:none;place-items:center;color:#ddd;font:500 20px system-ui;text-align:center;padding:30px;background:#111}
+</style>
+</head>
+<body>
+<div id="tela"></div>
+<button id="cheia" type="button">Tela cheia</button>
+<div id="aviso" role="alert"></div>
+<script type="module">
+import { desenhar, decodificar, padrao, promoValida, telaFechada, coresDe } from '../painel.js';
+const tela = document.getElementById('tela'), aviso = document.getElementById('aviso');
+let atual = null, assinatura = '';
+
+// de onde vem a configuração: 1) ?loja= na nuvem  2) #c= no link  3) o que o editor salvou neste aparelho
+const q = new URLSearchParams(location.search), loja = q.get('loja');
+async function ler(){
+  if (loja){
+    try { const r = await fetch(`/api/painel?loja=${encodeURIComponent(loja)}`, { cache: 'no-store' }); if (r.ok) return (await r.json()).cfg; } catch {}
+  }
+  const h = location.hash.match(/c=([^&]+)/);
+  if (h){ try { return await decodificar(h[1]); } catch { mostrarAviso('Este link da TV está incompleto. Copie de novo no editor do dono.'); return null; } }
+  try { const s = localStorage.getItem('acougue-painel'); if (s) return JSON.parse(s); } catch {}
+  return padrao();
+}
+function mostrarAviso(t){ aviso.textContent = t; aviso.style.display = 'grid'; }
+const esc = t => String(t ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+// fora do horário de exibição a TV mostra só o nome da loja
+function pintarFechada(cfg){
+  const cor = coresDe(cfg);
+  tela.innerHTML = `<div style="position:absolute;inset:0;background:${cor.fundo};color:${cor.texto};display:flex;flex-direction:column;align-items:center;justify-content:center;gap:26px;text-align:center;padding:40px;font-family:Archivo,system-ui,sans-serif">
+    <div style="font-weight:900;font-size:min(7vh,5.5vw);text-transform:uppercase;letter-spacing:.06em;line-height:1.1">${esc(cfg.loja)}</div>
+    ${cfg.horario ? `<div style="font-size:min(3vh,2.4vw);opacity:.85">${esc(cfg.horario)}</div>` : ''}
+    ${cfg.horarioTV?.de ? `<div style="font-weight:800;font-size:min(3.4vh,2.8vw);color:${cor.destaque}">Abrimos às ${esc(cfg.horarioTV.de)}</div>` : ''}
+  </div>`;
+}
+async function atualizar(){
+  const cfg = await ler(); if (!cfg) return;
+  const ass = JSON.stringify(cfg) + promoValida(cfg) + '|' + telaFechada(cfg);   // virar o dia liga/desliga a promoção e a tela fechada
+  if (ass === assinatura) return;                      // só redesenha quando algo mudou
+  assinatura = ass; aviso.style.display = 'none';
+  atual?.parar(); atual = null;
+  if (telaFechada(cfg)) return void pintarFechada(cfg);
+  atual = desenhar(tela, cfg, { forcarMovimento: true });
+}
+atualizar();
+setInterval(atualizar, 20000);                                  // nuvem: confere a cada 20 s
+addEventListener('storage', e => { if (e.key === 'acougue-painel') atualizar(); });   // mesmo aparelho: na hora
+addEventListener('hashchange', atualizar);
+addEventListener('resize', () => { assinatura = ''; atualizar(); });
+document.getElementById('cheia').onclick = () => document.documentElement.requestFullscreen?.();
+// tela não apaga sozinha
+async function acordado(){ try { await navigator.wakeLock?.request('screen'); } catch {} }
+acordado(); document.addEventListener('visibilitychange', () => document.visibilityState === 'visible' && acordado());
+</script>
+</body>
+</html>

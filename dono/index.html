@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Painel do dono · Açougue Venda Rápida</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;800;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{--f:#141110;--c:#1e1a18;--l:#372f2b;--t:#f6efe6;--s:#c9bcae;--b:#b3341f;--o:#e8b04b;--ok:#3fb27f}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--f);color:var(--t);font:15px/1.5 Inter,system-ui,sans-serif}
+  :focus-visible{outline:3px solid var(--o);outline-offset:2px}
+  header{position:sticky;top:0;z-index:10;display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:10px 16px;background:rgba(20,17,16,.95);border-bottom:1px solid var(--l)}
+  header h1{font:900 17px Archivo,sans-serif;margin:0 auto 0 0}header h1 span{color:#ff6a3d}
+  .estado{font-size:13px;color:var(--s)}
+  button,.btn{font:600 14px Inter,sans-serif;border-radius:10px;border:1px solid var(--l);background:var(--c);color:var(--t);padding:9px 13px;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:6px}
+  button.prim,.btn.prim{background:var(--b);border-color:var(--b);color:#fff}
+  button:hover{border-color:var(--s)}
+  main{display:grid;grid-template-columns:minmax(330px,440px) 1fr;gap:16px;padding:16px;align-items:start}
+  aside{display:flex;flex-direction:column;gap:12px}
+  details{background:var(--c);border:1px solid var(--l);border-radius:14px;padding:4px 14px}
+  details[open]{padding-bottom:14px}
+  summary{cursor:pointer;font:800 15px Archivo,sans-serif;padding:10px 0;list-style:none;display:flex;justify-content:space-between}
+  summary::after{content:'+';color:var(--s)}details[open] summary::after{content:'–'}
+  label{display:block;font-size:13px;color:var(--s);margin:10px 0 4px}
+  input[type=text],input[type=number],select,textarea{width:100%;background:#120f0e;border:1px solid var(--l);color:var(--t);border-radius:9px;padding:9px 10px;font:inherit}
+  input[type=range]{width:100%}
+  .lado{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  .grupo{display:flex;flex-wrap:wrap;gap:6px}
+  .grupo button[aria-pressed="true"]{border-color:var(--o);box-shadow:inset 0 0 0 1px var(--o)}
+  .tema{width:64px;height:40px;border-radius:9px;border:2px solid var(--l);font-size:11px;font-weight:700;display:grid;place-items:center}
+  .cores{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+  .cores label{margin:0}
+  .cores input{width:100%;height:36px;border:1px solid var(--l);border-radius:8px;background:none;padding:2px}
+  .it .de,input[type=date]{color-scheme:dark}
+  .alerta{font-size:13px;color:#ffcf8a;margin-top:6px}
+  .ok{font-size:13px;color:#8be0b6;margin-top:6px}
+  .cantos{display:grid;grid-template-columns:1fr 1fr;gap:6px;width:150px}
+  table{width:100%;border-collapse:collapse}
+  .itens{display:flex;flex-direction:column;gap:6px}
+  .it{display:grid;grid-template-columns:22px 1fr 86px 52px 30px 30px 30px;gap:5px;align-items:center;background:#171311;border:1px solid var(--l);border-radius:10px;padding:5px}
+  .it.arrastando{opacity:.5;border-style:dashed}
+  .it .alca{cursor:grab;color:var(--s);text-align:center;touch-action:none;user-select:none;font-size:18px;line-height:1}
+  .it input,.it select{padding:6px 6px;font-size:14px}
+  .it button{padding:4px 0;justify-content:center}
+  .it button[aria-pressed="true"].of{background:var(--o);color:#1a1208;border-color:var(--o)}
+  .it button[aria-pressed="true"].es{background:#555;color:#fff}
+  .it .cat{grid-column:2/4}.it .de{grid-column:4/8}
+  .area{position:sticky;top:70px}
+  .moldura{background:#000;border:10px solid #2a2421;border-radius:16px;box-shadow:0 30px 60px -30px #000;overflow:hidden;margin:0 auto}
+  .moldura.paisagem{aspect-ratio:16/9;width:100%}
+  .moldura.retrato{aspect-ratio:9/16;height:min(78vh,900px)}
+  .dica{color:var(--s);font-size:13px;text-align:center;margin:8px 0}
+  .linkbox{display:flex;gap:6px;margin-top:8px}
+  #toast{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);background:#0f2219;border:1px solid var(--ok);color:#dff7ea;padding:10px 16px;border-radius:12px;display:none;z-index:30}
+  @media (max-width:900px){main{grid-template-columns:1fr}.area{position:static;order:-1}}
+  @media print{body{background:#fff;color:#000}header,aside,.area,#toast{display:none}#impressao{display:block!important}}
+  #impressao{display:none;font-family:Archivo,sans-serif;padding:20px}
+  #impressao h2{font-size:30px;margin:0 0 4px}#impressao table td{border-bottom:1px solid #ccc;padding:8px;font-size:20px}#impressao td.p{text-align:right;font-weight:900}
+</style>
+</head>
+<body>
+<header>
+  <h1>Painel do dono · <span>Açougue Venda Rápida</span></h1>
+  <span class="estado" id="estado" aria-live="polite">Salvo neste aparelho</span>
+  <a class="btn" href="../tv/" target="_blank" rel="noopener">Abrir a TV</a>
+  <button class="prim" id="btnLink" type="button">Enviar para a TV</button>
+</header>
+
+<main>
+<aside aria-label="Ajustes do painel">
+  <details open><summary>Tabela de preços</summary>
+    <p class="estado" style="margin:0 0 8px">Arraste pela alça ⋮⋮ para mudar a ordem. ★ = oferta, Ø = esgotado.</p>
+    <div class="itens" id="itens"></div>
+    <div class="grupo" style="margin-top:8px">
+      <button type="button" id="btnNovo">+ Corte</button>
+      <button type="button" id="btnImprimir">Imprimir tabela</button>
+    </div>
+    <label for="reaj">Reajustar todos os preços (%)</label>
+    <div class="lado"><input type="number" id="reaj" step="0.5" placeholder="ex.: 5 ou -3"><button type="button" id="btnReaj">Aplicar</button></div>
+    <label><input type="checkbox" id="agrupar"> Separar por categoria na TV</label>
+  </details>
+
+  <details open><summary>Promoção da semana</summary>
+    <label><input type="checkbox" id="promoAtiva"> Mostrar promoção</label>
+    <label for="promoFoto">Foto da promoção</label><input type="file" id="promoFoto" accept="image/*">
+    <button type="button" id="promoTira" style="margin-top:6px">Tirar foto</button>
+    <div class="lado"><div><label for="promoTitulo">Chamada</label><input type="text" id="promoTitulo" maxlength="30"></div><div><label for="promoItem">Produto</label><input type="text" id="promoItem" maxlength="30"></div></div>
+    <div class="lado"><div><label for="promoPreco">Preço (R$)</label><input type="number" id="promoPreco" step="0.01" min="0" inputmode="decimal"></div><div><label for="promoUn">Unidade</label><select id="promoUn"><option>kg</option><option>un</option><option>bandeja</option><option>100 g</option></select></div></div>
+    <label for="promoVal">Texto da validade</label><input type="text" id="promoVal" maxlength="40">
+    <div class="lado"><div><label for="promoIni">Começa em</label><input type="date" id="promoIni"></div><div><label for="promoFim">Termina em</label><input type="date" id="promoFim"></div></div>
+    <p class="estado">Fora dessas datas a TV esconde a promoção sozinha e mostra só os preços.</p>
+  </details>
+
+  <details open><summary>Layout e movimento</summary>
+    <label>Tela da TV</label>
+    <div class="grupo" id="orient"><button type="button" data-v="paisagem">Deitada (16:9)</button><button type="button" data-v="retrato">Em pé (9:16)</button></div>
+    <label>Onde fica cada coisa</label><div class="grupo" id="arranjo"></div>
+    <label>Como os preços se mexem</label><div class="grupo" id="movimento"></div>
+    <label for="vel">Velocidade</label><input type="range" id="vel" min="10" max="120">
+    <label for="fonte">Tamanho da letra</label><input type="range" id="fonte" min="70" max="150">
+    <p class="estado">Na prévia, arraste a barra entre a promoção e os preços para mudar o tamanho.</p>
+  </details>
+
+  <details><summary>Logo e identidade</summary>
+    <div class="lado"><div><label for="loja">Nome do açougue</label><input type="text" id="loja" maxlength="32"></div><div><label for="sub">Frase</label><input type="text" id="sub" maxlength="40"></div></div>
+    <label for="logo">Logo (PNG com fundo transparente fica melhor)</label><input type="file" id="logo" accept="image/*">
+    <button type="button" id="logoTira" style="margin-top:6px">Tirar logo</button>
+    <label>Canto da logo (depois arraste na prévia para ajustar)</label>
+    <div class="cantos" id="cantos"><button type="button" data-c="se">↖ Em cima esq.</button><button type="button" data-c="sd">↗ Em cima dir.</button><button type="button" data-c="ie">↙ Embaixo esq.</button><button type="button" data-c="id">↘ Embaixo dir.</button></div>
+    <label for="logoTam">Tamanho da logo</label><input type="range" id="logoTam" min="6" max="35">
+  </details>
+
+  <details><summary>Cores</summary>
+    <div class="grupo" id="temas"></div>
+    <label>Personalizar</label>
+    <div class="cores">
+      <label>Fundo<input type="color" id="cFundo"></label><label>Texto<input type="color" id="cTexto"></label>
+      <label>Destaque<input type="color" id="cDest"></label><label>Preço<input type="color" id="cPreco"></label>
+    </div>
+    <div id="contraste"></div>
+  </details>
+
+  <details><summary>Horário e rodapé</summary>
+    <label><input type="checkbox" id="relogio"> Relógio</label><label><input type="checkbox" id="data"> Data</label>
+    <label for="horario">Horário de funcionamento</label><input type="text" id="horario" maxlength="60">
+    <label for="rodape">Faixa do rodapé</label><input type="text" id="rodape" maxlength="60">
+    <label style="margin-top:14px"><input type="checkbox" id="tvAtiva"> Liga e desliga a TV no horário</label>
+    <div class="lado"><div><label for="tvDe">Abre às</label><input type="time" id="tvDe"></div><div><label for="tvAte">Fecha às</label><input type="time" id="tvAte"></div></div>
+    <p class="estado" style="margin-top:4px">Fora desse horário a TV mostra só o nome da loja e a hora que abre.</p>
+  </details>
+
+  <details><summary>Cópia de segurança</summary>
+    <div class="grupo"><button type="button" id="btnExp">Baixar cópia</button><label class="btn" style="margin:0">Restaurar cópia<input type="file" id="imp" accept="application/json" hidden></label><button type="button" id="btnZerar">Voltar ao exemplo</button></div>
+  </details>
+</aside>
+
+<section class="area" aria-label="Prévia da TV">
+  <div class="moldura paisagem" id="moldura"><div id="previa" style="width:100%;height:100%"></div></div>
+  <p class="dica">Prévia ao vivo. Arraste a logo e a barra do meio.</p>
+  <p class="alerta" id="avisoLogo" hidden>A logo está cobrindo o preço da lista — arraste-a para cima, perto do título, ou reduza o tamanho.</p>
+  <p class="alerta" id="avisoTela" hidden>Fora do horário de exibição: agora a TV mostra a tela fechada.</p>
+  <div id="linkArea" hidden>
+    <label for="linkTv">Link da TV (abra este endereço no navegador da TV)</label>
+    <div class="linkbox"><input type="text" id="linkTv" readonly><button type="button" id="btnCopiar">Copiar</button></div>
+    <p class="estado" id="linkInfo"></p>
+  </div>
+</section>
+</main>
+<div id="impressao"></div>
+<div id="toast" role="status"></div>
+
+<script type="module">
+import { desenhar, padrao, TEMAS, ARRANJOS, MOVIMENTOS, CATEGORIAS, coresDe, contraste, codificar, reduzirImagem, telaFechada } from '../painel.js';
+const $ = id => document.getElementById(id);
+const CHAVE = 'acougue-painel';
+let cfg; try { cfg = JSON.parse(localStorage.getItem(CHAVE)) || padrao(); } catch { cfg = padrao(); }
+let desenho = null, tSalvar = null;
+
+function toast(t){ const e = $('toast'); e.textContent = t; e.style.display = 'block'; clearTimeout(e._t); e._t = setTimeout(() => e.style.display = 'none', 2600); }
+function salvar(){
+  $('estado').textContent = 'Salvando…';
+  clearTimeout(tSalvar);
+  tSalvar = setTimeout(() => {
+    cfg.atualizado = Date.now();
+    try { localStorage.setItem(CHAVE, JSON.stringify(cfg)); $('estado').textContent = 'Salvo neste aparelho · ' + new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }); }
+    catch { $('estado').textContent = 'Não coube na memória do aparelho: use fotos menores.'; }
+    $('linkArea').hidden = true;
+  }, 300);
+}
+function previa(){
+  $('moldura').className = 'moldura ' + (cfg.orientacao || 'paisagem');
+  desenho?.parar(); desenho = desenhar($('previa'), cfg, { editavel: true, mudou: () => { salvar(); previa(); } });
+  avisoContraste(); checarHorario(); checarLogo();
+  const img = $('previa').querySelector('.logo img');   // o tamanho da logo só é conhecido depois do load
+  img?.addEventListener('load', checarLogo);
+}
+function checarLogo(){
+  requestAnimationFrame(() => {
+    const pn = $('previa');
+    const lg = pn.querySelector('.logo'); let cruza = false;
+    if (lg){ const r = lg.getBoundingClientRect();
+      for (const li of pn.querySelectorAll('.li')){ const b = li.getBoundingClientRect();
+        if (r.left < b.right && r.right > b.left && r.top < b.bottom && r.bottom > b.top){ cruza = true; break; } } }
+    $('avisoLogo').hidden = !cruza;
+  });
+}
+function checarHorario(){ $('avisoTela').hidden = !telaFechada(cfg); }
+setInterval(checarHorario, 60000);
+const mudou = () => { salvar(); previa(); };
+
+// ---------- tabela de preços ----------
+const brlIn = v => Number(v || 0).toFixed(2);
+function itens(){
+  const box = $('itens'); box.innerHTML = '';
+  cfg.itens.forEach((it, i) => {
+    const d = document.createElement('div'); d.className = 'it'; d.dataset.i = i;
+    d.innerHTML = `<span class="alca" title="Arraste para mudar a ordem" aria-label="Mover ${it.n}" tabindex="0">⋮⋮</span>
+      <input type="text" aria-label="Nome do corte" value="${it.n.replace(/"/g, '&quot;')}" maxlength="28">
+      <input type="number" aria-label="Preço de ${it.n}" step="0.01" min="0" inputmode="decimal" value="${brlIn(it.p)}">
+      <select aria-label="Unidade">${['kg', 'un', 'bandeja', '100 g'].map(u => `<option${u === it.u ? ' selected' : ''}>${u}</option>`).join('')}</select>
+      <button type="button" class="of" aria-pressed="${!!it.of}" title="Oferta" aria-label="Marcar ${it.n} como oferta">★</button>
+      <button type="button" class="es" aria-pressed="${!!it.esg}" title="Esgotado" aria-label="Marcar ${it.n} como esgotado">Ø</button>
+      <button type="button" title="Remover" aria-label="Remover ${it.n}">✕</button>
+      <span></span><select class="cat" aria-label="Categoria de ${it.n}">${CATEGORIAS.map(c => `<option${c === it.c ? ' selected' : ''}>${c}</option>`).join('')}</select>
+      <input type="number" class="de" step="0.01" min="0" inputmode="decimal" placeholder="de R$" title="Preço antigo: aparece riscado (de/por)" aria-label="Preço antigo de ${it.n} (de/por)" value="${it.de || ''}">`;
+    const [alca, nome, preco, un, of, es, rem, , cat, de] = d.children;
+    de.oninput = () => { it.de = parseFloat(de.value.replace(',', '.')) || 0; mudou(); };
+    nome.oninput = () => { it.n = nome.value; mudou(); };
+    preco.oninput = () => { it.p = parseFloat(preco.value.replace(',', '.')) || 0; mudou(); };
+    un.onchange = () => { it.u = un.value; mudou(); };
+    cat.onchange = () => { it.c = cat.value; mudou(); };
+    of.onclick = () => { it.of = !it.of; of.setAttribute('aria-pressed', it.of); mudou(); };
+    es.onclick = () => { it.esg = !it.esg; es.setAttribute('aria-pressed', it.esg); mudou(); };
+    rem.onclick = () => { cfg.itens.splice(i, 1); itens(); mudou(); };
+    alca.onkeydown = e => { const j = e.key === 'ArrowUp' ? i - 1 : e.key === 'ArrowDown' ? i + 1 : -1; if (j >= 0 && j < cfg.itens.length){ e.preventDefault(); mover(i, j); box.children[j].querySelector('.alca').focus(); } };
+    alca.addEventListener('pointerdown', e => arrastar(e, d, i));
+    box.append(d);
+  });
+}
+function mover(de, para){ const [x] = cfg.itens.splice(de, 1); cfg.itens.splice(para, 0, x); itens(); mudou(); }
+function arrastar(e, linha, i){
+  e.preventDefault(); linha.classList.add('arrastando');
+  const box = $('itens');
+  const sobre = ev => {
+    const alvo = [...box.children].find(c => { const r = c.getBoundingClientRect(); return ev.clientY >= r.top && ev.clientY <= r.bottom; });
+    if (alvo && alvo !== linha){ const r = alvo.getBoundingClientRect(); box.insertBefore(linha, ev.clientY < r.top + r.height / 2 ? alvo : alvo.nextSibling); }
+  };
+  const fim = () => {
+    removeEventListener('pointermove', sobre); linha.classList.remove('arrastando');
+    const nova = [...box.children].map(c => cfg.itens[+c.dataset.i]); cfg.itens = nova; itens(); mudou();
+  };
+  addEventListener('pointermove', sobre); addEventListener('pointerup', fim, { once: true });
+}
+$('btnNovo').onclick = () => { cfg.itens.push({ n: 'Novo corte', c: 'Bovinos', p: 0, u: 'kg', of: false, esg: false }); itens(); mudou(); $('itens').lastChild.querySelector('input').select(); };
+$('btnReaj').onclick = () => {
+  const pct = parseFloat($('reaj').value.replace(',', '.')); if (!pct) return;
+  cfg.itens.forEach(it => it.p = Math.round(it.p * (1 + pct / 100) * 100) / 100);
+  itens(); mudou(); toast(`Preços ${pct > 0 ? 'aumentados' : 'reduzidos'} em ${Math.abs(pct)}%.`); $('reaj').value = '';
+};
+$('agrupar').onchange = e => { cfg.agruparCategoria = e.target.checked; mudou(); };
+$('btnImprimir').onclick = () => {
+  const b = v => Number(v).toLocaleString('pt-BR', { minimumFractionDigits: 2 });
+  $('impressao').innerHTML = `<h2>${cfg.loja}</h2><p>Tabela de preços · ${new Date().toLocaleDateString('pt-BR')}</p><table>${cfg.itens.map(i => `<tr><td>${i.n}${i.of ? ' (oferta)' : ''}</td><td class="p">${i.esg ? 'esgotado' : 'R$ ' + b(i.p) + '/' + i.u}</td></tr>`).join('')}</table>`;
+  print();
+};
+
+// ---------- promoção ----------
+const liga = (id, get, set, ev = 'input') => { const e = $(id); get(e); e.addEventListener(ev, () => { set(e); mudou(); }); };
+liga('promoAtiva', e => e.checked = cfg.promo.ativa, e => cfg.promo.ativa = e.checked, 'change');
+liga('promoTitulo', e => e.value = cfg.promo.titulo || '', e => cfg.promo.titulo = e.value);
+liga('promoItem', e => e.value = cfg.promo.item || '', e => cfg.promo.item = e.value);
+liga('promoPreco', e => e.value = cfg.promo.preco ?? '', e => cfg.promo.preco = parseFloat(e.value) || 0);
+liga('promoUn', e => e.value = cfg.promo.unidade || 'kg', e => cfg.promo.unidade = e.value, 'change');
+liga('promoIni', e => e.value = cfg.promo.inicio || '', e => cfg.promo.inicio = e.value, 'change');
+liga('promoFim', e => e.value = cfg.promo.fim || '', e => cfg.promo.fim = e.value, 'change');
+liga('promoVal', e => e.value = cfg.promo.validade || '', e => cfg.promo.validade = e.value);
+$('promoFoto').onchange = async e => { const f = e.target.files[0]; if (!f) return; try { cfg.promo.foto = await reduzirImagem(f, 1100, .74); mudou(); toast('Foto da promoção colocada.'); } catch (er) { toast(er.message); } };
+$('promoTira').onclick = () => { cfg.promo.foto = null; mudou(); };
+
+// ---------- layout ----------
+function grupo(id, opcoes, chave){
+  const g = $(id); g.innerHTML = '';
+  Object.entries(opcoes).forEach(([v, t]) => { const b = document.createElement('button'); b.type = 'button'; b.dataset.v = v; b.textContent = t; g.append(b); });
+  const marca = () => g.querySelectorAll('button').forEach(b => b.setAttribute('aria-pressed', b.dataset.v === cfg[chave]));
+  g.onclick = e => { const b = e.target.closest('button'); if (!b) return; cfg[chave] = b.dataset.v; marca(); mudou(); };
+  marca();
+}
+grupo('arranjo', ARRANJOS, 'arranjo');
+grupo('movimento', MOVIMENTOS, 'movimento');
+grupo('orient', { paisagem: 'Deitada (16:9)', retrato: 'Em pé (9:16)' }, 'orientacao');
+liga('vel', e => e.value = cfg.velocidade, e => cfg.velocidade = +e.value);
+liga('fonte', e => e.value = cfg.tamFonte, e => cfg.tamFonte = +e.value);
+
+// ---------- logo e identidade ----------
+liga('loja', e => e.value = cfg.loja, e => cfg.loja = e.value);
+liga('sub', e => e.value = cfg.subtitulo || '', e => cfg.subtitulo = e.value);
+$('logo').onchange = async e => { const f = e.target.files[0]; if (!f) return; try { cfg.logo = await reduzirImagem(f, 420, .9); mudou(); toast('Logo colocada. Arraste na prévia para ajustar.'); } catch (er) { toast(er.message); } };
+$('logoTira').onclick = () => { cfg.logo = null; mudou(); };
+$('cantos').onclick = e => { const b = e.target.closest('button'); if (!b) return; cfg.logoPos = { canto: b.dataset.c, x: 3, y: 4 }; marcaCantos(); mudou(); };
+const marcaCantos = () => $('cantos').querySelectorAll('button').forEach(b => b.setAttribute('aria-pressed', b.dataset.c === cfg.logoPos?.canto));
+marcaCantos();
+liga('logoTam', e => e.value = cfg.logoTam, e => cfg.logoTam = +e.value);
+
+// ---------- cores ----------
+function temas(){
+  const g = $('temas'); g.innerHTML = '';
+  Object.entries(TEMAS).forEach(([k, t]) => { const b = document.createElement('button'); b.type = 'button'; b.className = 'tema'; b.style.background = t.fundo; b.style.color = t.destaque; b.textContent = t.nome; b.setAttribute('aria-pressed', cfg.tema === k && !cfg.cores); b.onclick = () => { cfg.tema = k; cfg.cores = null; temas(); pintaCores(); mudou(); }; g.append(b); });
+}
+const MAPA = { cFundo: 'fundo', cTexto: 'texto', cDest: 'destaque', cPreco: 'preco' };
+function pintaCores(){ const c = coresDe(cfg); Object.entries(MAPA).forEach(([id, k]) => $(id).value = c[k]); }
+Object.entries(MAPA).forEach(([id, k]) => $(id).addEventListener('input', e => { cfg.cores = { ...coresDe(cfg), [k]: e.target.value }; temas(); mudou(); }));
+function avisoContraste(){
+  const c = coresDe(cfg), a = contraste(c.texto, c.fundo), b = contraste(c.preco, c.faixa);
+  const ruim = Math.min(a, b) < 4.5;
+  $('contraste').innerHTML = `<p class="${ruim ? 'alerta' : 'ok'}">${ruim ? 'Atenção: com essas cores o texto fica difícil de ler de longe' : 'Leitura boa de longe'} (contraste ${a.toFixed(1)} no texto e ${b.toFixed(1)} no preço; o mínimo é 4,5).</p>`;
+}
+temas(); pintaCores();
+
+// ---------- horário ----------
+liga('relogio', e => e.checked = cfg.relogio, e => cfg.relogio = e.checked, 'change');
+liga('data', e => e.checked = cfg.data, e => cfg.data = e.checked, 'change');
+liga('horario', e => e.value = cfg.horario || '', e => cfg.horario = e.value);
+liga('rodape', e => e.value = cfg.faixaRodape || '', e => cfg.faixaRodape = e.value);
+const tvCfg = e => { cfg.horarioTV = { ...(cfg.horarioTV || { ativa: false, de: '07:00', ate: '22:00' }), ...e }; mudou(); };
+liga('tvAtiva', x => x.checked = !!cfg.horarioTV?.ativa, e => tvCfg({ ativa: e.checked }), 'change');
+liga('tvDe', e => e.value = cfg.horarioTV?.de || '', e => tvCfg({ de: e.value }), 'change');
+liga('tvAte', e => e.value = cfg.horarioTV?.ate || '', e => tvCfg({ ate: e.value }), 'change');
+$('agrupar').checked = !!cfg.agruparCategoria;
+
+// ---------- cópia de segurança ----------
+$('btnExp').onclick = () => { const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([JSON.stringify(cfg, null, 1)], { type: 'application/json' })); a.download = `painel-${(cfg.loja || 'acougue').toLowerCase().replace(/\W+/g, '-')}.json`; a.click(); };
+$('imp').onchange = async e => { try { cfg = { ...padrao(), ...JSON.parse(await e.target.files[0].text()) }; localStorage.setItem(CHAVE, JSON.stringify(cfg)); location.reload(); } catch { toast('Esse arquivo não é uma cópia do painel.'); } };
+$('btnZerar').onclick = () => { if (confirm('Voltar ao exemplo? Seus preços e fotos deste aparelho serão substituídos.')){ localStorage.removeItem(CHAVE); location.reload(); } };
+
+// ---------- enviar para a TV ----------
+$('btnLink').onclick = async () => {
+  localStorage.setItem(CHAVE, JSON.stringify(cfg));
+  const cod = await codificar(cfg);
+  const url = new URL('../tv/', location.href).href + '#c=' + cod;
+  $('linkTv').value = url; $('linkArea').hidden = false;
+  $('linkInfo').textContent = `Na TV deste aparelho a tela já atualiza sozinha. Para outra TV, abra este link nela (${Math.round(url.length / 1024)} KB). Mudou o preço? Envie o link de novo.`;
+  $('linkTv').select();
+};
+$('btnCopiar').onclick = async () => { try { await navigator.clipboard.writeText($('linkTv').value); toast('Link copiado.'); } catch { $('linkTv').select(); toast('Selecionei o link: copie com Ctrl+C.'); } };
+
+itens(); previa();
+addEventListener('resize', () => previa());
+</script>
+</body>
+</html>

@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Açougue Venda Rápida · Kairós Digital</title>
+<meta name="description" content="Painel de preços na TV que você edita do celular, catálogo com combos e pedido pelo WhatsApp com Pix. Para açougues de bairro.">
+<meta name="robots" content="noindex">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;700;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/motion@11/dist/motion.js"></script>
+<style>
+  :root{--carvao:#141110;--carvao2:#1e1a18;--linha:#372f2b;--creme:#f6efe6;--suave:#c9bcae;--brasa:#d6452b;--brasa2:#ff6a3d;--ouro:#e8b04b;--verde:#3fb27f}
+  *{box-sizing:border-box}html{scroll-behavior:smooth}
+  body{margin:0;background:var(--carvao);color:var(--creme);font:16px/1.6 Inter,system-ui,sans-serif;overflow-x:hidden}
+  h1,h2,h3{font-family:Archivo,Inter,sans-serif;line-height:1.08;margin:0}
+  a{color:inherit}
+  .wrap{max-width:1160px;margin:0 auto;padding:0 20px}
+  :focus-visible{outline:3px solid var(--ouro);outline-offset:3px}
+  #brasas{position:fixed;inset:0;z-index:-1;pointer-events:none}
+  nav.topo{position:sticky;top:0;z-index:20;background:rgba(20,17,16,.86);backdrop-filter:blur(10px);border-bottom:1px solid var(--linha)}
+  nav.topo .wrap{display:flex;align-items:center;justify-content:space-between;height:62px}
+  .marca{font:900 18px Archivo,sans-serif;letter-spacing:.5px}.marca span{color:var(--brasa2)}
+  .btn{display:inline-flex;align-items:center;gap:8px;border:0;border-radius:12px;padding:14px 22px;font:700 16px Inter,sans-serif;cursor:pointer;text-decoration:none;transition:transform .2s,box-shadow .2s}
+  .btn.prim{background:linear-gradient(180deg,#b3341f,#922713);color:#fff;box-shadow:0 10px 30px -10px rgba(214,69,43,.8)}
+  .btn.prim:hover{transform:translateY(-2px);box-shadow:0 16px 40px -10px rgba(214,69,43,.9)}
+  .btn.sec{background:transparent;color:var(--creme);border:1px solid var(--linha)}
+  .btn.sec:hover{border-color:var(--suave)}
+  .tag{display:inline-block;border:1px solid var(--linha);border-radius:999px;padding:5px 12px;font-size:13px;color:var(--suave)}
+  /* hero */
+  .hero{padding:70px 0 40px}.hero .wrap{display:grid;grid-template-columns:1.05fr 1fr;gap:44px;align-items:center}
+  .hero h1{font-size:clamp(38px,6vw,66px);font-weight:900;letter-spacing:-1px}
+  .hero h1 em{font-style:normal;color:var(--brasa2)}
+  .hero p.lead{font-size:19px;color:var(--suave);max-width:560px;margin:18px 0 26px}
+  .hero .acoes{display:flex;gap:12px;flex-wrap:wrap}
+  .prova{display:flex;gap:22px;margin-top:28px;flex-wrap:wrap}.prova div b{display:block;font:900 26px Archivo,sans-serif;color:var(--ouro)}.prova div span{font-size:13px;color:var(--suave)}
+  .palavra{display:inline-block}
+  /* TV mockup */
+  .tv{perspective:1200px}
+  .tela{transform:rotateY(-10deg) rotateX(4deg);transform-style:preserve-3d;transition:transform .4s;background:#0b0908;border:10px solid #2a2421;border-radius:18px;box-shadow:0 40px 80px -30px #000,0 0 0 1px #3d3430,0 0 80px -20px rgba(214,69,43,.45);overflow:hidden}
+  .tv:hover .tela{transform:rotateY(-4deg) rotateX(2deg)}
+  .painel{padding:18px;min-height:330px;transition:background .3s}
+  .painel header{display:flex;justify-content:space-between;align-items:center;border-bottom:2px solid currentColor;padding-bottom:8px;margin-bottom:10px}
+  .painel .nomeLoja{font:900 24px Archivo,sans-serif;text-transform:uppercase;letter-spacing:1px}
+  .painel .data{font-size:13px;opacity:.85}
+  .painel ul{list-style:none;margin:0;padding:0;display:grid;gap:6px}
+  .painel li{display:flex;justify-content:space-between;align-items:baseline;font:700 19px Archivo,sans-serif;padding:6px 10px;border-radius:8px;background:rgba(255,255,255,.06)}
+  .painel li .p{font-size:22px}
+  .painel li.oferta{outline:2px solid var(--ouro)}
+  .painel li.oferta .p::after{content:" OFERTA";font-size:11px;vertical-align:middle;margin-left:6px;background:var(--ouro);color:#1a1208;padding:2px 6px;border-radius:5px}
+  .pe{width:40%;height:16px;margin:0 auto;background:#2a2421;border-radius:0 0 10px 10px}
+  /* secoes */
+  section{padding:70px 0}
+  .titulo{max-width:720px;margin-bottom:34px}.titulo h2{font-size:clamp(28px,4vw,42px)}.titulo p{color:var(--suave);font-size:17px}
+  .grade{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+  .card{background:linear-gradient(180deg,var(--carvao2),#181412);border:1px solid var(--linha);border-radius:18px;padding:22px;position:relative;transform-style:preserve-3d;transition:transform .25s,border-color .25s}
+  .card:hover{border-color:#5a4a42}
+  .card h3{font-size:20px;margin:10px 0 6px}.card p{color:var(--suave);margin:0;font-size:15px}
+  .ico{width:44px;height:44px;border-radius:12px;display:grid;place-items:center;background:rgba(214,69,43,.14);color:var(--brasa2)}
+  .st{position:absolute;top:18px;right:18px;font-size:12px;font-weight:700;padding:3px 9px;border-radius:999px}
+  .st.ok{background:rgba(63,178,127,.16);color:#7fe0b2}.st.beta{background:#3a2a10;color:#ffe2a6}.st.obra{background:rgba(201,188,174,.12);color:var(--suave)}
+  /* demo */
+  .demo{display:grid;grid-template-columns:.9fr 1.1fr;gap:28px;align-items:start}
+  .editor{background:var(--carvao2);border:1px solid var(--linha);border-radius:18px;padding:20px}
+  .editor label{display:block;font-size:13px;color:var(--suave);margin:12px 0 4px}
+  .editor input,.editor select{width:100%;background:#120f0e;border:1px solid var(--linha);color:var(--creme);border-radius:10px;padding:10px 12px;font:inherit}
+  .linhaItem{display:grid;grid-template-columns:1fr 100px 38px;gap:8px;margin-bottom:8px}
+  .linhaItem button{background:#120f0e;border:1px solid var(--linha);color:var(--suave);border-radius:10px;cursor:pointer}
+  .linhaItem button[aria-pressed="true"]{background:var(--ouro);color:#1a1208;border-color:var(--ouro)}
+  .modelos{display:flex;gap:8px;flex-wrap:wrap;margin-top:6px}
+  .modelos button{border:2px solid var(--linha);border-radius:10px;padding:8px 12px;cursor:pointer;font:700 13px Inter,sans-serif}
+  .modelos button[aria-pressed="true"]{border-color:var(--ouro)}
+  .cron{display:inline-flex;gap:8px;align-items:center;font-size:14px;color:var(--suave);margin-bottom:14px}
+  /* planos */
+  .planos{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+  .plano h3{font-size:22px}.plano .preco{font:900 34px Archivo,sans-serif;margin:10px 0 2px}.plano .preco small{font:500 15px Inter;color:var(--suave)}
+  .plano ul{padding-left:18px;color:var(--suave);font-size:15px}.plano.destaque{border-color:var(--brasa)}
+  .aviso{color:var(--suave);font-size:14px;margin-top:16px}
+  /* passos */
+  .passos{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;counter-reset:p}
+  .passo{border-top:3px solid var(--brasa);padding-top:14px}.passo::before{counter-increment:p;content:"0" counter(p);font:900 30px Archivo;color:var(--brasa2)}
+  .passo h3{font-size:18px;margin:6px 0}.passo p{color:var(--suave);margin:0;font-size:15px}
+  /* form */
+  form.lead{display:grid;grid-template-columns:1fr 1fr;gap:12px;background:var(--carvao2);border:1px solid var(--linha);border-radius:18px;padding:24px}
+  form.lead label{font-size:13px;color:var(--suave);display:block;margin-bottom:4px}
+  form.lead input,form.lead select{width:100%;background:#120f0e;border:1px solid var(--linha);color:var(--creme);border-radius:10px;padding:12px;font:inherit}
+  form.lead .cheio{grid-column:1/-1}
+  .erro{color:#ff9b87;font-size:14px;min-height:20px}
+  details{border-bottom:1px solid var(--linha);padding:16px 0}summary{cursor:pointer;font-weight:700;font-size:17px}details p{color:var(--suave);margin:10px 0 0}
+  footer{border-top:1px solid var(--linha);padding:30px 0;color:var(--suave);font-size:14px}
+  .zap{position:fixed;right:18px;bottom:18px;z-index:30;width:58px;height:58px;border-radius:50%;background:#1fa855;display:grid;place-items:center;box-shadow:0 10px 30px -8px rgba(31,168,85,.8)}
+  @media (max-width:900px){.hero .wrap,.demo{grid-template-columns:1fr}.grade,.planos{grid-template-columns:1fr}.passos{grid-template-columns:1fr 1fr}form.lead{grid-template-columns:1fr}.tela{transform:none}}
+  @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}#brasas{display:none}}
+</style>
+</head>
+<body>
+<canvas id="brasas" aria-hidden="true"></canvas>
+<nav class="topo" aria-label="Principal"><div class="wrap">
+  <div class="marca">AÇOUGUE <span>VENDA RÁPIDA</span></div>
+  <a class="btn prim" href="#contato" style="padding:10px 16px;font-size:14px;white-space:nowrap">Quero ver</a>
+</div></nav>
+
+<main>
+<section class="hero" aria-labelledby="h1"><div class="wrap">
+  <div>
+    <span class="tag">Para açougues e casas de carne de bairro</span>
+    <h1 id="h1" style="margin-top:14px"><span class="palavra">Preço</span> <span class="palavra">do</span> <span class="palavra">dia</span> <span class="palavra">na</span> <span class="palavra">TV.</span> <span class="palavra"><em>Pedido</em></span> <span class="palavra"><em>no</em></span> <span class="palavra"><em>WhatsApp.</em></span></h1>
+    <p class="lead">Você troca o preço da alcatra no celular e manda para a TV da loja com um toque. O cliente vê a oferta, monta o combo e manda o pedido pronto no seu WhatsApp.</p>
+    <div class="acoes">
+      <a class="btn prim" href="#demo">Testar o painel agora</a>
+      <a class="btn sec" href="dono/">Abrir o painel do dono</a>
+    </div>
+    <div class="prova">
+      <div><b>&lt; 3 min</b><span>para ver funcionando</span></div>
+      <div><b>0</b><span>aplicativo para instalar</span></div>
+      <div><b>1 link</b><span>abre em qualquer TV com navegador</span></div>
+    </div>
+  </div>
+  <div class="tv" aria-label="Exemplo do painel na TV">
+    <div class="tela"><div class="painel" id="painelHero"></div></div><div class="pe"></div>
+  </div>
+</div></section>
+
+<section aria-labelledby="h-o"><div class="wrap">
+  <div class="titulo"><h2 id="h-o">O que entra no seu açougue</h2><p>Sem promessa no ar: cada peça diz se já está pronta, em teste ou em construção.</p></div>
+  <div class="grade">
+    <article class="card"><span class="st ok">Pronto</span><div class="ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="13" rx="2"/><path d="M8 21h8M12 17v4"/></svg></div><h3>Painel de preços na TV</h3><p>6 temas e cores livres, sua logo em qualquer canto (é só arrastar), promoção da semana com foto e validade automática — fora das datas a TV esconde sozinha — TV deitada ou em pé, preços rolando para cima, para baixo, para o lado ou em páginas. <a href="dono/" style="color:#ffb199">Testar o editor completo</a>.</p></article>
+    <article class="card"><span class="st ok">Pronto</span><div class="ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M2 12h20"/></svg></div><h3>Tabela de preços que você controla</h3><p>Muda o preço com o valor antigo riscado (de/por), marca oferta ou esgotado, reajusta tudo em % de uma vez, arrasta para mudar a ordem e imprime a tabela para o balcão.</p></article>
+    <article class="card"><span class="st beta">Em teste</span><div class="ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.4 8.4 0 0 1-12.5 7.3L3 21l2.2-5.5A8.4 8.4 0 1 1 21 11.5z"/></svg></div><h3>Pedido pelo WhatsApp</h3><p>Catálogo no celular do cliente; o pedido chega no seu WhatsApp já com itens, quantidade e total.</p></article>
+    <article class="card"><span class="st beta">Em teste</span><div class="ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7h18M3 12h18M3 17h12"/></svg></div><h3>Combos e kits</h3><p>Kit churrasco, kit semana: você monta, o cliente pede com um toque.</p></article>
+    <article class="card"><span class="st beta">Em teste</span><div class="ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><path d="M14 14h3v3h-3zM18 18h3v3h-3z"/></svg></div><h3>QR no balcão e Pix</h3><p>Placa com QR leva ao catálogo; Pix copia-e-cola com o valor do pedido.</p></article>
+    <article class="card"><span class="st obra">Em construção</span><div class="ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19V9M10 19V5M16 19v-7M22 19H2"/></svg></div><h3>Painel de pedidos</h3><p>Lista de pedidos com status (separando, pronto, saiu). Entra para quem fechar agora, sem custo a mais.</p></article>
+  </div>
+</div></section>
+
+<section id="demo" aria-labelledby="h-d"><div class="wrap">
+  <div class="titulo"><h2 id="h-d">Teste agora: mude o preço e veja a TV</h2><p>Isto é o editor de verdade, em versão de demonstração. Nada é salvo nem enviado.</p></div>
+  <div class="cron" aria-live="polite"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg><span id="cron">Você está testando há 0 s</span></div>
+  <div class="demo">
+    <div class="editor">
+      <label for="loja">Nome do açougue</label><input id="loja" value="Casa de Carnes do Bairro" maxlength="32">
+      <label>Modelo da tela</label>
+      <div class="modelos" role="group" aria-label="Modelo da tela">
+        <button type="button" data-m="brasa" aria-pressed="true" style="background:#1a0f0c;color:#ffd9cc">Brasa</button>
+        <button type="button" data-m="creme" aria-pressed="false" style="background:#f6efe6;color:#3b1d14">Creme</button>
+        <button type="button" data-m="verde" aria-pressed="false" style="background:#0f2219;color:#d8f5e6">Verde</button>
+      </div>
+      <label>Cortes e preço por kg (toque na estrela para marcar oferta)</label>
+      <div id="itens"></div>
+    </div>
+    <div class="tv"><div class="tela"><div class="painel" id="painelDemo"></div></div><div class="pe"></div></div>
+  </div>
+</div></section>
+
+<section aria-labelledby="h-c"><div class="wrap">
+  <div class="titulo"><h2 id="h-c">Como começa</h2></div>
+  <div class="passos">
+    <div class="passo"><h3>Conversa de 15 min</h3><p>Pelo WhatsApp ou na loja. Você mostra seus cortes e preços.</p></div>
+    <div class="passo"><h3>Montamos com a sua cara</h3><p>Logo, cores, modelo da tela e o catálogo.</p></div>
+    <div class="passo"><h3>Liga na TV</h3><p>Um link na TV da loja. Se a TV não tem navegador, indicamos um aparelho barato.</p></div>
+    <div class="passo"><h3>Você edita sozinho</h3><p>Preço mudou? Celular, "Enviar para a TV", pronto.</p></div>
+  </div>
+</div></section>
+
+<section aria-labelledby="h-p"><div class="wrap">
+  <div class="titulo"><h2 id="h-p">Planos</h2><p>Valores de lançamento para os primeiros açougues de Goiânia. Combinamos tudo antes, por escrito.</p></div>
+  <div class="planos">
+    <article class="card plano"><h3>Painel</h3><div class="preco">R$ 197<small>/mês</small></div><ul><li>Painel de preços na TV</li><li>3 modelos, sua logo e cores</li><li>Edição pelo celular</li></ul></article>
+    <article class="card plano destaque"><span class="st beta">Mais pedido</span><h3>Painel + Pedidos</h3><div class="preco">R$ 297<small>/mês</small></div><ul><li>Tudo do Painel</li><li>Catálogo e combos no celular</li><li>Pedido no WhatsApp com Pix</li><li>Placa QR para o balcão</li></ul></article>
+    <article class="card plano"><h3>Completo</h3><div class="preco">R$ 499<small>/mês</small></div><ul><li>Tudo do anterior</li><li>Mais de uma TV ou loja</li><li>Painel de pedidos (em construção)</li><li>Ajuste mensal das artes</li></ul></article>
+  </div>
+  <p class="aviso">Sem fidelidade. Itens "em teste" e "em construção" entram sem custo extra quando ficarem prontos, e a data é combinada antes.</p>
+</div></section>
+
+<section id="contato" aria-labelledby="h-f"><div class="wrap">
+  <div class="titulo"><h2 id="h-f">Quero ver no meu açougue</h2><p>Preencha e o WhatsApp abre com a mensagem pronta. Seus dados servem só para esse contato.</p></div>
+  <form class="lead" id="form" novalidate>
+    <div><label for="f-nome">Seu nome</label><input id="f-nome" autocomplete="name" required></div>
+    <div><label for="f-loja">Nome do açougue</label><input id="f-loja" required></div>
+    <div><label for="f-bairro">Bairro / cidade</label><input id="f-bairro" required></div>
+    <div><label for="f-quer">O que mais interessa</label><select id="f-quer"><option>Painel na TV</option><option>Pedido pelo WhatsApp</option><option>Os dois</option></select></div>
+    <p class="erro cheio" id="erro" role="alert"></p>
+    <button class="btn prim cheio" type="submit">Abrir o WhatsApp com a mensagem</button>
+  </form>
+</div></section>
+
+<section aria-labelledby="h-q"><div class="wrap">
+  <div class="titulo"><h2 id="h-q">Perguntas</h2></div>
+  <details><summary>Preciso trocar minha TV?</summary><p>Não. Se ela tem navegador, abre direto. Se não tem, um aparelho de streaming comum resolve.</p></details>
+  <details><summary>E se a internet cair?</summary><p>A tela continua mostrando os últimos preços salvos até a internet voltar.</p></details>
+  <details><summary>Quem atualiza os preços?</summary><p>Você, pelo celular, em segundos. Se preferir, a gente ajusta para você no plano Completo.</p></details>
+  <details><summary>Tem contrato longo?</summary><p>Não. É mensal e você cancela quando quiser.</p></details>
+</div></section>
+</main>
+
+<footer><div class="wrap">Açougue Venda Rápida · Desenvolvido por Vilson Mota · <a href="https://www.instagram.com/_kairosdigital_/" target="_blank" rel="noopener">Kairós Digital</a> · <a href="https://wa.me/5562984924326" target="_blank" rel="noopener">WhatsApp (62) 98492-4326</a></div></footer>
+<a class="zap" href="https://wa.me/5562984924326?text=Oi!%20Vi%20o%20A%C3%A7ougue%20Venda%20R%C3%A1pida%20e%20quero%20saber%20mais." target="_blank" rel="noopener" aria-label="Falar no WhatsApp"><svg width="28" height="28" viewBox="0 0 24 24" fill="#fff"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm5.3 14.1c-.2.6-1.3 1.2-1.8 1.2-.5.1-1 .2-3.3-.7-2.8-1.1-4.6-4-4.7-4.2-.1-.2-1.1-1.5-1.1-2.9s.7-2 1-2.3c.3-.3.6-.3.8-.3h.6c.2 0 .4 0 .6.5l.9 2.1c.1.2.1.4 0 .6l-.4.6-.4.4c-.1.2-.3.3-.1.6.2.3.8 1.3 1.7 2.1 1.2 1 2.1 1.3 2.4 1.5.3.1.5.1.7-.1l.9-1.1c.2-.3.4-.2.7-.1l2 .9c.3.2.5.2.6.4 0 .1 0 .6-.2 1.2z"/></svg></a>
+
+<script>
+const WHATS = '5562984924326';
+const MODELOS = { brasa: { bg: '#1a0f0c', fg: '#ffe6dc' }, creme: { bg: '#f6efe6', fg: '#3b1d14' }, verde: { bg: '#0f2219', fg: '#dff7ea' } };
+const estado = { loja: 'Casa de Carnes do Bairro', modelo: 'brasa', itens: [
+  { n: 'Picanha', p: 79.9, of: false }, { n: 'Alcatra', p: 49.9, of: true }, { n: 'Contrafilé', p: 52.9, of: false },
+  { n: 'Costela', p: 29.9, of: false }, { n: 'Linguiça toscana', p: 24.9, of: false }, { n: 'Coxa e sobrecoxa', p: 14.9, of: false } ] };
+const brl = v => 'R$ ' + Number(v || 0).toFixed(2).replace('.', ',');
+const esc = t => String(t).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+function pintar(el){
+  const m = MODELOS[estado.modelo], agora = new Date();
+  el.style.background = m.bg; el.style.color = m.fg;
+  el.innerHTML = `<header><span class="nomeLoja">${esc(estado.loja || 'Seu açougue')}</span><span class="data">${agora.toLocaleDateString('pt-BR')} · ${agora.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}</span></header>
+    <ul>${estado.itens.map(i => `<li class="${i.of ? 'oferta' : ''}"><span>${esc(i.n)}</span><span class="p">${brl(i.p)}<small style="font-size:12px;opacity:.7">/kg</small></span></li>`).join('')}</ul>`;
+}
+const pintarTudo = () => { pintar(document.getElementById('painelHero')); pintar(document.getElementById('painelDemo')); };
+function editor(){
+  const box = document.getElementById('itens'); box.innerHTML = '';
+  estado.itens.forEach((it, i) => {
+    const d = document.createElement('div'); d.className = 'linhaItem';
+    d.innerHTML = `<input aria-label="Corte ${i + 1}" value="${esc(it.n)}" maxlength="22"><input aria-label="Preço de ${esc(it.n)} por kg" type="number" step="0.1" min="0" inputmode="decimal" value="${it.p}"><button type="button" aria-label="Marcar ${esc(it.n)} como oferta" aria-pressed="${it.of}">★</button>`;
+    const [nome, preco, of] = d.children;
+    nome.oninput = () => { it.n = nome.value; pintarTudo(); };
+    preco.oninput = () => { it.p = parseFloat(preco.value); pintarTudo(); };
+    of.onclick = () => { it.of = !it.of; of.setAttribute('aria-pressed', it.of); pintarTudo(); };
+    box.append(d);
+  });
+}
+document.getElementById('loja').oninput = e => { estado.loja = e.target.value; pintarTudo(); };
+document.querySelectorAll('.modelos button').forEach(b => b.onclick = () => {
+  estado.modelo = b.dataset.m; document.querySelectorAll('.modelos button').forEach(x => x.setAttribute('aria-pressed', x === b)); pintarTudo();
+});
+editor(); pintarTudo(); setInterval(pintarTudo, 30000);
+// cronômetro: a demo tem que caber em 3 minutos
+let ini = null;
+document.getElementById('demo').addEventListener('input', () => { ini = ini || Date.now(); }, { once: true });
+document.getElementById('demo').addEventListener('click', () => { ini = ini || Date.now(); });
+setInterval(() => { if (ini) document.getElementById('cron').textContent = `Você está testando há ${Math.round((Date.now() - ini) / 1000)} s`; }, 1000);
+// origem do lead: utm e placa QR (?placa=)
+const q = new URLSearchParams(location.search);
+const origem = [q.get('placa') && 'placa ' + q.get('placa'), q.get('utm_source'), q.get('utm_campaign')].filter(Boolean).join(' / ') || 'site';
+document.getElementById('form').addEventListener('submit', e => {
+  e.preventDefault();
+  const v = id => document.getElementById(id).value.trim();
+  if (!v('f-nome') || !v('f-loja') || !v('f-bairro')){ document.getElementById('erro').textContent = 'Preencha nome, açougue e bairro para abrir o WhatsApp.'; return; }
+  document.getElementById('erro').textContent = '';
+  const txt = `Oi! Sou ${v('f-nome')}, do ${v('f-loja')} (${v('f-bairro')}). Quero ver o Açougue Venda Rápida: ${v('f-quer')}. [origem: ${origem}]`;
+  window.open(`https://wa.me/${WHATS}?text=${encodeURIComponent(txt)}`, '_blank', 'noopener');
+});
+// movimento (respeita quem pede menos movimento)
+const calmo = matchMedia('(prefers-reduced-motion: reduce)').matches;
+if (!calmo && window.Motion){
+  const { animate, inView, stagger } = Motion;
+  animate('.hero .palavra', { opacity: [0, 1], y: [24, 0], filter: ['blur(8px)', 'blur(0px)'] }, { delay: stagger(.06), duration: .6 });
+  animate('.hero .tela', { opacity: [0, 1], y: [40, 0] }, { delay: .4, duration: .9 });
+  inView('.card, .passo, details', el => { animate(el, { opacity: [0, 1], y: [30, 0] }, { duration: .6 }); }, { amount: .2 });
+  document.querySelectorAll('.card').forEach(c => {
+    c.addEventListener('pointermove', e => { const r = c.getBoundingClientRect(), x = (e.clientX - r.left) / r.width - .5, y = (e.clientY - r.top) / r.height - .5; c.style.transform = `rotateY(${x * 8}deg) rotateX(${-y * 8}deg)`; });
+    c.addEventListener('pointerleave', () => { c.style.transform = ''; });
+  });
+  // brasas subindo no fundo
+  const cv = document.getElementById('brasas'), g = cv.getContext('2d'); let W, H; const P = [];
+  const tam = () => { W = cv.width = innerWidth; H = cv.height = innerHeight; }; tam(); addEventListener('resize', tam);
+  for (let i = 0; i < 46; i++) P.push({ x: Math.random(), y: Math.random(), r: Math.random() * 2 + .6, v: Math.random() * .0012 + .0004, a: Math.random() });
+  (function quadro(){ g.clearRect(0, 0, W, H); for (const p of P){ p.y -= p.v; if (p.y < -.02){ p.y = 1.02; p.x = Math.random(); } g.beginPath(); g.arc(p.x * W + Math.sin(p.y * 12 + p.a * 6) * 14, p.y * H, p.r, 0, 6.3); g.fillStyle = `rgba(255,${110 + p.a * 60 | 0},60,${.25 + p.a * .35})`; g.fill(); } requestAnimationFrame(quadro); })();
+}
+</script>
+</body>
+</html>
