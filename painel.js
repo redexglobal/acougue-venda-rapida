@@ -121,6 +121,7 @@ const CSS = `
 .pn .trilho.lado .li{margin:0;padding:2cqh 2.4cqh;flex-direction:column;align-items:flex-start;min-width:28cqw}
 .pn .rod{position:absolute;left:0;right:0;bottom:0;height:7cqh;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:min(2.8cqh,2.9cqw);gap:3cqw;flex-wrap:wrap;text-align:center;padding:0 2cqw;line-height:1.2}
 .pn .logo{position:absolute;z-index:3;cursor:default;touch-action:none}
+.pn .logo.topo-l img{max-height:11cqh;width:auto;max-width:100%}
 .pn .logo img{width:100%;height:auto;display:block;filter:drop-shadow(0 .6cqh 1.4cqh rgba(0,0,0,.35))}
 .pn.editavel .logo{cursor:grab;outline:.3cqh dashed rgba(255,255,255,.55);outline-offset:.4cqh}
 .pn .div{position:absolute;z-index:4;background:rgba(255,255,255,.0)}
@@ -217,6 +218,8 @@ export function desenhar(alvo, cfg, opcoes = {}){
     lg.innerHTML = `<img src="${cfg.logo}" alt="Logo de ${esc(cfg.loja)}">`;
     lg.style.width = (cfg.logoTam || 14) + '%';
     posicionarLogo(lg, cfg.logoPos);
+    // logo em cima fica dentro da faixa do título: nunca cobre um preço (Decreto 5.903, art. 9º)
+    lg.classList.toggle('topo-l', (cfg.logoPos?.canto || 'se')[0] === 's' && (cfg.logoPos?.y ?? 4) < 12);
     pn.append(lg);
     if (opcoes.editavel) arrastarLogo(pn, lg, cfg, opcoes.mudou);
   }
