@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex">
-<title>22 modelos de painel de carnes · Açougue Venda Rápida</title>
+<title>34 modelos de painel de carnes · Açougue Venda Rápida</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link id="fontes" rel="stylesheet">
 <style>
@@ -46,7 +46,7 @@
 <body>
 <header>
   <div class="barra">
-    <h1>22 modelos de painel · <span>Açougue Venda Rápida</span></h1>
+    <h1>34 modelos de painel · <span>Açougue Venda Rápida</span></h1>
     <a class="btn" href="../">Página de vendas</a>
     <a class="btn prim" href="../dono/">Abrir o editor</a>
   </div>
@@ -78,7 +78,7 @@ const CORES_CORTE = ['#b3402a', '#c2593b', '#a8452d', '#d06a4a', '#9a3522', '#c9
 
 let segAtual = '';
 const segs = document.getElementById('segs');
-[['', 'Todos (22)'], ...Object.entries(SEGMENTOS).map(([k, v]) => [k, `${v} (${MODELOS.filter(m => m.segmento === k).length})`])].forEach(([k, v]) => {
+[['', `Todos (${MODELOS.length})`], ...Object.entries(SEGMENTOS).map(([k, v]) => [k, `${v} (${MODELOS.filter(m => m.segmento === k).length})`])].forEach(([k, v]) => {
   const b = document.createElement('button'); b.type = 'button'; b.textContent = v; b.dataset.s = k; b.setAttribute('aria-pressed', k === segAtual);
   b.onclick = () => { segAtual = k; segs.querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', x.dataset.s === k)); filtrar(); };
   segs.append(b);
@@ -91,8 +91,8 @@ function montarCartao(m){
   cfg.movimento = 'parado'; cfg.promo = { ...cfg.promo, inicio: '', fim: '' };
   if (m.cfg.fotosItens) cfg.itens.forEach(it => it.foto = fotoPara(it.n) || fotoGrande('carne-crua').replace('.webp', '-p.webp'));
   if (m.cfg.fotoLojaFundo) cfg.fotoLoja = fotoGrande('fogo-de-chao');
-  const FOTO_SEG = { churrasco: 'fogo-de-chao', gourmet: 'tomahawk-tabua', rustico: 'fogo-de-chao-2', mercado: 'bifes-marmorizados', pequeno: 'picanha-grelha', bairro: 'picanha-fatiada', foto: 'carne-na-brasa' };
-  const promoItem = { gourmet: ['Tomahawk', 129.9], churrasco: ['Costela fogo de chão', 39.9], rustico: ['Costela fogo de chão', 39.9], mercado: ['Contrafilé', 52.9] }[m.segmento] || ['Picanha', 69.9];
+  const FOTO_SEG = { natal: 'carre-cordeiro', madeira: 'bife-tabua', tech: 'bifes-marmorizados', churrasco: 'fogo-de-chao', gourmet: 'tomahawk-tabua', rustico: 'fogo-de-chao-2', mercado: 'bifes-marmorizados', pequeno: 'picanha-grelha', bairro: 'picanha-fatiada', foto: 'carne-na-brasa' };
+  const promoItem = { natal: ['Carré de cordeiro', 129.9], madeira: ['Bife ancho', 99.9], tech: ['Contrafilé', 52.9], gourmet: ['Tomahawk', 129.9], churrasco: ['Costela fogo de chão', 39.9], rustico: ['Costela fogo de chão', 39.9], mercado: ['Contrafilé', 52.9] }[m.segmento] || ['Picanha', 69.9];
   cfg.promo = { ...cfg.promo, foto: fotoGrande(FOTO_SEG[m.segmento] || 'picanha-grelha'), item: promoItem[0], preco: promoItem[1] };   // foto real de exemplo: o dono coloca a dele
   const art = document.createElement('article'); art.className = 'card'; art.dataset.seg = m.segmento;
   const ret = m.cfg.orientacao === 'retrato';

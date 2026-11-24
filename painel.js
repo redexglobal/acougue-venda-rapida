@@ -117,7 +117,10 @@ const CSS = `
 .pn .li .pp{font-weight:900;white-space:nowrap}
 .pn .li .pp small{font-size:.5em;font-weight:700;opacity:.8;margin-left:.3em}
 .pn .li.of{outline:.35cqh solid}
-.pn .li.of .nm::after{content:'OFERTA';font-size:.45em;font-weight:900;margin-left:.8em;padding:.15em .5em;border-radius:.4em;vertical-align:middle}
+.pn .li .nmw{display:flex;flex-wrap:wrap;align-items:center;column-gap:.6em;min-width:0}
+.pn .li .selo{font-size:.42em;font-weight:900;padding:.18em .55em;border-radius:.4em;letter-spacing:.04em;white-space:nowrap;flex:none}
+.pn .li .desc{flex-basis:100%;font-size:.5em;font-weight:600;opacity:.8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:.1em}
+.pn .li.combo{align-items:center}
 .pn .li.esg{opacity:.45}.pn .li.esg .pp{text-decoration:line-through}
 .pn .trilho.lado .li{margin:0;padding:2cqh 2.4cqh;flex-direction:column;align-items:flex-start;min-width:28cqw}
 .pn .rod{position:absolute;left:0;right:0;bottom:0;height:7cqh;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:min(2.8cqh,2.9cqw);gap:3cqw;flex-wrap:wrap;text-align:center;padding:0 2cqw;line-height:1.2}
@@ -180,13 +183,56 @@ const CSS = `
 .pn .topo,.pn .corpo,.pn .rod,.pn .hora{z-index:2}
 .pn.comFundo .lista{background:rgba(0,0,0,.35)!important;backdrop-filter:blur(2px)}
 @media (prefers-reduced-motion:reduce){.pn.l-brilho .li::before{animation:none;display:none}}
+/* ---- 24/11/2026: Natal, madeira nobre, tecnológico, cromo ---- */
+.pn.t-natal .topo{background:radial-gradient(circle at 12px 9px,#ff4d4d 0 .5cqh,transparent .6cqh) 0 .6cqh/5cqh 2cqh repeat-x,radial-gradient(circle at 37px 13px,#ffd34d 0 .5cqh,transparent .6cqh) 0 .6cqh/5cqh 2cqh repeat-x,radial-gradient(circle at 25px 11px,#4dff88 0 .5cqh,transparent .6cqh) 0 .6cqh/5cqh 2cqh repeat-x}
+.pn.t-natal .topo::before{content:'';position:absolute;left:0;right:0;top:.4cqh;height:1.6cqh;border-bottom:.25cqh solid rgba(40,90,40,.9);border-radius:0 0 50% 50%/0 0 100% 100%;opacity:.8}
+.pn.t-natal{background-image:radial-gradient(rgba(255,255,255,.55) .18cqh,transparent .22cqh),radial-gradient(rgba(255,255,255,.35) .12cqh,transparent .16cqh);background-size:9cqh 9cqh,5cqh 5cqh;background-position:0 0,2cqh 3cqh;animation:pnNeve 18s linear infinite}
+@keyframes pnNeve{to{background-position:0 9cqh,2cqh 8cqh}}
+.pn.t-madeira2{background-image:repeating-linear-gradient(90deg,rgba(255,220,170,.06) 0 .25cqw,transparent .25cqw 3.2cqw),repeating-linear-gradient(90deg,rgba(0,0,0,.14) 0 .12cqw,transparent .12cqw 1.3cqw),linear-gradient(180deg,rgba(255,255,255,.05),rgba(0,0,0,.25))}
+.pn.t-holo{background-image:radial-gradient(ellipse at 15% 0%,rgba(80,160,255,.28),transparent 55%),radial-gradient(ellipse at 90% 100%,rgba(200,80,255,.22),transparent 55%),repeating-linear-gradient(0deg,rgba(255,255,255,.035) 0 .12cqh,transparent .12cqh .5cqh)}
+.pn.t-cromo{background-image:linear-gradient(160deg,rgba(255,255,255,.08),transparent 35%,rgba(255,255,255,.05) 60%,transparent 80%)}
+.pn.l-vidro .li{background:rgba(255,255,255,.06)!important;border:.15cqh solid rgba(120,200,255,.35);box-shadow:inset 0 0 1.4cqh rgba(120,200,255,.12);backdrop-filter:blur(3px)}
+.pn.l-vidro .li .pp{letter-spacing:.03em}
+.pn.l-cromo .li{background:linear-gradient(180deg,rgba(255,255,255,.14),rgba(255,255,255,.02) 50%,rgba(0,0,0,.25))!important;border:.15cqh solid rgba(255,255,255,.18)}
+.pn.l-cromo .li .pp,.pn.l-cromo .loja{background:linear-gradient(180deg,#ffffff 0%,#d9dde3 35%,#8a929c 55%,#f4f6f8 75%,#b9c0c8 100%);-webkit-background-clip:text;background-clip:text;color:transparent!important}
+.pn.l-natal .li{background:rgba(255,255,255,.06)!important;border-left:.6cqh solid var(--d);border-radius:.6cqh}
+@media (prefers-reduced-motion:reduce){.pn.t-natal{animation:none}}
+
 `;
 let cssPosto = false;
 function porCss(){ if (cssPosto) return; const s = document.createElement('style'); s.textContent = CSS; document.head.append(s); cssPosto = true; }
 
 // desenha; devolve { parar() } para cancelar animações
-export function desenhar(alvo, cfg, opcoes = {}){
+
+// ---------- 24/11/2026: selos de destaque, combos e painel da semana ----------
+export const SELOS = {
+  oferta:   { txt: 'OFERTA',          bg: null,      fg: null },        // usa a cor de destaque do modelo
+  natal:    { txt: 'OFERTA DE NATAL', bg: '#b3261e', fg: '#fff6d6', borda: '#e8c35a' },
+  ceia:     { txt: 'PARA A CEIA',     bg: '#14532d', fg: '#fff6d6', borda: '#e8c35a' },
+  combo:    { txt: 'COMBO',           bg: '#1d4ed8', fg: '#ffffff' },
+  novidade: { txt: 'NOVIDADE',        bg: '#7c3aed', fg: '#ffffff' },
+  maisVendido: { txt: 'MAIS VENDIDO', bg: '#e8b04b', fg: '#1a1208' },
+  ultimas:  { txt: 'ÚLTIMAS PEÇAS',   bg: '#dc2626', fg: '#ffffff' },
+  leveMais: { txt: 'LEVE 2 PAGUE MENOS', bg: '#16a34a', fg: '#ffffff' },
+  fimSemana:{ txt: 'SÓ NO FIM DE SEMANA', bg: '#ea580c', fg: '#ffffff' },
+  premium:  { txt: 'PREMIUM',         bg: '#111111', fg: '#e8c35a', borda: '#e8c35a' },
+  queima:   { txt: 'QUEIMA TOTAL',    bg: '#facc15', fg: '#111111' },
+};
+export const DIAS = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
+// configuração do dia: preço e promoção da semana planejados com antecedência
+export function doDia(cfg, agora = new Date()){
+  const d = agora.getDay();
+  const itens = (cfg.itens || []).map(it => {
+    const p = it.dias?.[d];
+    return p > 0 ? { ...it, p } : (it.diasOcultos?.includes(d) ? null : it);
+  }).filter(Boolean);
+  const promo = cfg.promoDias?.[d]?.ativa ? { ...cfg.promo, ...cfg.promoDias[d] } : cfg.promo;
+  return { ...cfg, itens, promo };
+}
+
+export function desenhar(alvo, cfgBase, opcoes = {}){
   porCss();
+  const cfg = opcoes.dia === false ? cfgBase : doDia(cfgBase, opcoes.agora || new Date());
   const cor = coresDe(cfg), escala = (cfg.tamFonte || 100) / 100;
   const vertical = cfg.orientacao === 'retrato';
   alvo.innerHTML = '';
@@ -249,8 +295,11 @@ export function desenhar(alvo, cfg, opcoes = {}){
     // mais colunas (e a promoção dividindo a largura) = letra menor, para o nome do corte caber inteiro
     const fator = nCol === 1 ? 1 : temPromo && !coluna ? (nCol === 2 ? .7 : .56) : (nCol === 2 ? .86 : .74);
     const fs = (vertical ? 3.2 : 3.6) * escala * fator;
-    const linha = it => `<div class="li${it.of ? ' of' : ''}${it.esg ? ' esg' : ''}" style="font-size:${fs}cqh;background:rgba(255,255,255,.05);outline-color:${cor.destaque}">
-        <span class="esq">${cfg.fotosItens && it.foto ? `<img class="ft" src="${it.foto}" alt="">` : ''}<span class="nm">${esc(it.n)}</span></span><span class="dots"></span><span class="pp" style="color:${cor.preco}">${!it.esg && it.de > it.p ? `<s style="font-size:.55em;opacity:.7;margin-right:.4em">de R$ ${brl(it.de)}</s>` : ''}${it.esg ? 'esgotado' : (it.de > it.p ? 'por ' : '') + 'R$ ' + brl(it.p)}<small>/${esc(it.u || 'kg')}</small></span></div>`;
+    const seloDe = it => { const k = it.selo || (it.of ? 'oferta' : ''); if (!k) return ''; const z = SELOS[k] || { txt: String(k).toUpperCase().slice(0, 22) };
+      const bg = z.bg || cor.destaque, fg = z.fg || (contraste(cor.destaque, '#000000') > contraste(cor.destaque, '#ffffff') ? '#000' : '#fff');
+      return `<span class="selo" style="background:${bg};color:${fg};${z.borda ? `box-shadow:0 0 0 .12em ${z.borda} inset;` : ''}">${esc(z.txt)}</span>`; };
+    const linha = it => `<div class="li${it.of || it.selo ? ' of' : ''}${it.esg ? ' esg' : ''}${it.desc ? ' combo' : ''}" style="font-size:${fs}cqh;background:rgba(255,255,255,.05);outline-color:${(SELOS[it.selo]?.bg) || cor.destaque}">
+        <span class="esq">${cfg.fotosItens && it.foto ? `<img class="ft" src="${it.foto}" alt="">` : ''}<span class="nmw"><span class="nm">${esc(it.n)}</span>${seloDe(it)}${it.desc ? `<span class="desc">${esc(it.desc)}</span>` : ''}</span></span><span class="dots"></span><span class="pp" style="color:${cor.preco}">${!it.esg && it.de > it.p ? `<s style="font-size:.55em;opacity:.7;margin-right:.4em">de R$ ${brl(it.de)}</s>` : ''}${it.esg ? 'esgotado' : (it.de > it.p ? 'por ' : '') + 'R$ ' + brl(it.p)}<small>/${esc(it.u || 'kg')}</small></span></div>`;
     const itens = (cfg.itens || []).filter(i => i.n);
     let html = '';
     if (cfg.agruparCategoria && !lado){
@@ -258,9 +307,6 @@ export function desenhar(alvo, cfg, opcoes = {}){
     } else html = itens.map(linha).join('');
     trilho.innerHTML = html;
     listaEl.append(trilho);
-    const st = document.createElement('style');
-    st.textContent = `.pn .li.of .nm::after{background:${cor.destaque};color:${contraste(cor.destaque, '#000000') > contraste(cor.destaque, '#ffffff') ? '#000' : '#fff'}}`;
-    pn.append(st);
     anim = movimentar(listaEl, trilho, cfg, opcoes);
   }
 

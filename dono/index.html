@@ -47,7 +47,8 @@
   .it button{padding:4px 0;justify-content:center}
   .it button[aria-pressed="true"].of{background:var(--o);color:#1a1208;border-color:var(--o)}
   .it button[aria-pressed="true"].es{background:#555;color:#fff}
-  .it .cat{grid-column:2/4}.it .de{grid-column:4/6}.it .fc{grid-column:6/8;font-size:12px;padding:4px 2px}.it .fc.tem{border-color:var(--ok);color:#8be0b6}
+  .it .cat{grid-column:2/4}.it .de{grid-column:4/6}.it .fc{grid-column:6/8;font-size:12px;padding:4px 2px}.it .sl{grid-column:2/5;font-size:13px;padding:5px}.it .ds{grid-column:5/8;font-size:13px;padding:5px}
+  .it .fc.tem{border-color:var(--ok);color:#8be0b6}
   .area{position:sticky;top:70px}
   .moldura{background:#000;border:10px solid #2a2421;border-radius:16px;box-shadow:0 30px 60px -30px #000;overflow:hidden;margin:0 auto}
   .moldura.paisagem{aspect-ratio:16/9;width:100%}
@@ -96,7 +97,7 @@
     <p class="estado" style="margin:0 0 8px">Arraste pela alça ⋮⋮ para mudar a ordem. ★ = oferta, Ø = esgotado.</p>
     <div class="itens" id="itens"></div>
     <div class="grupo" style="margin-top:8px">
-      <button type="button" id="btnNovo">+ Corte</button>
+      <button type="button" id="btnNovo">+ Corte</button><button type="button" id="btnCombo">+ Combo</button>
       <button type="button" id="btnImprimir">Imprimir tabela</button>
     </div>
     <label for="bibCat">Adicionar da biblioteca (102 cortes)</label>
@@ -112,11 +113,21 @@
     <label for="promoFoto">Foto da promoção</label><input type="file" id="promoFoto" accept="image/*">
     <button type="button" id="promoTira" style="margin-top:6px">Tirar foto</button>
     <label>Ou escolha uma foto pronta</label><div id="promoProntas" style="display:grid;grid-template-columns:repeat(6,1fr);gap:4px"></div>
-    <div class="lado"><div><label for="promoTitulo">Chamada</label><input type="text" id="promoTitulo" maxlength="30"></div><div><label for="promoItem">Produto</label><input type="text" id="promoItem" maxlength="30"></div></div>
+    <div class="lado"><div><label for="promoTitulo">Chamada</label><input type="text" id="promoTitulo" maxlength="30" list="chamadas"><datalist id="chamadas"><option>Promoção da semana</option><option>Oportunidade</option><option>Oferta de Natal</option><option>Especial para a ceia</option><option>Combo da semana</option><option>Só hoje</option><option>Churrasco da virada</option></datalist></div><div><label for="promoItem">Produto</label><input type="text" id="promoItem" maxlength="30"></div></div>
     <div class="lado"><div><label for="promoPreco">Preço (R$)</label><input type="number" id="promoPreco" step="0.01" min="0" inputmode="decimal"></div><div><label for="promoUn">Unidade</label><select id="promoUn"><option>kg</option><option>un</option><option>bandeja</option><option>100 g</option></select></div></div>
     <label for="promoVal">Texto da validade</label><input type="text" id="promoVal" maxlength="40">
     <div class="lado"><div><label for="promoIni">Começa em</label><input type="date" id="promoIni"></div><div><label for="promoFim">Termina em</label><input type="date" id="promoFim"></div></div>
     <p class="estado">Fora dessas datas a TV esconde a promoção sozinha e mostra só os preços.</p>
+  </details>
+
+  <details><summary>Painel da semana (planejar os próximos dias)</summary>
+    <p class="estado" style="margin:0 0 6px">Escolha o dia e coloque o preço que vale nele. Em branco = usa o preço normal. A TV troca sozinha à meia-noite. A prévia mostra o dia escolhido.</p>
+    <div class="grupo" id="dias" role="group" aria-label="Dia da semana"></div>
+    <div id="semanaItens" style="display:grid;grid-template-columns:1fr 96px 34px;gap:4px 6px;margin-top:8px;font-size:14px;align-items:center"></div>
+    <label><input type="checkbox" id="pdAtiva"> Promoção própria neste dia</label>
+    <div class="lado"><div><label for="pdItem">Produto</label><input type="text" id="pdItem" maxlength="30"></div><div><label for="pdPreco">Preço (R$)</label><input type="number" id="pdPreco" step="0.01" min="0"></div></div>
+    <label for="pdTitulo">Chamada</label><input type="text" id="pdTitulo" maxlength="30" list="chamadas">
+    <button type="button" id="semanaLimpa" style="margin-top:8px">Limpar o planejamento deste dia</button>
   </details>
 
   <details open><summary>Layout e movimento</summary>
@@ -186,13 +197,14 @@
 <div id="toast" role="status"></div>
 
 <script type="module">
+import { SELOS, DIAS } from '../painel.js';
 import { desenhar, padrao, TEMAS, ARRANJOS, MOVIMENTOS, CATEGORIAS, coresDe, contraste, codificar, reduzirImagem, telaFechada } from '../painel.js';
 import { ESTILOS, MODELOS, BIBLIOTECA } from '../modelos.js';
 import { FOTOS, fotoGrande, fotoPequena, fotoPara } from '../fotos.js';
 const $ = id => document.getElementById(id);
 const CHAVE = 'acougue-painel';
 let cfg; try { cfg = JSON.parse(localStorage.getItem(CHAVE)) || padrao(); } catch { cfg = padrao(); }
-let desenho = null, tSalvar = null;
+let desenho = null, tSalvar = null, diaPrevia = null;
 
 function toast(t){ const e = $('toast'); e.textContent = t; e.style.display = 'block'; clearTimeout(e._t); e._t = setTimeout(() => e.style.display = 'none', 2600); }
 function salvar(){
@@ -207,7 +219,7 @@ function salvar(){
 }
 function previa(){
   $('moldura').className = 'moldura ' + (cfg.orientacao || 'paisagem');
-  desenho?.parar(); desenho = desenhar($('previa'), cfg, { editavel: true, mudou: () => { salvar(); previa(); } });
+  desenho?.parar(); desenho = desenhar($('previa'), cfg, { editavel: true, agora: diaPrevia === null ? new Date() : proximo(diaPrevia), mudou: () => { salvar(); previa(); } });
   avisoContraste(); checarHorario(); checarLogo();
   const img = $('previa').querySelector('.logo img');   // o tamanho da logo só é conhecido depois do load
   img?.addEventListener('load', checarLogo);
@@ -228,7 +240,7 @@ const mudou = () => { salvar(); previa(); };
 
 // ---------- tabela de preços ----------
 const brlIn = v => Number(v || 0).toFixed(2);
-function itens(){
+function itens(){ setTimeout(() => typeof semana === 'function' && semana());
   const box = $('itens'); box.innerHTML = '';
   cfg.itens.forEach((it, i) => {
     const d = document.createElement('div'); d.className = 'it'; d.dataset.i = i;
@@ -241,8 +253,12 @@ function itens(){
       <button type="button" title="Remover" aria-label="Remover ${it.n}">✕</button>
       <span></span><select class="cat" aria-label="Categoria de ${it.n}">${CATEGORIAS.map(c => `<option${c === it.c ? ' selected' : ''}>${c}</option>`).join('')}</select>
       <input type="number" class="de" step="0.01" min="0" inputmode="decimal" placeholder="de R$" title="Preço antigo: aparece riscado (de/por)" aria-label="Preço antigo de ${it.n} (de/por)" value="${it.de || ''}">
-      <label class="btn fc${it.foto ? ' tem' : ''}" title="Foto deste corte">${it.foto ? 'Foto ✓' : 'Foto'}<input type="file" accept="image/*" hidden aria-label="Foto de ${it.n}"></label>`;
-    const [alca, nome, preco, un, of, es, rem, , cat, de, fc] = d.children;
+      <label class="btn fc${it.foto ? ' tem' : ''}" title="Foto deste corte">${it.foto ? 'Foto ✓' : 'Foto'}<input type="file" accept="image/*" hidden aria-label="Foto de ${it.n}"></label>
+      <span></span><select class="sl" aria-label="Selo de destaque de ${it.n}"><option value="">Sem selo</option>${Object.entries(SELOS).map(([k, z]) => `<option value="${k}"${(it.selo || (it.of ? 'oferta' : '')) === k ? ' selected' : ''}>${z.txt}</option>`).join('')}</select>
+      <input type="text" class="ds" maxlength="60" placeholder="o que vem no combo (opcional)" aria-label="Descrição de ${it.n}" value="${(it.desc || '').replace(/"/g, '&quot;')}">`;
+    const [alca, nome, preco, un, of, es, rem, , cat, de, fc, , sl, ds] = d.children;
+    sl.onchange = () => { it.selo = sl.value || undefined; it.of = !!sl.value; of.setAttribute('aria-pressed', it.of); mudou(); };
+    ds.oninput = () => { it.desc = ds.value; mudou(); };
     fc.querySelector('input').onchange = async ev => { const f = ev.target.files[0]; if (!f) return; try { it.foto = await reduzirImagem(f, 160, .8); if (!cfg.fotosItens){ cfg.fotosItens = true; acab(); } itens(); mudou(); } catch (er) { toast(er.message); } };
     de.oninput = () => { it.de = parseFloat(de.value.replace(',', '.')) || 0; mudou(); };
     nome.oninput = () => { it.n = nome.value; mudou(); };
@@ -271,6 +287,7 @@ function arrastar(e, linha, i){
   };
   addEventListener('pointermove', sobre); addEventListener('pointerup', fim, { once: true });
 }
+$('btnCombo').onclick = () => { cfg.itens.push({ n: 'Combo churrasco', c: 'Kits e combos', p: 0, u: 'un', of: true, selo: 'combo', desc: 'Picanha 1 kg · linguiça 1 kg · carvão', esg: false }); cfg.agruparCategoria = true; itens(); mudou(); $('itens').lastChild.querySelector('input').select(); toast('Combo criado: escreva o nome, o preço e o que vem nele.'); };
 $('btnNovo').onclick = () => { cfg.itens.push({ n: 'Novo corte', c: 'Bovinos', p: 0, u: 'kg', of: false, esg: false }); itens(); mudou(); $('itens').lastChild.querySelector('input').select(); };
 $('btnReaj').onclick = () => {
   const pct = parseFloat($('reaj').value.replace(',', '.')); if (!pct) return;
@@ -462,8 +479,39 @@ FOTOS.forEach(f => { const b = document.createElement('button'); b.type = 'butto
   b.onclick = () => { cfg.promo.foto = fotoGrande(f.id); mudou(); toast('Foto da promoção trocada.'); }; $('promoProntas').append(b); });
 $('tFotosAuto').onclick = () => { let n = 0; cfg.itens.forEach(it => { if (!it.foto){ const f = fotoPara(it.n); if (f){ it.foto = f; n++; } } }); cfg.fotosItens = true; acab(); itens(); mudou(); toast(n ? `${n} corte(s) ganharam foto pronta. Os que ficaram sem foto você coloca a sua.` : 'Nenhum corte novo com foto pronta parecida.'); };
 
+// ---------- painel da semana ----------
+function proximo(d){ const h = new Date(); h.setHours(12, 0, 0, 0); h.setDate(h.getDate() + ((d - h.getDay() + 7) % 7)); return h; }
+function semana(){
+  const box = $('dias');
+  if (!box.children.length) [null, 1, 2, 3, 4, 5, 6, 0].forEach(d => { const b = document.createElement('button'); b.type = 'button'; b.dataset.d = d === null ? '' : d;
+    b.onclick = () => { diaPrevia = d; semana(); previa(); }; box.append(b); });   // criados uma vez: redesenhar no meio do clique perdia o clique
+  [...box.children].forEach(b => { const d = b.dataset.d === '' ? null : +b.dataset.d;
+    const plan = d !== null && (cfg.itens.some(i => i.dias?.[d] > 0 || i.diasOcultos?.includes(d)) || cfg.promoDias?.[d]?.ativa);
+    b.textContent = d === null ? 'Hoje' : DIAS[d] + (plan ? ' •' : ''); b.setAttribute('aria-pressed', diaPrevia === d); });
+  const si = $('semanaItens'); si.innerHTML = '';
+  const d = diaPrevia, off = d === null;
+  ['pdAtiva', 'pdItem', 'pdPreco', 'pdTitulo', 'semanaLimpa'].forEach(id => $(id).disabled = off);
+  if (off){ si.innerHTML = '<p class="estado" style="grid-column:1/-1;margin:0">Escolha um dia acima para planejar.</p>'; $('pdAtiva').checked = false; ['pdItem', 'pdPreco', 'pdTitulo'].forEach(id => $(id).value = ''); return; }
+  cfg.itens.forEach(it => {
+    const n = document.createElement('span'); n.textContent = it.n;
+    const inp = document.createElement('input'); inp.type = 'number'; inp.step = '0.01'; inp.min = '0'; inp.placeholder = Number(it.p).toFixed(2); inp.value = it.dias?.[d] || ''; inp.setAttribute('aria-label', `Preço de ${it.n} na ${DIAS[d]}`);
+    inp.oninput = () => { it.dias = it.dias || {}; const v = parseFloat(inp.value); if (v > 0) it.dias[d] = v; else delete it.dias[d]; mudou(); };
+    const oc = document.createElement('button'); oc.type = 'button'; oc.textContent = 'Ø'; oc.title = 'Não mostrar neste dia'; oc.setAttribute('aria-pressed', !!it.diasOcultos?.includes(d)); oc.setAttribute('aria-label', `Não mostrar ${it.n} na ${DIAS[d]}`);
+    oc.onclick = () => { const tinha = it.diasOcultos?.includes(d); it.diasOcultos = (it.diasOcultos || []).filter(x => x !== d); if (!tinha) it.diasOcultos.push(d); oc.setAttribute('aria-pressed', !tinha); mudou(); };
+    si.append(n, inp, oc);
+  });
+  const pd = cfg.promoDias?.[d] || {};
+  $('pdAtiva').checked = !!pd.ativa; $('pdItem').value = pd.item || ''; $('pdPreco').value = pd.preco || ''; $('pdTitulo').value = pd.titulo || '';
+}
+const promoDia = () => { cfg.promoDias = cfg.promoDias || {}; const d = diaPrevia;
+  cfg.promoDias[d] = { ativa: $('pdAtiva').checked, item: $('pdItem').value, preco: parseFloat($('pdPreco').value) || 0, titulo: $('pdTitulo').value || 'Promoção do dia' };
+  if (!cfg.promoDias[d].ativa && !cfg.promoDias[d].item) delete cfg.promoDias[d]; mudou(); };
+['pdItem', 'pdPreco', 'pdTitulo'].forEach(id => $(id).addEventListener('change', promoDia)); $('pdAtiva').addEventListener('change', promoDia);
+$('semanaLimpa').onclick = () => { const d = diaPrevia; cfg.itens.forEach(it => { if (it.dias) delete it.dias[d]; if (it.diasOcultos) it.diasOcultos = it.diasOcultos.filter(x => x !== d); }); if (cfg.promoDias) delete cfg.promoDias[d]; semana(); mudou(); };
+
 itens(); previa();
 addEventListener('resize', () => previa());
+semana();
 </script>
 </body>
 </html>

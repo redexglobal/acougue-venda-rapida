@@ -17,11 +17,16 @@ export const ESTILOS = {
   minimal:   { nome: 'Minimal',        tit: 'Inter',            txt: 'Inter',    linha: 'tabela' },
   neon:      { nome: 'Neon',           tit: 'Bebas Neue',       txt: 'Archivo',  linha: 'cartao', textura: 'grade' },
   fogo:      { nome: 'Fogo',           tit: 'Bebas Neue',       txt: 'Archivo',  linha: 'brilho', textura: 'brasa' },
+  natal:     { nome: 'Natal (luzinhas e neve)', tit: 'Playfair Display', txt: 'Archivo', linha: 'natal', textura: 'natal' },
+  madeiraNobre: { nome: 'Madeira nobre', tit: 'Playfair Display', txt: 'Inter',  linha: 'pontilhado', textura: 'madeira2' },
+  holo:      { nome: 'Tecnológico (holograma)', tit: 'Bebas Neue', txt: 'Inter', linha: 'vidro', textura: 'holo' },
+  cromo:     { nome: 'Cromo brilhante', tit: 'Bebas Neue',     txt: 'Archivo',  linha: 'cromo', textura: 'cromo' },
 };
 export const FONTES_URL = 'https://fonts.googleapis.com/css2?family=Alfa+Slab+One&family=Archivo:wght@600;800;900&family=Bebas+Neue&family=Inter:wght@400;600;800&family=Kalam:wght@400;700&family=Playfair+Display:ital,wght@0,700;0,900;1,700&display=swap';
 
 // ---------- segmentos ----------
 export const SEGMENTOS = {
+  natal: 'Natal e fim de ano', madeira: 'Madeira nobre', tech: 'Tecnológico e brilho',
   bairro: 'Açougue de bairro', rustico: 'Rústico e empório', mercado: 'Supermercado e atacado',
   pequeno: 'Setor pequeno', gourmet: 'Gourmet, chique e premium', churrasco: 'Churrasco, moderno e natural', foto: 'Com a sua foto',
 };
@@ -39,6 +44,8 @@ export const BIBLIOTECA = [
   ...L('Peixes', [['Tilápia (filé)', 49.9], ['Salmão (filé)', 119.9], ['Pintado (posta)', 59.9], ['Tambaqui (costela)', 44.9], ['Camarão limpo', 89.9], ['Merluza (filé)', 39.9]]),
   ...L('Exóticos', [['Javali', 79.9], ['Jacaré (filé)', 99.9], ['Cabrito', 64.9], ['Codorna', 49.9]]),
   ...L('Kits e combos', [['Kit churrasco 2 kg', 109.9, 'un'], ['Kit churrasco família 4 kg', 199.9, 'un'], ['Kit semana (5 kg variado)', 149.9, 'un'], ['Kit feijoada', 59.9, 'un'], ['Kit premium (ancho + chorizo)', 179.9, 'un'], ['Espetinho misto', 6.9, 'un'], ['Hambúrguer artesanal 180 g', 9.9, 'un']]),
+  ...L('Kits e combos', [['Kit ceia (pernil + tender + farofa)', 189.9, 'un'], ['Kit Natal família (peru + pernil)', 249.9, 'un'], ['Combo churrasco Réveillon 5 kg', 239.9, 'un']]),
+  ...L('Outros', [['Tender', 69.9], ['Lombo para ceia', 39.9], ['Peru temperado', 34.9], ['Bacalhau (posta)', 129.9], ['Chester temperado', 32.9]]),
   ...L('Outros', [['Carvão 5 kg', 29.9, 'un'], ['Sal grosso', 6.9, 'un'], ['Pão de alho', 14.9, 'un'], ['Queijo coalho (espeto)', 4.9, 'un']]),
 ];
 export const CATEGORIAS_TODAS = [...new Set(BIBLIOTECA.map(i => i.c))];
@@ -50,6 +57,8 @@ const SORTIDO_GOURMET = pega('Ancho', 'Chorizo', 'Tomahawk', 'Prime rib', 'Pican
 const SORTIDO_CHURRASCO = pega('Picanha', 'Maminha', 'Fraldinha', 'Cupim', 'Costela janela', 'Ancho', 'Chorizo', 'Linguiça toscana', 'Linguiça apimentada', 'Coração de frango', 'Meio da asa (tulipa)', 'Pão de alho', 'Queijo coalho (espeto)', 'Carvão 5 kg', 'Kit churrasco família 4 kg');
 const SORTIDO_PEQUENO = pega('Picanha', 'Alcatra', 'Contrafilé', 'Costela', 'Patinho moído', 'Coxa e sobrecoxa', 'Linguiça toscana');
 const SORTIDO_NATURAL = pega('Picanha', 'Filé mignon', 'Patinho', 'Peito de frango', 'Filé de peito', 'Frango inteiro', 'Lombo suíno', 'Pernil de cordeiro', 'Tilápia (filé)', 'Salmão (filé)', 'Linguiça de frango');
+const SORTIDO_NATAL = pega('Peru temperado', 'Chester temperado', 'Tender', 'Lombo para ceia', 'Pernil', 'Bacalhau (posta)', 'Carré de cordeiro', 'Picanha', 'Kit ceia (pernil + tender + farofa)', 'Kit Natal família (peru + pernil)', 'Combo churrasco Réveillon 5 kg');
+SORTIDO_NATAL.forEach((it, i) => { if (i === 0) it.selo = 'natal'; if (i === 8) { it.selo = 'ceia'; it.desc = 'Pernil 2 kg · tender 1 kg · farofa da casa'; } if (i === 9) { it.selo = 'combo'; it.desc = 'Peru 3 kg · pernil 2 kg · temperados'; } if (i === 10) { it.selo = 'combo'; it.desc = 'Picanha · fraldinha · linguiça · coração · carvão'; } });
 const SORTIDO_RUSTICO = pega('Picanha', 'Costela', 'Cupim', 'Carne de sol', 'Charque', 'Costela defumada', 'Linguiça cuiabana', 'Linguiça de pernil', 'Panceta', 'Barriga suína', 'Bacon', 'Paio', 'Javali', 'Cabrito');
 
 // ---------- 22 modelos ----------
@@ -100,6 +109,31 @@ export const MODELOS = [
     { estilo: 'padrao', tema: 'brasa', halo: true, moldura: false, arranjo: 'promo-esq', colunas: 1, movimento: 'cima', fotosItens: true, itens: SORTIDO_BAIRRO }),
   M('fachada-fundo', 'Fachada no Fundo', 'foto', 'A foto da sua loja vira o fundo da tela, escurecida para o preço ler bem.',
     { estilo: 'padrao', tema: 'noite', halo: true, moldura: false, arranjo: 'so-precos', colunas: 2, movimento: 'parado', fotoLojaFundo: true, itens: SORTIDO_BAIRRO }),
+  // ---- 24/11/2026: Natal, madeira nobre, tecnológico e brilho ----
+  M('natal-vermelho-ouro', 'Natal Vermelho e Ouro', 'natal', 'Vermelho, dourado e luzinhas no topo: as ofertas da ceia em destaque.',
+    { estilo: 'natal', cores: { fundo: '#7a0d12', texto: '#fff6e6', destaque: '#e8c35a', preco: '#ffe08a', faixa: '#5e080c' }, halo: true, moldura: true, arranjo: 'promo-esq', colunas: 1, movimento: 'cima', itens: SORTIDO_NATAL }),
+  M('natal-neve', 'Natal Neve', 'natal', 'Verde-pinheiro com neve caindo devagar e preço em dourado.',
+    { estilo: 'natal', cores: { fundo: '#0f2a1d', texto: '#f3fff7', destaque: '#d94141', preco: '#ffe08a', faixa: '#123423' }, halo: false, moldura: true, arranjo: 'promo-dir', colunas: 1, movimento: 'paginas', itens: SORTIDO_NATAL }),
+  M('ceia-gourmet', 'Ceia Gourmet', 'natal', 'Preto e dourado para a ceia de quem vende cortes nobres e kits prontos.',
+    { estilo: 'dourado', cores: { fundo: '#0d0b08', texto: '#f7efe0', destaque: '#d9b25f', preco: '#f0d08a', faixa: '#17130c' }, halo: true, moldura: true, arranjo: 'promo-esq', colunas: 1, movimento: 'paginas', itens: SORTIDO_NATAL }),
+  M('natal-rustico', 'Natal Rústico', 'natal', 'Madeira escura com luzinhas: o Natal da casa de carnes do interior.',
+    { estilo: 'rustico', cores: { fundo: '#2a1a10', texto: '#fff0d6', destaque: '#d94141', preco: '#ffd166', faixa: '#3a2516' }, halo: true, moldura: true, arranjo: 'promo-cima', colunas: 2, movimento: 'parado', itens: SORTIDO_NATAL }),
+  M('reveillon-brilho', 'Réveillon Brilho', 'natal', 'Preto e prata com brilho passando nos preços: churrasco da virada.',
+    { estilo: 'cromo', cores: { fundo: '#08080c', texto: '#f4f6f8', destaque: '#c9d1da', preco: '#ffffff', faixa: '#121218' }, halo: true, moldura: false, arranjo: 'promo-esq', colunas: 1, movimento: 'cima', itens: SORTIDO_CHURRASCO }),
+  M('madeira-nobre', 'Madeira Nobre', 'madeira', 'Madeira clara, serifa elegante e pontilhado: empório fino de carnes.',
+    { estilo: 'madeiraNobre', cores: { fundo: '#5a3a22', texto: '#fff7ec', destaque: '#f0c27a', preco: '#ffe2b0', faixa: '#4a2f1b' }, halo: false, moldura: true, arranjo: 'promo-esq', colunas: 1, movimento: 'paginas', itens: SORTIDO_GOURMET }),
+  M('madeira-carvao', 'Madeira e Carvão', 'madeira', 'Madeira queimada e brasa no fundo: para casa de churrasco de verdade.',
+    { estilo: 'rustico', cores: { fundo: '#1c120c', texto: '#f6e7cf', destaque: '#ff7a2f', preco: '#ffcf7a', faixa: '#2a1a10' }, halo: true, moldura: false, arranjo: 'promo-dir', colunas: 1, movimento: 'cima', itens: SORTIDO_CHURRASCO }),
+  M('madeira-tabua', 'Tábua de Corte', 'madeira', 'Cor de tábua de carne e letra de placa: simples, quente e legível.',
+    { estilo: 'madeiraNobre', cores: { fundo: '#8a5a32', texto: '#1f120a', destaque: '#7a1c0c', preco: '#2a0f05', faixa: '#a06a3c' }, halo: false, moldura: false, arranjo: 'so-precos', colunas: 2, movimento: 'parado', itens: SORTIDO_BAIRRO }),
+  M('tech-holograma', 'Tecnológico Holograma', 'tech', 'Vidro, luz azul e violeta: açougue moderno que quer parecer do futuro.',
+    { estilo: 'holo', cores: { fundo: '#060a18', texto: '#e8f1ff', destaque: '#6ea8ff', preco: '#a8e1ff', faixa: '#0c1328' }, halo: true, moldura: false, arranjo: 'promo-dir', colunas: 1, movimento: 'cima', itens: SORTIDO_GOURMET }),
+  M('tech-led', 'Painel LED', 'tech', 'Preto absoluto com números em verde-LED: leitura de longe e cara de balança digital.',
+    { estilo: 'holo', cores: { fundo: '#020403', texto: '#d7ffe6', destaque: '#28ff7a', preco: '#28ff7a', faixa: '#06100a' }, halo: true, moldura: false, arranjo: 'so-precos', colunas: 2, movimento: 'parado', itens: SORTIDO_MERCADO }),
+  M('cromo-premium', 'Cromo Premium', 'tech', 'Preços em metal escovado com brilho: vitrine de carne cara.',
+    { estilo: 'cromo', cores: { fundo: '#101216', texto: '#eef1f5', destaque: '#9fb3c8', preco: '#ffffff', faixa: '#181b21' }, halo: false, moldura: true, arranjo: 'promo-esq', colunas: 1, movimento: 'paginas', itens: SORTIDO_GOURMET }),
+  M('brilho-ouro', 'Brilho Ouro', 'tech', 'Cartões com reflexo passando e destaque dourado: chama atenção sem perder a classe.',
+    { estilo: 'brilho', cores: { fundo: '#120d05', texto: '#fff6e0', destaque: '#f2c14e', preco: '#ffe08a', faixa: '#1e160a' }, halo: true, moldura: true, arranjo: 'promo-esq', colunas: 1, movimento: 'cima', itens: SORTIDO_BAIRRO }),
 ];
 
 // aplica um modelo mantendo o que é do dono (nome, logo, fotos, promoção, horário e, se pedir, os preços)

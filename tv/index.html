@@ -83,7 +83,7 @@ function pintarFechada(cfg){
 }
 async function atualizar(){
   const cfg = await ler(); if (!cfg) return;
-  const ass = JSON.stringify(cfg) + (faixaConta || '') + promoValida(cfg) + '|' + telaFechada(cfg);   // virar o dia liga/desliga a promoção e a tela fechada
+  const ass = JSON.stringify(cfg) + (faixaConta || '') + promoValida(cfg) + '|' + telaFechada(cfg) + '|' + new Date().getDay();   // virar o dia liga/desliga a promoção e a tela fechada
   if (ass === assinatura) return;                      // só redesenha quando algo mudou
   assinatura = ass; aviso.style.display = 'none';
   const cr = document.getElementById('carencia'); cr.style.display = faixaConta ? 'block' : 'none'; cr.textContent = faixaConta || '';
