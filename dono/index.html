@@ -6,7 +6,7 @@
 <meta name="robots" content="noindex">
 <title>Painel do dono · Açougue Venda Rápida</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;800;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Alfa+Slab+One&family=Archivo:wght@600;800;900&family=Bebas+Neue&family=Inter:wght@400;500;600;700;800&family=Kalam:wght@400;700&family=Playfair+Display:ital,wght@0,700;0,900;1,700&display=swap" rel="stylesheet">
 <style>
   :root{--f:#141110;--c:#1e1a18;--l:#372f2b;--t:#f6efe6;--s:#c9bcae;--b:#b3341f;--o:#e8b04b;--ok:#3fb27f}
   *{box-sizing:border-box}
@@ -47,7 +47,7 @@
   .it button{padding:4px 0;justify-content:center}
   .it button[aria-pressed="true"].of{background:var(--o);color:#1a1208;border-color:var(--o)}
   .it button[aria-pressed="true"].es{background:#555;color:#fff}
-  .it .cat{grid-column:2/4}.it .de{grid-column:4/8}
+  .it .cat{grid-column:2/4}.it .de{grid-column:4/6}.it .fc{grid-column:6/8;font-size:12px;padding:4px 2px}.it .fc.tem{border-color:var(--ok);color:#8be0b6}
   .area{position:sticky;top:70px}
   .moldura{background:#000;border:10px solid #2a2421;border-radius:16px;box-shadow:0 30px 60px -30px #000;overflow:hidden;margin:0 auto}
   .moldura.paisagem{aspect-ratio:16/9;width:100%}
@@ -71,6 +71,16 @@
 
 <main>
 <aside aria-label="Ajustes do painel">
+  <details open><summary>Modelo e acabamento</summary>
+    <p class="estado" style="margin:0 0 6px">Modelo atual: <b id="modeloNome">personalizado</b>. <a href="../modelos/" style="color:#ffb199">Ver os 22 modelos</a></p>
+    <label for="estilo">Estilo das linhas e da letra</label><select id="estilo"></select>
+    <label>Acabamento</label>
+    <div class="grupo"><button type="button" id="tHalo">Halo (brilho)</button><button type="button" id="tMold">Moldura</button><button type="button" id="tFotos">Foto em cada corte</button></div>
+    <label>Colunas de preços</label><div class="grupo" id="colunas"><button type="button" data-v="1">1</button><button type="button" data-v="2">2</button><button type="button" data-v="3">3</button></div>
+    <label for="fotoLoja">Foto da loja (fachada ou balcão)</label><input type="file" id="fotoLoja" accept="image/*">
+    <div class="grupo" style="margin-top:6px"><button type="button" id="tFundo">Usar a foto de fundo</button><button type="button" id="fotoLojaTira">Tirar foto da loja</button></div>
+  </details>
+
   <details open><summary>Tabela de preços</summary>
     <p class="estado" style="margin:0 0 8px">Arraste pela alça ⋮⋮ para mudar a ordem. ★ = oferta, Ø = esgotado.</p>
     <div class="itens" id="itens"></div>
@@ -78,6 +88,9 @@
       <button type="button" id="btnNovo">+ Corte</button>
       <button type="button" id="btnImprimir">Imprimir tabela</button>
     </div>
+    <label for="bibCat">Adicionar da biblioteca (102 cortes)</label>
+    <div class="lado"><select id="bibCat"></select><button type="button" id="bibAdd">Adicionar marcados</button></div>
+    <div id="bibLista" style="max-height:180px;overflow:auto;margin-top:6px;display:grid;grid-template-columns:1fr 1fr;gap:2px 8px;font-size:13px"></div>
     <label for="reaj">Reajustar todos os preços (%)</label>
     <div class="lado"><input type="number" id="reaj" step="0.5" placeholder="ex.: 5 ou -3"><button type="button" id="btnReaj">Aplicar</button></div>
     <label><input type="checkbox" id="agrupar"> Separar por categoria na TV</label>
@@ -154,6 +167,7 @@
 
 <script type="module">
 import { desenhar, padrao, TEMAS, ARRANJOS, MOVIMENTOS, CATEGORIAS, coresDe, contraste, codificar, reduzirImagem, telaFechada } from '../painel.js';
+import { ESTILOS, MODELOS, BIBLIOTECA } from '../modelos.js';
 const $ = id => document.getElementById(id);
 const CHAVE = 'acougue-painel';
 let cfg; try { cfg = JSON.parse(localStorage.getItem(CHAVE)) || padrao(); } catch { cfg = padrao(); }
@@ -205,8 +219,10 @@ function itens(){
       <button type="button" class="es" aria-pressed="${!!it.esg}" title="Esgotado" aria-label="Marcar ${it.n} como esgotado">Ø</button>
       <button type="button" title="Remover" aria-label="Remover ${it.n}">✕</button>
       <span></span><select class="cat" aria-label="Categoria de ${it.n}">${CATEGORIAS.map(c => `<option${c === it.c ? ' selected' : ''}>${c}</option>`).join('')}</select>
-      <input type="number" class="de" step="0.01" min="0" inputmode="decimal" placeholder="de R$" title="Preço antigo: aparece riscado (de/por)" aria-label="Preço antigo de ${it.n} (de/por)" value="${it.de || ''}">`;
-    const [alca, nome, preco, un, of, es, rem, , cat, de] = d.children;
+      <input type="number" class="de" step="0.01" min="0" inputmode="decimal" placeholder="de R$" title="Preço antigo: aparece riscado (de/por)" aria-label="Preço antigo de ${it.n} (de/por)" value="${it.de || ''}">
+      <label class="btn fc${it.foto ? ' tem' : ''}" title="Foto deste corte">${it.foto ? 'Foto ✓' : 'Foto'}<input type="file" accept="image/*" hidden aria-label="Foto de ${it.n}"></label>`;
+    const [alca, nome, preco, un, of, es, rem, , cat, de, fc] = d.children;
+    fc.querySelector('input').onchange = async ev => { const f = ev.target.files[0]; if (!f) return; try { it.foto = await reduzirImagem(f, 160, .8); if (!cfg.fotosItens){ cfg.fotosItens = true; acab(); } itens(); mudou(); } catch (er) { toast(er.message); } };
     de.oninput = () => { it.de = parseFloat(de.value.replace(',', '.')) || 0; mudou(); };
     nome.oninput = () => { it.n = nome.value; mudou(); };
     preco.oninput = () => { it.p = parseFloat(preco.value.replace(',', '.')) || 0; mudou(); };
@@ -325,6 +341,44 @@ $('btnLink').onclick = async () => {
   $('linkTv').select();
 };
 $('btnCopiar').onclick = async () => { try { await navigator.clipboard.writeText($('linkTv').value); toast('Link copiado.'); } catch { $('linkTv').select(); toast('Selecionei o link: copie com Ctrl+C.'); } };
+
+// ---------- modelo e acabamento ----------
+Object.entries(ESTILOS).forEach(([k, e]) => { const o = document.createElement('option'); o.value = k; o.textContent = e.nome; $('estilo').append(o); });
+$('estilo').value = cfg.estilo || 'padrao';
+$('estilo').onchange = e => { cfg.estilo = e.target.value; mudou(); };
+function acab(){
+  $('tHalo').setAttribute('aria-pressed', !!cfg.halo); $('tMold').setAttribute('aria-pressed', !!cfg.moldura);
+  $('tFotos').setAttribute('aria-pressed', !!cfg.fotosItens); $('tFundo').setAttribute('aria-pressed', !!cfg.fotoLojaFundo);
+  $('colunas').querySelectorAll('button').forEach(b => b.setAttribute('aria-pressed', +b.dataset.v === (cfg.colunas || 1)));
+  $('modeloNome').textContent = MODELOS.find(m => m.id === cfg.modelo)?.nome || 'personalizado';
+}
+[['tHalo', 'halo'], ['tMold', 'moldura'], ['tFotos', 'fotosItens'], ['tFundo', 'fotoLojaFundo']].forEach(([id, k]) => $(id).onclick = () => {
+  cfg[k] = !cfg[k];
+  if (k === 'fotoLojaFundo' && cfg[k] && !cfg.fotoLoja) toast('Coloque a foto da loja acima para ela virar o fundo.');
+  if (k === 'fotosItens' && cfg[k] && !cfg.itens.some(i => i.foto)) toast('Agora toque em "Foto" ao lado de cada corte.');
+  acab(); mudou();
+});
+$('colunas').onclick = e => { const b = e.target.closest('button'); if (!b) return; cfg.colunas = +b.dataset.v; acab(); mudou(); };
+$('fotoLoja').onchange = async e => { const f = e.target.files[0]; if (!f) return; try { cfg.fotoLoja = await reduzirImagem(f, 1280, .7); cfg.fotoLojaFundo = true; acab(); mudou(); toast('Foto da loja colocada no fundo.'); } catch (er) { toast(er.message); } };
+$('fotoLojaTira').onclick = () => { cfg.fotoLoja = null; cfg.fotoLojaFundo = false; acab(); mudou(); };
+acab();
+// ---------- biblioteca de cortes ----------
+const cats = [...new Set(BIBLIOTECA.map(i => i.c))];
+cats.forEach(c => { const o = document.createElement('option'); o.value = c; o.textContent = `${c} (${BIBLIOTECA.filter(i => i.c === c).length})`; $('bibCat').append(o); });
+function bib(){
+  const tem = new Set(cfg.itens.map(i => i.n.toLowerCase()));
+  $('bibLista').innerHTML = BIBLIOTECA.filter(i => i.c === $('bibCat').value).map((i, k) =>
+    `<label style="margin:0;color:${tem.has(i.n.toLowerCase()) ? '#7d7068' : 'inherit'}"><input type="checkbox" data-n="${i.n}" ${tem.has(i.n.toLowerCase()) ? 'disabled' : ''}> ${i.n}</label>`).join('');
+}
+$('bibCat').onchange = bib; bib();
+$('bibAdd').onclick = () => {
+  const marcados = [...$('bibLista').querySelectorAll('input:checked')].map(x => x.dataset.n);
+  if (!marcados.length) return toast('Marque os cortes que quer adicionar.');
+  marcados.forEach(n => { const b = BIBLIOTECA.find(i => i.n === n); cfg.itens.push({ ...b }); });
+  itens(); bib(); mudou(); toast(`${marcados.length} corte(s) adicionados. Confira os preços: os da biblioteca são exemplo.`);
+};
+const veio = new URLSearchParams(location.search).get('modelo');
+if (veio) toast(`Modelo "${MODELOS.find(m => m.id === veio)?.nome || veio}" aplicado. Seus preços, logo e fotos foram mantidos.`);
 
 itens(); previa();
 addEventListener('resize', () => previa());

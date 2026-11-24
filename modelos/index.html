@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>22 modelos de painel de carnes · Açougue Venda Rápida</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link id="fontes" rel="stylesheet">
+<style>
+  :root{--f:#141110;--c:#1e1a18;--l:#372f2b;--t:#f6efe6;--s:#c9bcae;--b:#b3341f;--o:#e8b04b}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--f);color:var(--t);font:15px/1.5 Inter,system-ui,sans-serif}
+  :focus-visible{outline:3px solid var(--o);outline-offset:2px}
+  header{position:sticky;top:0;z-index:10;background:rgba(20,17,16,.95);border-bottom:1px solid var(--l);padding:12px 18px}
+  .barra{display:flex;align-items:center;gap:12px;flex-wrap:wrap;max-width:1500px;margin:0 auto}
+  h1{font:900 20px Archivo,sans-serif;margin:0 auto 0 0}h1 span{color:#ff6a3d}
+  .chips{display:flex;gap:6px;flex-wrap:wrap;max-width:1500px;margin:10px auto 0}
+  button,.btn{font:600 14px Inter,sans-serif;border-radius:10px;border:1px solid var(--l);background:var(--c);color:var(--t);padding:8px 12px;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:6px}
+  button[aria-pressed="true"]{border-color:var(--o);box-shadow:inset 0 0 0 1px var(--o)}
+  .prim{background:var(--b);border-color:var(--b);color:#fff}
+  main{max-width:1500px;margin:0 auto;padding:18px}
+  .intro{color:var(--s);max-width:900px;margin:0 0 16px}
+  .grade{display:grid;grid-template-columns:repeat(auto-fill,minmax(420px,1fr));gap:18px}
+  .card[hidden]{display:none}
+  .card{background:var(--c);border:1px solid var(--l);border-radius:16px;overflow:hidden;display:flex;flex-direction:column}
+  .tela{background:#000;aspect-ratio:16/9;position:relative}
+  .tela.retrato{aspect-ratio:16/9;display:grid;place-items:center}
+  .tela.retrato .p{height:100%;aspect-ratio:9/16}
+  .tela .p{width:100%;height:100%}
+  .info{padding:12px 14px;display:flex;flex-direction:column;gap:8px}
+  .info h2{font:800 17px Archivo,sans-serif;margin:0}
+  .info .seg{font-size:12px;color:var(--o);text-transform:uppercase;letter-spacing:.08em}
+  .info p{margin:0;color:var(--s);font-size:14px}
+  .ops{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+  .cor{width:28px;height:28px;border-radius:50%;border:2px solid var(--l);cursor:pointer;padding:0}
+  .cor[aria-pressed="true"]{border-color:#fff;box-shadow:0 0 0 2px var(--o)}
+  .ops label{font-size:12px;color:var(--s);display:flex;align-items:center;gap:4px}
+  .ops input[type=color]{width:30px;height:28px;border:1px solid var(--l);border-radius:6px;background:none;padding:1px}
+  .acoes{display:flex;gap:8px;flex-wrap:wrap;margin-top:2px}
+  .tag{font-size:12px;border:1px solid var(--l);border-radius:999px;padding:2px 8px;color:var(--s)}
+  #toast{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);background:#0f2219;border:1px solid #3fb27f;color:#dff7ea;padding:10px 16px;border-radius:12px;display:none;z-index:30}
+  @media (max-width:520px){.grade{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<header>
+  <div class="barra">
+    <h1>22 modelos de painel · <span>Açougue Venda Rápida</span></h1>
+    <a class="btn" href="../">Página de vendas</a>
+    <a class="btn prim" href="../dono/">Abrir o editor</a>
+  </div>
+  <div class="chips" id="segs" role="group" aria-label="Filtrar por tipo de loja"></div>
+</header>
+<main>
+  <p class="intro">Escolha o que tem a cara da sua loja. Cada modelo aceita qualquer cor, liga ou desliga o brilho (halo) e a moldura, e funciona com a sua logo, a foto da sua loja, a foto de cada corte e a promoção da semana. Os preços são de exemplo: no editor você coloca os seus.</p>
+  <div class="grade" id="grade"></div>
+</main>
+<div id="toast" role="status"></div>
+<script type="module">
+import { desenhar, padrao, TEMAS, coresDe } from '../painel.js';
+import { MODELOS, SEGMENTOS, ESTILOS, FONTES_URL, aplicarModelo } from '../modelos.js';
+document.getElementById('fontes').href = FONTES_URL;
+const CHAVE = 'acougue-painel';
+const PALETAS = [
+  { fundo: '#170d0a', texto: '#fff1ea', destaque: '#ff6a3d', preco: '#ffd166', faixa: '#2a1410' },
+  { fundo: '#7d0f0f', texto: '#fff8ec', destaque: '#ffd84d', preco: '#ffffff', faixa: '#5e0a0a' },
+  { fundo: '#0f2219', texto: '#e8f7ee', destaque: '#7bd389', preco: '#ffe08a', faixa: '#173327' },
+  { fundo: '#0b1a33', texto: '#eef4ff', destaque: '#4fa3ff', preco: '#ffffff', faixa: '#11264a' },
+  { fundo: '#0c0c0c', texto: '#f2ede4', destaque: '#c8a96a', preco: '#f2ede4', faixa: '#151515' },
+  { fundo: '#f6efe6', texto: '#2b1610', destaque: '#b3341f', preco: '#7a1c0c', faixa: '#eadccb' },
+];
+const fotoFundoExemplo = 'data:image/svg+xml;utf8,' + encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="800" height="450"><defs><linearGradient id="a" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#6b3b2a"/><stop offset="1" stop-color="#2a1610"/></linearGradient></defs><rect width="800" height="450" fill="url(#a)"/><rect x="60" y="120" width="680" height="260" fill="#3c2219"/><rect x="90" y="150" width="200" height="200" fill="#a8452d"/><rect x="310" y="150" width="200" height="200" fill="#c2593b"/><rect x="530" y="150" width="180" height="200" fill="#8e3a26"/><rect x="0" y="0" width="800" height="70" fill="#1a0f0b"/></svg>`);
+const fotoPromo = 'data:image/svg+xml;utf8,' + encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="640" height="480"><defs><radialGradient id="g" cx=".5" cy=".55" r=".6"><stop offset="0" stop-color="#5a2a1c"/><stop offset="1" stop-color="#1b0c08"/></radialGradient></defs><rect width="640" height="480" fill="url(#g)"/><ellipse cx="320" cy="250" rx="230" ry="130" fill="#a8402a"/><ellipse cx="300" cy="235" rx="200" ry="105" fill="#c4553a"/><path d="M150 230 Q300 170 470 240" stroke="#f1d3c2" stroke-width="16" fill="none" opacity=".7"/><path d="M180 280 Q320 240 450 290" stroke="#f1d3c2" stroke-width="9" fill="none" opacity=".45"/><ellipse cx="320" cy="375" rx="250" ry="22" fill="#000" opacity=".35"/></svg>`);
+const fotoCorte = cor => 'data:image/svg+xml;utf8,' + encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="80" height="80"><rect width="80" height="80" rx="12" fill="#2a1410"/><ellipse cx="40" cy="42" rx="30" ry="22" fill="${cor}"/><ellipse cx="34" cy="38" rx="12" ry="7" fill="#f3d9c8" opacity=".55"/></svg>`);
+const CORES_CORTE = ['#b3402a', '#c2593b', '#a8452d', '#d06a4a', '#9a3522', '#c9774f'];
+
+let segAtual = '';
+const segs = document.getElementById('segs');
+[['', 'Todos (22)'], ...Object.entries(SEGMENTOS).map(([k, v]) => [k, `${v} (${MODELOS.filter(m => m.segmento === k).length})`])].forEach(([k, v]) => {
+  const b = document.createElement('button'); b.type = 'button'; b.textContent = v; b.dataset.s = k; b.setAttribute('aria-pressed', k === segAtual);
+  b.onclick = () => { segAtual = k; segs.querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', x.dataset.s === k)); filtrar(); };
+  segs.append(b);
+});
+
+const cards = [];
+function montarCartao(m){
+  const base = { ...padrao(), loja: 'Casa de Carnes do Bairro', atualizado: null };
+  let cfg = aplicarModelo(base, m, { manterItens: false });
+  cfg.movimento = 'parado'; cfg.promo = { ...cfg.promo, inicio: '', fim: '' };
+  if (m.cfg.fotosItens) cfg.itens.forEach((it, i) => it.foto = fotoCorte(CORES_CORTE[i % CORES_CORTE.length]));
+  if (m.cfg.fotoLojaFundo) cfg.fotoLoja = fotoFundoExemplo;
+  cfg.promo = { ...cfg.promo, foto: fotoPromo };   // foto de exemplo: o dono coloca a dele
+  const art = document.createElement('article'); art.className = 'card'; art.dataset.seg = m.segmento;
+  const ret = m.cfg.orientacao === 'retrato';
+  art.innerHTML = `<div class="tela${ret ? ' retrato' : ''}"><div class="p"></div></div>
+    <div class="info"><span class="seg">${SEGMENTOS[m.segmento]}</span><h2>${m.nome}</h2><p>${m.sobre}</p>
+      <div class="ops" role="group" aria-label="Cores do modelo ${m.nome}"></div>
+      <div class="ops"><button type="button" class="bHalo" aria-pressed="${!!cfg.halo}">Halo (brilho)</button><button type="button" class="bMold" aria-pressed="${!!cfg.moldura}">Moldura</button>
+        <span class="tag">${ESTILOS[cfg.estilo]?.nome || ''}</span><span class="tag">${cfg.colunas || 1} coluna${(cfg.colunas || 1) > 1 ? 's' : ''}</span>${ret ? '<span class="tag">TV em pé</span>' : ''}</div>
+      <div class="acoes"><button type="button" class="prim usar">Usar este modelo</button></div></div>`;
+  const alvo = art.querySelector('.p'), ops = art.querySelectorAll('.ops')[0];
+  let desenho = null, visivel = false;
+  const pintar = () => { if (!visivel) return; desenho?.parar(); desenho = desenhar(alvo, cfg); };
+  // cores: a original do modelo + 6 paletas + escolher qualquer cor
+  const original = coresDe(cfg);
+  [original, ...PALETAS].forEach((p, i) => {
+    const b = document.createElement('button'); b.type = 'button'; b.className = 'cor'; b.title = i ? 'Trocar as cores' : 'Cores originais do modelo';
+    b.setAttribute('aria-label', i ? `Paleta ${i}` : 'Cores originais'); b.style.background = `linear-gradient(135deg,${p.fundo} 50%,${p.destaque} 50%)`; b.setAttribute('aria-pressed', i === 0);
+    b.onclick = () => { cfg.cores = { ...p }; ops.querySelectorAll('.cor').forEach(x => x.setAttribute('aria-pressed', x === b)); pintar(); };
+    ops.append(b);
+  });
+  const lf = document.createElement('label'); lf.innerHTML = 'Fundo <input type="color">'; lf.querySelector('input').value = original.fundo;
+  lf.querySelector('input').oninput = e => { cfg.cores = { ...coresDe(cfg), fundo: e.target.value }; pintar(); };
+  const ld = document.createElement('label'); ld.innerHTML = 'Destaque <input type="color">'; ld.querySelector('input').value = original.destaque;
+  ld.querySelector('input').oninput = e => { cfg.cores = { ...coresDe(cfg), destaque: e.target.value }; pintar(); };
+  ops.append(lf, ld);
+  art.querySelector(".bHalo").onclick = e => { cfg.halo = !cfg.halo; e.target.setAttribute('aria-pressed', cfg.halo); pintar(); };
+  art.querySelector(".bMold").onclick = e => { cfg.moldura = !cfg.moldura; e.target.setAttribute('aria-pressed', cfg.moldura); pintar(); };
+  art.querySelector('.usar').onclick = () => {
+    let atual; try { atual = JSON.parse(localStorage.getItem(CHAVE)); } catch {}
+    const visual = { estilo: cfg.estilo, tema: cfg.tema, cores: cfg.cores, halo: cfg.halo, moldura: cfg.moldura, arranjo: cfg.arranjo, colunas: cfg.colunas, orientacao: cfg.orientacao || 'paisagem', tamFonte: cfg.tamFonte, fotosItens: !!m.cfg.fotosItens, fotoLojaFundo: !!m.cfg.fotoLojaFundo, movimento: m.cfg.movimento || 'cima' };
+    const novo = atual ? { ...atual, ...visual, modelo: m.id } : { ...padrao(), ...visual, modelo: m.id, itens: m.cfg.itens.map(i => ({ ...i })) };
+    localStorage.setItem(CHAVE, JSON.stringify(novo));
+    location.href = '../dono/?modelo=' + m.id;
+  };
+  new IntersectionObserver((es, ob) => es.forEach(e => { if (e.isIntersecting){ visivel = true; pintar(); ob.disconnect(); } }), { rootMargin: '300px' }).observe(art);
+  cards.push(art); return art;
+}
+const grade = document.getElementById('grade');
+MODELOS.forEach(m => grade.append(montarCartao(m)));
+function filtrar(){ cards.forEach(c => c.hidden = !!segAtual && c.dataset.seg !== segAtual); }
+</script>
+</body>
+</html>

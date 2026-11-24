@@ -22,7 +22,8 @@ export const MOVIMENTOS = {
   parado: 'Parado (cabe tudo)', cima: 'Rolando para cima', baixo: 'Rolando para baixo',
   lado: 'Deslizando para o lado', paginas: 'Páginas que trocam',
 };
-export const CATEGORIAS = ['Bovinos', 'Suínos', 'Aves', 'Linguiças', 'Peixes', 'Kits e combos', 'Outros'];
+import { ESTILOS, CATEGORIAS_TODAS } from './modelos.js';
+export const CATEGORIAS = CATEGORIAS_TODAS;   // Bovinos, Premium, Suínos, Aves, Cordeiro, Linguiças, Embutidos, Peixes, Exóticos, Kits, Outros
 
 export function padrao(){
   return {
@@ -127,6 +128,58 @@ const CSS = `
 .pn .div{position:absolute;z-index:4;background:rgba(255,255,255,.0)}
 .pn.editavel .div{background:rgba(255,255,255,.25);border-radius:1cqh}
 .pn.editavel .div:hover{background:rgba(255,255,255,.55)}
+
+/* ---- 23/11/2026: estilos, halo, moldura, colunas, fotos ---- */
+.pn{--d:#ff6a3d;--ft:Archivo;--fx:Archivo}
+.pn .loja{font-family:var(--ft)}
+.pn .li,.pn .cat,.pn .rod,.pn .hora,.pn .promo .cx{font-family:var(--fx)}
+.pn .promo .pit,.pn .promo .pr{font-family:var(--ft)}
+.pn .li .dots{display:none;flex:1;border-bottom:.35cqh dotted currentColor;opacity:.45;margin:0 .4em .25em;min-width:.4em}
+.pn .li .ft{width:1.9em;height:1.9em;border-radius:.4em;object-fit:cover;flex:none;margin-right:.5em;align-self:center}
+.pn .li .esq{display:flex;align-items:center;min-width:0;flex:0 1 auto}
+.pn .li .pp{flex:none}
+.pn .li .dots{flex:1 1 0}
+.pn.comFotos .li{align-items:center}
+.pn .trilho.col2{column-count:2;column-gap:1.4cqw}.pn .trilho.col3{column-count:3;column-gap:1.2cqw}
+.pn .trilho.col2 .li,.pn .trilho.col3 .li,.pn .trilho.col2 .cat,.pn .trilho.col3 .cat{break-inside:avoid}
+/* forma das linhas */
+.pn.l-pontilhado .li{background:none!important;border-radius:0;padding:.55cqh 1.2cqh;margin:.2cqh 0}
+.pn.l-pontilhado .li .dots{display:block}
+.pn.l-tabela .li{border-radius:0;margin:0;padding:.75cqh 1.4cqh;border-bottom:.15cqh solid rgba(127,127,127,.25)}
+.pn.l-tabela .li:nth-child(even){background:rgba(127,127,127,.08)!important}
+.pn.l-tabela .li:nth-child(odd){background:none!important}
+.pn.l-etiqueta .li{background:rgba(255,255,255,.1)!important;border-radius:.6cqh}
+.pn.l-etiqueta .li .pp{color:var(--dt)!important;background:var(--d);padding:.1em .45em;border-radius:.2em;transform:rotate(-2deg);box-shadow:.25cqh .35cqh 0 rgba(0,0,0,.35)}
+.pn.l-lousa .li{background:none!important;padding:.5cqh 1.2cqh;margin:.15cqh 0}
+.pn.l-lousa .li .dots{display:block;border-bottom-style:dashed}
+.pn.l-lousa .li .nm,.pn.l-lousa .li .pp{text-shadow:0 0 .08em currentColor;letter-spacing:.02em}
+.pn.l-brilho .li{background:linear-gradient(180deg,rgba(255,255,255,.16),rgba(255,255,255,.03) 55%,rgba(0,0,0,.12))!important;border:.15cqh solid rgba(255,255,255,.12);position:relative;overflow:hidden}
+.pn.l-brilho .li::before{content:'';position:absolute;top:0;bottom:0;width:30%;left:-40%;background:linear-gradient(100deg,transparent,rgba(255,255,255,.22),transparent);animation:pnBrilho 5.5s infinite}
+.pn.l-brilho .li:nth-child(3n)::before{animation-delay:1.8s}.pn.l-brilho .li:nth-child(3n+1)::before{animation-delay:3.6s}
+@keyframes pnBrilho{0%{left:-40%}35%,100%{left:120%}}
+/* halo (brilho em volta) liga/desliga */
+.pn.halo .loja{text-shadow:0 0 .35em var(--d),0 0 1.1em var(--d)}
+.pn.halo .pp{text-shadow:0 0 .45em currentColor}
+.pn.halo .li.of{box-shadow:0 0 2cqh var(--d),inset 0 0 1cqh var(--d)}
+.pn.halo .promo{box-shadow:0 0 3cqh -0.5cqh var(--d)}
+/* moldura */
+.pn.moldura::before{content:'';position:absolute;inset:1.1cqh;border:.45cqh double var(--d);border-radius:1.4cqh;pointer-events:none;z-index:5;opacity:.85}
+.pn.moldura::after{content:'';position:absolute;inset:2.1cqh;border:.15cqh solid var(--d);border-radius:1cqh;pointer-events:none;z-index:5;opacity:.35}
+/* texturas */
+.pn.t-madeira{background-image:repeating-linear-gradient(92deg,rgba(0,0,0,.18) 0 .3cqw,transparent .3cqw 2.2cqw,rgba(255,255,255,.035) 2.2cqw 2.5cqw,transparent 2.5cqw 5.6cqw),repeating-linear-gradient(180deg,rgba(0,0,0,.28) 0 .35cqh,transparent .35cqh 16cqh)}
+.pn.t-lousa{background-image:radial-gradient(ellipse at 30% 20%,rgba(255,255,255,.07),transparent 60%),radial-gradient(ellipse at 80% 90%,rgba(255,255,255,.05),transparent 55%)}
+.pn.t-azulejo{background-image:linear-gradient(90deg,rgba(0,0,0,.07) .2cqh,transparent .2cqh),linear-gradient(0deg,rgba(0,0,0,.07) .2cqh,transparent .2cqh);background-size:9cqh 9cqh}
+.pn.t-kraft{background-image:radial-gradient(rgba(0,0,0,.06) 1px,transparent 1px),radial-gradient(rgba(255,255,255,.08) 1px,transparent 1px);background-size:5px 5px,7px 7px;background-position:0 0,2px 3px}
+.pn.t-linho{background-image:repeating-linear-gradient(45deg,rgba(255,255,255,.025) 0 2px,transparent 2px 6px)}
+.pn.t-marmore{background-image:linear-gradient(115deg,transparent 40%,rgba(120,110,95,.12) 41%,transparent 44%),linear-gradient(160deg,transparent 60%,rgba(120,110,95,.09) 61%,transparent 63%),linear-gradient(35deg,transparent 20%,rgba(120,110,95,.07) 21%,transparent 23%),radial-gradient(ellipse at 70% 30%,rgba(0,0,0,.04),transparent 60%)}
+.pn.t-grade{background-image:linear-gradient(rgba(255,43,214,.08) .15cqh,transparent .15cqh),linear-gradient(90deg,rgba(77,252,255,.07) .15cqh,transparent .15cqh);background-size:6cqh 6cqh}
+.pn.t-brasa{background-image:radial-gradient(ellipse at 50% 120%,rgba(255,90,31,.45),transparent 60%),radial-gradient(ellipse at 10% 110%,rgba(255,160,40,.25),transparent 45%)}
+/* foto da loja no fundo */
+.pn .fundoLoja{position:absolute;inset:0;background-size:cover;background-position:center;z-index:0}
+.pn .fundoLoja::after{content:'';position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.72),rgba(0,0,0,.55) 40%,rgba(0,0,0,.78))}
+.pn .topo,.pn .corpo,.pn .rod,.pn .hora{z-index:2}
+.pn.comFundo .lista{background:rgba(0,0,0,.35)!important;backdrop-filter:blur(2px)}
+@media (prefers-reduced-motion:reduce){.pn.l-brilho .li::before{animation:none;display:none}}
 `;
 let cssPosto = false;
 function porCss(){ if (cssPosto) return; const s = document.createElement('style'); s.textContent = CSS; document.head.append(s); cssPosto = true; }
@@ -137,8 +190,13 @@ export function desenhar(alvo, cfg, opcoes = {}){
   const cor = coresDe(cfg), escala = (cfg.tamFonte || 100) / 100;
   const vertical = cfg.orientacao === 'retrato';
   alvo.innerHTML = '';
-  const pn = document.createElement('div'); pn.className = 'pn' + (opcoes.editavel ? ' editavel' : '');
-  pn.style.background = cor.fundo; pn.style.color = cor.texto;
+  const est = ESTILOS[cfg.estilo] || ESTILOS.padrao;
+  const pn = document.createElement('div');
+  pn.className = ['pn', opcoes.editavel && 'editavel', 'l-' + est.linha, est.textura && 't-' + est.textura, cfg.halo && 'halo', cfg.moldura && 'moldura',
+    cfg.fotoLojaFundo && cfg.fotoLoja && 'comFundo', cfg.fotosItens && 'comFotos'].filter(Boolean).join(' ');
+  pn.style.backgroundColor = cor.fundo; pn.style.color = cor.texto;
+  pn.style.setProperty('--d', cor.destaque); pn.style.setProperty('--dt', contraste(cor.destaque, '#000000') > contraste(cor.destaque, '#ffffff') ? '#111' : '#fff'); pn.style.setProperty('--ft', `'${est.tit}'`); pn.style.setProperty('--fx', `'${est.txt}'`);
+  if (cfg.fotoLojaFundo && cfg.fotoLoja){ const fl = document.createElement('div'); fl.className = 'fundoLoja'; fl.style.backgroundImage = `url('${cfg.fotoLoja}')`; pn.append(fl); }
   pn.setAttribute('role', 'img'); pn.setAttribute('aria-label', `Painel de preços de ${cfg.loja}`);
   alvo.append(pn);
 
@@ -186,14 +244,17 @@ export function desenhar(alvo, cfg, opcoes = {}){
   let anim = null;
   if (listaEl){
     const lado = cfg.movimento === 'lado';
-    const trilho = document.createElement('div'); trilho.className = 'trilho' + (lado ? ' lado' : '');
-    const fs = (vertical ? 3.2 : 3.6) * escala;
+    const nCol = lado ? 1 : Math.min(3, Math.max(1, cfg.colunas || 1));
+    const trilho = document.createElement('div'); trilho.className = 'trilho' + (lado ? ' lado' : '') + (nCol > 1 ? ' col' + nCol : '');
+    // mais colunas (e a promoção dividindo a largura) = letra menor, para o nome do corte caber inteiro
+    const fator = nCol === 1 ? 1 : temPromo && !coluna ? (nCol === 2 ? .7 : .56) : (nCol === 2 ? .86 : .74);
+    const fs = (vertical ? 3.2 : 3.6) * escala * fator;
     const linha = it => `<div class="li${it.of ? ' of' : ''}${it.esg ? ' esg' : ''}" style="font-size:${fs}cqh;background:rgba(255,255,255,.05);outline-color:${cor.destaque}">
-        <span class="nm">${esc(it.n)}</span><span class="pp" style="color:${cor.preco}">${!it.esg && it.de > it.p ? `<s style="font-size:.55em;opacity:.7;margin-right:.4em">de R$ ${brl(it.de)}</s>` : ''}${it.esg ? 'esgotado' : (it.de > it.p ? 'por ' : '') + 'R$ ' + brl(it.p)}<small>/${esc(it.u || 'kg')}</small></span></div>`;
+        <span class="esq">${cfg.fotosItens && it.foto ? `<img class="ft" src="${it.foto}" alt="">` : ''}<span class="nm">${esc(it.n)}</span></span><span class="dots"></span><span class="pp" style="color:${cor.preco}">${!it.esg && it.de > it.p ? `<s style="font-size:.55em;opacity:.7;margin-right:.4em">de R$ ${brl(it.de)}</s>` : ''}${it.esg ? 'esgotado' : (it.de > it.p ? 'por ' : '') + 'R$ ' + brl(it.p)}<small>/${esc(it.u || 'kg')}</small></span></div>`;
     const itens = (cfg.itens || []).filter(i => i.n);
     let html = '';
     if (cfg.agruparCategoria && !lado){
-      CATEGORIAS.forEach(c => { const g = itens.filter(i => (i.c || 'Outros') === c); if (g.length) html += `<div class="cat" style="color:${cor.destaque};font-size:${2.4 * escala}cqh">${c}</div>` + g.map(linha).join(''); });
+      [...CATEGORIAS, ...new Set(itens.map(i => i.c).filter(c => !CATEGORIAS.includes(c)))].forEach(c => { const g = itens.filter(i => (i.c || 'Outros') === c); if (g.length) html += `<div class="cat" style="color:${cor.destaque};font-size:${2.4 * escala}cqh">${c}</div>` + g.map(linha).join(''); });
     } else html = itens.map(linha).join('');
     trilho.innerHTML = html;
     listaEl.append(trilho);
