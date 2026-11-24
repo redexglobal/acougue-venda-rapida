@@ -86,7 +86,7 @@
     <p class="estado" style="margin:0 0 6px">Modelo atual: <b id="modeloNome">personalizado</b>. <a href="../modelos/" style="color:#ffb199">Ver os 22 modelos</a></p>
     <label for="estilo">Estilo das linhas e da letra</label><select id="estilo"></select>
     <label>Acabamento</label>
-    <div class="grupo"><button type="button" id="tHalo">Halo (brilho)</button><button type="button" id="tMold">Moldura</button><button type="button" id="tFotos">Foto em cada corte</button></div>
+    <div class="grupo"><button type="button" id="tHalo">Halo (brilho)</button><button type="button" id="tMold">Moldura</button><button type="button" id="tFotos">Foto em cada corte</button><button type="button" id="tFotosAuto">Pôr fotos prontas nos cortes</button></div>
     <label>Colunas de preços</label><div class="grupo" id="colunas"><button type="button" data-v="1">1</button><button type="button" data-v="2">2</button><button type="button" data-v="3">3</button></div>
     <label for="fotoLoja">Foto da loja (fachada ou balcão)</label><input type="file" id="fotoLoja" accept="image/*">
     <div class="grupo" style="margin-top:6px"><button type="button" id="tFundo">Usar a foto de fundo</button><button type="button" id="fotoLojaTira">Tirar foto da loja</button></div>
@@ -111,6 +111,7 @@
     <label><input type="checkbox" id="promoAtiva"> Mostrar promoção</label>
     <label for="promoFoto">Foto da promoção</label><input type="file" id="promoFoto" accept="image/*">
     <button type="button" id="promoTira" style="margin-top:6px">Tirar foto</button>
+    <label>Ou escolha uma foto pronta</label><div id="promoProntas" style="display:grid;grid-template-columns:repeat(6,1fr);gap:4px"></div>
     <div class="lado"><div><label for="promoTitulo">Chamada</label><input type="text" id="promoTitulo" maxlength="30"></div><div><label for="promoItem">Produto</label><input type="text" id="promoItem" maxlength="30"></div></div>
     <div class="lado"><div><label for="promoPreco">Preço (R$)</label><input type="number" id="promoPreco" step="0.01" min="0" inputmode="decimal"></div><div><label for="promoUn">Unidade</label><select id="promoUn"><option>kg</option><option>un</option><option>bandeja</option><option>100 g</option></select></div></div>
     <label for="promoVal">Texto da validade</label><input type="text" id="promoVal" maxlength="40">
@@ -187,6 +188,7 @@
 <script type="module">
 import { desenhar, padrao, TEMAS, ARRANJOS, MOVIMENTOS, CATEGORIAS, coresDe, contraste, codificar, reduzirImagem, telaFechada } from '../painel.js';
 import { ESTILOS, MODELOS, BIBLIOTECA } from '../modelos.js';
+import { FOTOS, fotoGrande, fotoPequena, fotoPara } from '../fotos.js';
 const $ = id => document.getElementById(id);
 const CHAVE = 'acougue-painel';
 let cfg; try { cfg = JSON.parse(localStorage.getItem(CHAVE)) || padrao(); } catch { cfg = padrao(); }
@@ -453,6 +455,12 @@ $('cEntrar').onclick = async () => {
 };
 $('cSenha').onkeydown = e => e.key === 'Enter' && $('cEntrar').click();
 (async () => { botaoConta(); if (!conta.token) return; const r = await apiConta('minha'); if (r.ok){ conta.dados = r.conta; faixa(r.conta); } else if (r.status === 401){ conta.token = ''; localStorage.removeItem('dono-token'); botaoConta(); } })();
+
+// ---------- fotos prontas (reais, licença livre) ----------
+FOTOS.forEach(f => { const b = document.createElement('button'); b.type = 'button'; b.title = f.nome; b.setAttribute('aria-label', 'Usar a foto ' + f.nome);
+  b.style.cssText = `aspect-ratio:1;padding:0;border-radius:8px;background:url(${fotoPequena(f.id)}) center/cover`;
+  b.onclick = () => { cfg.promo.foto = fotoGrande(f.id); mudou(); toast('Foto da promoção trocada.'); }; $('promoProntas').append(b); });
+$('tFotosAuto').onclick = () => { let n = 0; cfg.itens.forEach(it => { if (!it.foto){ const f = fotoPara(it.n); if (f){ it.foto = f; n++; } } }); cfg.fotosItens = true; acab(); itens(); mudou(); toast(n ? `${n} corte(s) ganharam foto pronta. Os que ficaram sem foto você coloca a sua.` : 'Nenhum corte novo com foto pronta parecida.'); };
 
 itens(); previa();
 addEventListener('resize', () => previa());

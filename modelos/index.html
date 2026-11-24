@@ -53,13 +53,14 @@
   <div class="chips" id="segs" role="group" aria-label="Filtrar por tipo de loja"></div>
 </header>
 <main>
-  <p class="intro">Escolha o que tem a cara da sua loja. Cada modelo aceita qualquer cor, liga ou desliga o brilho (halo) e a moldura, e funciona com a sua logo, a foto da sua loja, a foto de cada corte e a promoção da semana. Os preços são de exemplo: no editor você coloca os seus.</p>
+  <p class="intro">Fotos reais de exemplo (<a href="../fotos/creditos.html" style="color:#ffb199">créditos</a>). Escolha o que tem a cara da sua loja. Cada modelo aceita qualquer cor, liga ou desliga o brilho (halo) e a moldura, e funciona com a sua logo, a foto da sua loja, a foto de cada corte e a promoção da semana. Os preços são de exemplo: no editor você coloca os seus.</p>
   <div class="grade" id="grade"></div>
 </main>
 <div id="toast" role="status"></div>
 <script type="module">
 import { desenhar, padrao, TEMAS, coresDe } from '../painel.js';
 import { MODELOS, SEGMENTOS, ESTILOS, FONTES_URL, aplicarModelo } from '../modelos.js';
+import { fotoGrande, fotoPara } from '../fotos.js';
 document.getElementById('fontes').href = FONTES_URL;
 const CHAVE = 'acougue-painel';
 const PALETAS = [
@@ -88,9 +89,11 @@ function montarCartao(m){
   const base = { ...padrao(), loja: 'Casa de Carnes do Bairro', atualizado: null };
   let cfg = aplicarModelo(base, m, { manterItens: false });
   cfg.movimento = 'parado'; cfg.promo = { ...cfg.promo, inicio: '', fim: '' };
-  if (m.cfg.fotosItens) cfg.itens.forEach((it, i) => it.foto = fotoCorte(CORES_CORTE[i % CORES_CORTE.length]));
-  if (m.cfg.fotoLojaFundo) cfg.fotoLoja = fotoFundoExemplo;
-  cfg.promo = { ...cfg.promo, foto: fotoPromo };   // foto de exemplo: o dono coloca a dele
+  if (m.cfg.fotosItens) cfg.itens.forEach(it => it.foto = fotoPara(it.n) || fotoGrande('carne-crua').replace('.webp', '-p.webp'));
+  if (m.cfg.fotoLojaFundo) cfg.fotoLoja = fotoGrande('fogo-de-chao');
+  const FOTO_SEG = { churrasco: 'fogo-de-chao', gourmet: 'tomahawk-tabua', rustico: 'fogo-de-chao-2', mercado: 'bifes-marmorizados', pequeno: 'picanha-grelha', bairro: 'picanha-fatiada', foto: 'carne-na-brasa' };
+  const promoItem = { gourmet: ['Tomahawk', 129.9], churrasco: ['Costela fogo de chão', 39.9], rustico: ['Costela fogo de chão', 39.9], mercado: ['Contrafilé', 52.9] }[m.segmento] || ['Picanha', 69.9];
+  cfg.promo = { ...cfg.promo, foto: fotoGrande(FOTO_SEG[m.segmento] || 'picanha-grelha'), item: promoItem[0], preco: promoItem[1] };   // foto real de exemplo: o dono coloca a dele
   const art = document.createElement('article'); art.className = 'card'; art.dataset.seg = m.segmento;
   const ret = m.cfg.orientacao === 'retrato';
   art.innerHTML = `<div class="tela${ret ? ' retrato' : ''}"><div class="p"></div></div>
