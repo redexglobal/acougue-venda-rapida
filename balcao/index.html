@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Balcão · Fila de senhas</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@700;900&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js"></script>
+<style>
+  :root{--f:#141110;--c:#1e1a18;--l:#3a302b;--t:#f6efe6;--s:#c9bcae;--b:#b3341f;--o:#e8b04b;--ok:#3fb27f}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--f);color:var(--t);font:16px/1.5 Inter,system-ui,sans-serif}
+  :focus-visible{outline:3px solid var(--o);outline-offset:3px}
+  header{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:12px 16px;border-bottom:1px solid var(--l)}
+  header h1{font:900 18px Archivo,sans-serif;margin:0 auto 0 0}
+  main{max-width:1100px;margin:0 auto;padding:16px;display:grid;grid-template-columns:1.2fr 1fr;gap:16px}
+  .box{background:var(--c);border:1px solid var(--l);border-radius:16px;padding:16px}
+  h2{font:800 16px Archivo,sans-serif;margin:0 0 10px;color:var(--s);text-transform:uppercase;letter-spacing:.06em}
+  .agora{text-align:center;padding:10px 0}
+  .agora .num{font:900 72px/1 Archivo,sans-serif;color:var(--o)}
+  .agora .nm{font:700 24px Archivo,sans-serif;min-height:34px}
+  button{font:700 17px Inter,sans-serif;border-radius:14px;border:1px solid var(--l);background:#2a2320;color:var(--t);padding:14px 16px;cursor:pointer}
+  button.grande{width:100%;padding:20px;font-size:21px;background:var(--b);border-color:var(--b);color:#fff}
+  button.papel{background:#2b3a2f;border-color:#3f5a46}
+  .linha{display:flex;gap:8px;margin-top:10px}
+  .linha>*{flex:1}
+  input{font:inherit;font-size:20px;padding:12px;border-radius:12px;border:1px solid var(--l);background:#120f0e;color:#fff;width:100%}
+  ul{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:6px;max-height:340px;overflow:auto}
+  li{display:flex;align-items:center;gap:10px;background:#171311;border:1px solid var(--l);border-radius:10px;padding:8px 10px}
+  li b{font:900 20px Archivo,sans-serif;color:var(--o);min-width:64px}
+  li span{flex:1}li small{color:var(--s)}
+  li button{padding:6px 10px;font-size:14px}
+  .vazio{color:var(--s)}
+  .aviso{background:#2a2110;border:1px solid #6b5420;color:#f3d79a;border-radius:10px;padding:10px 12px;font-size:14px;margin:0 16px}
+  .qr{display:flex;gap:16px;align-items:center;flex-wrap:wrap}
+  .qr #qr img{width:180px;height:180px;background:#fff;padding:8px;border-radius:12px;display:block}
+  .qr p{margin:0 0 8px;color:var(--s);font-size:14px}
+  .estado{font-size:13px;color:var(--s)}
+  @media (max-width:860px){main{grid-template-columns:1fr}}
+  @media print{body{background:#fff;color:#000}header,main>*:not(#placa),.aviso{display:none!important}main{display:block}#placa{border:0;text-align:center}#placa .qr{justify-content:center;flex-direction:column}#placa .qr #qr img{width:320px;height:320px}#placa h2{color:#000;font-size:34px}#placa p{color:#000;font-size:20px}#placa button,#placa .estado{display:none}}
+</style>
+</head>
+<body>
+<header>
+  <h1 id="titulo">Balcão · Fila de senhas</h1>
+  <span class="estado" id="estado" aria-live="polite"></span>
+  <a href="../dono/" style="color:var(--s)">Voltar ao editor</a>
+</header>
+<p class="aviso" id="aviso" hidden></p>
+
+<section id="criar" class="box" style="max-width:520px;margin:20px auto" hidden>
+  <h2>Ligar a fila de senhas</h2>
+  <p class="estado">O cliente lê o QR, digita o nome e recebe a senha no celular. Você chama aqui, e a TV mostra o número e o nome. As senhas de papel continuam valendo junto.</p>
+  <label for="nomeLoja" class="estado">Nome da loja</label>
+  <input id="nomeLoja" maxlength="40" placeholder="Casa de Carnes do Bairro">
+  <p class="estado" id="erroCriar" role="alert"></p>
+  <button class="grande" id="btnCriar" type="button">Criar a fila</button>
+</section>
+
+<main id="painel" hidden>
+  <section class="box" aria-labelledby="h-agora">
+    <h2 id="h-agora">Chamando agora</h2>
+    <div class="agora" aria-live="assertive"><div class="num" id="agNum">—</div><div class="nm" id="agNome"></div></div>
+    <button class="grande" id="btnProxima" type="button">Chamar próxima do QR <small id="qtd"></small></button>
+    <div class="linha">
+      <button class="papel" id="btnPapelMais" type="button">Próxima de papel</button>
+      <input id="papelNum" type="number" min="0" max="9999" inputmode="numeric" placeholder="nº do papel" aria-label="Número da senha de papel">
+      <button class="papel" id="btnPapel" type="button">Chamar</button>
+    </div>
+    <div class="linha"><button id="btnRechamar" type="button">Chamar de novo</button><button id="btnPausa" type="button">Pausar QR</button><button id="btnZerar" type="button">Zerar o dia</button></div>
+    <p class="estado" id="ultimaPapel"></p>
+  </section>
+
+  <section class="box" aria-labelledby="h-fila">
+    <h2 id="h-fila">Esperando pelo QR</h2>
+    <ul id="fila"></ul>
+    <h2 style="margin-top:16px">Últimas chamadas</h2>
+    <ul id="ultimas"></ul>
+  </section>
+
+  <section class="box" id="placa" aria-labelledby="h-placa">
+    <h2 id="h-placa">QR do balcão</h2>
+    <div class="qr"><div id="qr"></div><div>
+      <p><b>Pegue sua senha pelo celular</b><br>Aponte a câmera, digite seu nome e acompanhe a fila sem ficar em pé no balcão.</p>
+      <button type="button" id="btnImprimir">Imprimir a placa</button>
+      <p class="estado" style="margin-top:8px">Link: <span id="linkSenha"></span></p>
+    </div></div>
+  </section>
+
+  <section class="box" aria-labelledby="h-tv">
+    <h2 id="h-tv">Mostrar na TV</h2>
+    <p class="estado">No editor, abra "Fila de senhas" e cole o código <b id="codLoja"></b>. Depois toque em "Enviar para a TV": a TV passa a mostrar a senha chamada em cima dos preços, com som e voz.</p>
+    <p class="estado">Guarde o endereço desta página: é ele que libera chamar as senhas. Não compartilhe.</p>
+  </section>
+</main>
+<script type="module">
+import { api, emDemo, aoMudar, anunciar } from '../fila-cliente.js';
+const $ = id => document.getElementById(id);
+const q = new URLSearchParams(location.search);
+let loja = q.get('loja') || localStorage.getItem('balcao-loja') || '';
+let chave = (location.hash.match(/k=([^&]+)/) || [])[1] || localStorage.getItem('balcao-chave') || '';
+let ultimoTs = 0;
+
+function avisoDemo(){ if (emDemo()){ $('aviso').hidden = false; $('aviso').textContent = 'Modo demonstração: a fila está só neste aparelho (balcão, celular e TV precisam estar abertos aqui). Para a loja de verdade falta ligar a fila na nuvem.'; } }
+async function inicio(){
+  if (!loja || !chave){ $('criar').hidden = false; return; }
+  localStorage.setItem('balcao-loja', loja); localStorage.setItem('balcao-chave', chave);
+  if (!location.hash) history.replaceState(null, '', `?loja=${loja}#k=${chave}`);
+  $('painel').hidden = false; $('codLoja').textContent = loja;
+  const link = new URL(`../senha/?loja=${loja}`, location.href).href; $('linkSenha').textContent = link;
+  const qr = qrcode(0, 'M'); qr.addData(link); qr.make(); $('qr').innerHTML = qr.createImgTag(6, 0, 'QR para pegar senha');
+  await atualizar();
+}
+$('btnCriar').onclick = async () => {
+  const r = await api('criar', { nome: $('nomeLoja').value.trim() });
+  if (!r.ok){ $('erroCriar').textContent = r.erro || 'Não deu certo.'; return; }
+  loja = r.loja; chave = r.chave; $('criar').hidden = true; history.replaceState(null, '', `?loja=${loja}#k=${chave}`); avisoDemo(); inicio();
+};
+async function atualizar(){
+  const r = await api('painel', { loja, chave }); avisoDemo();
+  if (!r.ok){ $('estado').textContent = r.erro || 'Sem conexão: continue com a senha de papel.'; return; }
+  $('titulo').textContent = `Balcão · ${r.loja}`; $('estado').textContent = 'Atualizado ' + new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+  $('agNum').textContent = r.atual?.senha || '—'; $('agNome').textContent = r.atual?.nome || '';
+  $('qtd').textContent = r.fila.length ? `(${r.fila.length} esperando)` : '(ninguém esperando)';
+  $('btnProxima').disabled = !r.fila.length;
+  $('ultimaPapel').textContent = `Última senha de papel chamada: ${String(r.papel).padStart(3, '0')}. "Próxima de papel" chama a ${String(r.papel + 1).padStart(3, '0')}.`;
+  $('btnPausa').textContent = r.pausada ? 'Reabrir QR' : 'Pausar QR'; $('btnPausa').dataset.p = r.pausada ? '1' : '';
+  $('fila').innerHTML = r.fila.length ? '' : '<li class="vazio">Ninguém esperando pelo QR.</li>';
+  r.fila.forEach(t => { const li = document.createElement('li');
+    li.innerHTML = `<b>${t.senha}</b><span>${t.nome.replace(/</g, '&lt;')}</span><small>${Math.max(0, Math.round((Date.now() - t.ts) / 60000))} min</small><button type="button">Chamar</button>`;
+    li.querySelector('button').onclick = () => acao('id', { id: t.id }); $('fila').append(li); });
+  const ult = [r.atual, ...(r.ultimos || [])].filter(Boolean);
+  $('ultimas').innerHTML = ult.length ? '' : '<li class="vazio">Nenhuma chamada hoje.</li>';
+  ult.forEach(c => { const li = document.createElement('li'); li.innerHTML = `<b>${c.senha}</b><span>${(c.nome || (c.tipo === 'papel' ? 'senha de papel' : '')).replace(/</g, '&lt;')}</span><small>${new Date(c.ts).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}</small>`; $('ultimas').append(li); });
+}
+async function acao(a, extra = {}){
+  const r = await api(a, { loja, chave, ...extra });
+  if (!r.ok){ $('estado').textContent = r.erro || 'Não deu certo.'; return; }
+  if (r.aviso) $('estado').textContent = r.aviso;
+  await atualizar();
+}
+$('btnProxima').onclick = () => acao('proxima');
+$('btnPapelMais').onclick = () => acao('papel');
+$('btnPapel').onclick = () => { const n = $('papelNum').value; if (n === '') return $('papelNum').focus(); acao('papel', { numero: n }); $('papelNum').value = ''; };
+$('papelNum').onkeydown = e => { if (e.key === 'Enter') $('btnPapel').click(); };
+$('btnRechamar').onclick = () => acao('rechamar');
+$('btnPausa').onclick = () => acao('pausar', { pausar: !$('btnPausa').dataset.p });
+$('btnZerar').onclick = () => { if (confirm('Zerar a fila de hoje? A numeração volta para Q001 e 001.')) acao('zerar'); };
+$('btnImprimir').onclick = () => print();
+// atalhos de teclado para balcão com teclado numérico: Enter = próxima do QR, + = próxima de papel
+addEventListener('keydown', e => { if (e.target.tagName === 'INPUT') return; if (e.key === 'Enter') $('btnProxima').click(); if (e.key === '+') $('btnPapelMais').click(); });
+inicio(); setInterval(() => !$('painel').hidden && atualizar(), 4000); aoMudar(() => !$('painel').hidden && atualizar());
+</script>
+</body>
+</html>

@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#141110">
+<title>Pegar senha</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@700;900&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  *{box-sizing:border-box}
+  body{margin:0;min-height:100vh;background:#141110;color:#f6efe6;font:17px/1.5 Inter,system-ui,sans-serif;display:flex;flex-direction:column;align-items:center;padding:24px 18px}
+  :focus-visible{outline:3px solid #e8b04b;outline-offset:3px}
+  main{width:100%;max-width:420px}
+  h1{font:900 26px Archivo,sans-serif;margin:6px 0 2px;text-align:center}
+  .loja{text-align:center;color:#c9bcae;margin:0 0 22px}
+  label{display:block;font-weight:600;margin:0 0 6px}
+  input[type=text]{width:100%;font:inherit;font-size:20px;padding:14px;border-radius:12px;border:1px solid #4a3f39;background:#1e1a18;color:#fff}
+  .aceite{display:flex;gap:10px;align-items:flex-start;margin:14px 0;font-size:15px;color:#d9cdc0}
+  .aceite input{width:22px;height:22px;margin-top:2px;flex:none}
+  button{width:100%;font:700 19px Inter,sans-serif;padding:16px;border-radius:14px;border:0;background:#b3341f;color:#fff;cursor:pointer}
+  button.sec{background:transparent;border:1px solid #4a3f39;color:#d9cdc0;font-size:15px;padding:12px;margin-top:10px}
+  .erro{color:#ffb4a6;min-height:24px;margin:8px 0;font-size:15px}
+  .bilhete{background:#f6efe6;color:#1a0f0b;border-radius:20px;padding:22px;text-align:center;position:relative;box-shadow:0 20px 50px -20px #000}
+  .bilhete::before,.bilhete::after{content:'';position:absolute;top:50%;width:26px;height:26px;border-radius:50%;background:#141110;transform:translateY(-50%)}
+  .bilhete::before{left:-13px}.bilhete::after{right:-13px}
+  .bilhete small{display:block;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#7a5a4a}
+  .num{font:900 84px/1 Archivo,sans-serif;margin:8px 0;color:#b3341f}
+  .nome{font:700 22px Archivo,sans-serif}
+  .status{margin-top:16px;font-size:18px;font-weight:700;text-align:center}
+  .status.vez{color:#7fe0b2;font-size:24px}
+  .atual{text-align:center;color:#c9bcae;margin-top:8px;font-size:15px}
+  .chamado .bilhete{animation:pulso 1s ease-in-out 6;background:#e9fff4}
+  @keyframes pulso{50%{transform:scale(1.04);box-shadow:0 0 0 10px rgba(63,178,127,.35)}}
+  .aviso{background:#2a2110;border:1px solid #6b5420;color:#f3d79a;border-radius:10px;padding:10px 12px;font-size:14px;margin-bottom:16px}
+  @media (prefers-reduced-motion:reduce){.chamado .bilhete{animation:none}}
+</style>
+</head>
+<body>
+<main>
+  <div id="aviso" class="aviso" hidden></div>
+  <h1>Pegar senha</h1>
+  <p class="loja" id="loja">Carregando…</p>
+
+  <form id="form" hidden novalidate>
+    <label for="nome">Seu nome</label>
+    <input type="text" id="nome" autocomplete="given-name" maxlength="30" required placeholder="Ex.: Maria Souza">
+    <label class="aceite"><input type="checkbox" id="aceite"> <span>Concordo em aparecer na TV da loja com o primeiro nome e a inicial (ex.: "Maria S."). O nome é apagado no fim do dia.</span></label>
+    <p class="erro" id="erro" role="alert"></p>
+    <button type="submit">Pegar minha senha</button>
+  </form>
+
+  <section id="minha" hidden aria-live="polite">
+    <div class="bilhete"><small>Sua senha</small><div class="num" id="num">–</div><div class="nome" id="nm"></div></div>
+    <p class="status" id="status"></p>
+    <p class="atual" id="atual"></p>
+    <button type="button" class="sec" id="desistir">Não vou mais esperar</button>
+  </section>
+</main>
+<script type="module">
+import { api, emDemo, aoMudar } from '../fila-cliente.js';
+const $ = id => document.getElementById(id);
+const loja = new URLSearchParams(location.search).get('loja') || '';
+const CH = 'minha-senha-' + loja;
+let meu = null; try { meu = JSON.parse(localStorage.getItem(CH)); } catch {}
+let jaVibrou = false;
+
+async function inicio(){
+  if (!loja){ $('loja').textContent = 'Este QR está incompleto. Peça a senha no balcão.'; return; }
+  const e = await api('estado', { loja });
+  if (!e.ok){ $('loja').textContent = e.erro || 'Fila não encontrada. Peça a senha no balcão.'; return; }
+  $('loja').textContent = e.loja;
+  if (emDemo()){ $('aviso').hidden = false; $('aviso').textContent = 'Modo demonstração: a fila está só neste aparelho.'; }
+  if (meu && meu.dia === new Date().toDateString()) mostrar(); else { localStorage.removeItem(CH); $('form').hidden = false; $('nome').focus(); }
+}
+$('form').onsubmit = async ev => {
+  ev.preventDefault(); $('erro').textContent = '';
+  const r = await api('pegar', { loja, nome: $('nome').value, aceite: $('aceite').checked });
+  if (!r.ok){ $('erro').textContent = r.erro || 'Não deu certo. Tente de novo ou peça no balcão.'; return; }
+  meu = { id: r.id, tk: r.tk, senha: r.senha, nome: r.nome, dia: new Date().toDateString() };
+  localStorage.setItem(CH, JSON.stringify(meu)); $('form').hidden = true; mostrar();
+};
+async function mostrar(){
+  $('minha').hidden = false; $('num').textContent = meu.senha; $('nm').textContent = meu.nome;
+  const r = await api('minha', { loja, id: meu.id, tk: meu.tk });
+  if (!r.ok){ $('status').textContent = r.erro; return; }
+  const chamado = r.status === 'chamado';
+  document.body.classList.toggle('chamado', chamado);
+  $('status').className = 'status' + (chamado ? ' vez' : '');
+  $('status').textContent = chamado ? 'É a sua vez! Vá até o balcão.' : r.status === 'saiu' ? 'Você saiu da fila.' : r.aFrente === 0 ? 'Você é o próximo.' : `${r.aFrente} pessoa${r.aFrente > 1 ? 's' : ''} na sua frente pelo QR.`;
+  $('atual').textContent = r.atual ? `Chamando agora: ${r.atual.senha}${r.atual.nome ? ' · ' + r.atual.nome : ''} (o balcão também chama as senhas de papel).` : '';
+  $('desistir').hidden = chamado || r.status === 'saiu';
+  if (chamado && !jaVibrou){ jaVibrou = true; navigator.vibrate?.([300, 150, 300, 150, 500]); }
+}
+$('desistir').onclick = async () => { await api('desistir', { loja, id: meu.id, tk: meu.tk }); localStorage.removeItem(CH); mostrar(); };
+inicio();
+setInterval(() => meu && !$('minha').hidden && mostrar(), 4000);
+aoMudar(() => meu && mostrar());
+</script>
+</body>
+</html>

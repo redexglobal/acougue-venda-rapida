@@ -13,12 +13,29 @@
   #cheia{position:fixed;right:14px;bottom:14px;z-index:9;opacity:0;transition:opacity .3s;background:rgba(0,0,0,.6);color:#fff;border:1px solid #555;border-radius:10px;padding:10px 14px;font:600 15px system-ui;cursor:pointer}
   body:hover #cheia,#cheia:focus{opacity:1}
   #aviso{position:fixed;inset:0;display:none;place-items:center;color:#ddd;font:500 20px system-ui;text-align:center;padding:30px;background:#111}
+  /* 24/11/2026: senha chamada, por cima dos preços */
+  #senhaTV{position:fixed;left:50%;top:50%;z-index:8;transform:translate(-50%,-50%) scale(.9);opacity:0;pointer-events:none;transition:opacity .35s,transform .35s;
+    background:var(--fd,#111);color:var(--tx,#fff);border:.6vh solid var(--dz,#ff6a3d);border-radius:3vh;padding:3vh 6vh;text-align:center;font-family:Archivo,system-ui,sans-serif;box-shadow:0 0 0 100vmax rgba(0,0,0,.55),0 0 8vh var(--dz,#ff6a3d)}
+  #senhaTV.on{opacity:1;transform:translate(-50%,-50%) scale(1)}
+  #senhaTV small{display:block;font-weight:800;letter-spacing:.2em;font-size:3vh;opacity:.85}
+  #senhaTV b{display:block;font-weight:900;font-size:22vh;line-height:1;color:var(--dz,#ff6a3d)}
+  #senhaTV span{display:block;font-weight:800;font-size:7vh;line-height:1.1}
+  #faixaSenha{position:fixed;left:0;right:0;bottom:0;height:9vh;z-index:7;display:none;gap:2.4vw;align-items:center;justify-content:center;background:#0b0b0b;color:#fff;border-top:.5vh solid var(--dz,#ff6a3d);font:800 4vh Archivo,system-ui,sans-serif}
+  #faixaSenha .at{font-size:6vh;color:var(--dz,#ff6a3d)}
+  #faixaSenha .ul{opacity:.65;font-size:3vh}
+  #faixaSenha.tem{display:flex}
+  body.comFila #tela{bottom:9vh}
+  #somAviso{position:fixed;left:14px;bottom:14px;z-index:9;background:rgba(0,0,0,.7);color:#fff;border:1px solid #777;border-radius:10px;padding:10px 14px;font:600 15px system-ui;cursor:pointer}
+  @media (prefers-reduced-motion:reduce){#senhaTV{transition:none}}
 </style>
 </head>
 <body>
 <div id="tela"></div>
 <button id="cheia" type="button">Tela cheia</button>
 <div id="aviso" role="alert"></div>
+<div id="senhaTV" aria-live="assertive"><small>SENHA</small><b id="sNum"></b><span id="sNome"></span></div>
+<div id="faixaSenha"><span>SENHA</span><span class="at" id="fNum"></span><span id="fNome"></span><span class="ul" id="fUlt"></span></div>
+<button id="somAviso" type="button" hidden>Toque para ligar o som das senhas</button>
 <script type="module">
 import { desenhar, decodificar, padrao, promoValida, telaFechada, coresDe } from '../painel.js';
 const tela = document.getElementById('tela'), aviso = document.getElementById('aviso');
@@ -64,6 +81,32 @@ document.getElementById('cheia').onclick = () => document.documentElement.reques
 // tela não apaga sozinha
 async function acordado(){ try { await navigator.wakeLock?.request('screen'); } catch {} }
 acordado(); document.addEventListener('visibilitychange', () => document.visibilityState === 'visible' && acordado());
+
+// ---------- 24/11/2026: fila de senhas (cfg.fila.loja) ----------
+import('../fila-cliente.js').then(({ api, aoMudar, anunciar }) => {
+  let ultimoTs = 0, cfgFila = null, timer = null, somLiberado = false;
+  const sTV = document.getElementById('senhaTV'), faixa = document.getElementById('faixaSenha'), somBtn = document.getElementById('somAviso');
+  somBtn.onclick = () => { somLiberado = true; somBtn.hidden = true; try { speechSynthesis.speak(new SpeechSynthesisUtterance('')); } catch {} };
+  async function cfgAtual(){ try { return await ler(); } catch { return null; } }
+  async function checar(){
+    const cfg = await cfgAtual(); const lojaFila = cfg?.fila?.loja;
+    if (!lojaFila || cfg.fila.ativa === false){ faixa.classList.remove('tem'); document.body.classList.remove('comFila'); return; }
+    if (!cfgFila){ const c = coresDe(cfg); document.documentElement.style.setProperty('--dz', c.destaque); document.documentElement.style.setProperty('--fd', c.fundo); document.documentElement.style.setProperty('--tx', c.texto); cfgFila = lojaFila; }
+    const r = await api('estado', { loja: lojaFila });
+    if (!r.ok || !r.atual){ faixa.classList.remove('tem'); document.body.classList.remove('comFila'); return; }
+    document.getElementById('fNum').textContent = r.atual.senha; document.getElementById('fNome').textContent = r.atual.nome || '';
+    document.getElementById('fUlt').textContent = (r.ultimos || []).length ? 'antes: ' + r.ultimos.slice(0, 3).map(u => u.senha).join(' · ') : '';
+    if (!faixa.classList.contains('tem')){ faixa.classList.add('tem'); document.body.classList.add('comFila'); window.dispatchEvent(new Event('resize')); }
+    if (r.atual.ts > ultimoTs){
+      const primeira = ultimoTs === 0; ultimoTs = r.atual.ts;
+      if (primeira && Date.now() - r.atual.ts > 15000) return;      // ao abrir a TV não repete uma chamada antiga
+      document.getElementById('sNum').textContent = r.atual.senha; document.getElementById('sNome').textContent = r.atual.nome || (r.atual.tipo === 'papel' ? 'senha de papel' : '');
+      sTV.classList.add('on'); clearTimeout(timer); timer = setTimeout(() => sTV.classList.remove('on'), 9000);
+      if (somLiberado || navigator.userActivation?.hasBeenActive) anunciar(r.atual, { voz: cfg.fila.voz !== false }); else somBtn.hidden = false;
+    }
+  }
+  checar(); setInterval(checar, 2500); aoMudar(checar);
+});
 </script>
 </body>
 </html>

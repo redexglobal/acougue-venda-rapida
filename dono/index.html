@@ -145,6 +145,14 @@
     <p class="estado" style="margin-top:4px">Fora desse horário a TV mostra só o nome da loja e a hora que abre.</p>
   </details>
 
+  <details><summary>Fila de senhas (QR + papel)</summary>
+    <p class="estado" style="margin:0 0 6px">O cliente lê o QR no balcão, digita o nome e recebe a senha no celular. Quando você chama, a TV mostra o número e o nome por cima dos preços, com som e voz. A senha de papel continua valendo: você chama as duas pelo mesmo balcão.</p>
+    <a class="btn prim" href="../balcao/" target="_blank" rel="noopener">Abrir o balcão (criar a fila)</a>
+    <label for="filaLoja">Código da fila (aparece no balcão)</label><input type="text" id="filaLoja" maxlength="40" placeholder="ex.: casa-de-carnes-a1b2c3">
+    <label><input type="checkbox" id="filaAtiva"> Mostrar as senhas na TV</label>
+    <label><input type="checkbox" id="filaVoz"> Falar a senha em voz alta</label>
+  </details>
+
   <details><summary>Cópia de segurança</summary>
     <div class="grupo"><button type="button" id="btnExp">Baixar cópia</button><label class="btn" style="margin:0">Restaurar cópia<input type="file" id="imp" accept="application/json" hidden></label><button type="button" id="btnZerar">Voltar ao exemplo</button></div>
   </details>
@@ -379,6 +387,12 @@ $('bibAdd').onclick = () => {
 };
 const veio = new URLSearchParams(location.search).get('modelo');
 if (veio) toast(`Modelo "${MODELOS.find(m => m.id === veio)?.nome || veio}" aplicado. Seus preços, logo e fotos foram mantidos.`);
+
+// ---------- fila de senhas ----------
+cfg.fila = cfg.fila || { loja: localStorage.getItem('balcao-loja') || '', ativa: true, voz: true };
+liga('filaLoja', e => e.value = cfg.fila.loja || '', e => cfg.fila.loja = e.value.trim().toLowerCase());
+liga('filaAtiva', e => e.checked = cfg.fila.ativa !== false, e => cfg.fila.ativa = e.checked, 'change');
+liga('filaVoz', e => e.checked = cfg.fila.voz !== false, e => cfg.fila.voz = e.checked, 'change');
 
 itens(); previa();
 addEventListener('resize', () => previa());
