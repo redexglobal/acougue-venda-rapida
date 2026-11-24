@@ -9,34 +9,10 @@
 // Privacidade: guarda só o primeiro nome digitado, apaga tudo em 24 h, a TV mostra nome + inicial.
 import { createHash, randomBytes, timingSafeEqual } from 'node:crypto';
 
-const URL_KV = process.env.KV_REST_API_URL || process.env.UPSTASH_REDIS_REST_URL;
-const TOKEN_KV = process.env.KV_REST_API_TOKEN || process.env.UPSTASH_REDIS_REST_TOKEN;
 const SAL = process.env.PIN_SAL || 'sal-de-teste-local';
 const DIA = 86400;
 
-// ---------- armazenamento ----------
-const mem = globalThis.__filaMem || (globalThis.__filaMem = new Map());
-async function redis(...cmd){
-  if (!URL_KV){                       // memória (teste local)
-    const [op, k, ...a] = cmd; const v = mem.get(k);
-    switch (op){
-      case 'GET': return v ?? null;
-      case 'SET': mem.set(k, a[0]); return 'OK';
-      case 'DEL': mem.delete(k); return 1;
-      case 'INCR': { const n = (+v || 0) + 1; mem.set(k, String(n)); return n; }
-      case 'EXPIRE': return 1;
-      case 'RPUSH': { const l = v || []; l.push(...a); mem.set(k, l); return l.length; }
-      case 'LPUSH': { const l = v || []; l.unshift(...a.reverse()); mem.set(k, l); return l.length; }
-      case 'LTRIM': { const l = v || []; mem.set(k, l.slice(+a[0], +a[1] + 1)); return 'OK'; }
-      case 'LRANGE': { const l = v || []; const fim = +a[1] < 0 ? l.length + +a[1] + 1 : +a[1] + 1; return l.slice(+a[0], fim); }
-      case 'LREM': { const l = (v || []).filter(x => x !== a[1]); mem.set(k, l); return 1; }
-      case 'LPOP': { const l = v || []; const x = l.shift(); mem.set(k, l); return x ?? null; }
-      default: throw new Error('comando ' + op);
-    }
-  }
-  const r = await fetch(URL_KV, { method: 'POST', headers: { Authorization: `Bearer ${TOKEN_KV}`, 'Content-Type': 'application/json' }, body: JSON.stringify(cmd) });
-  const j = await r.json(); if (j.error) throw new Error(j.error); return j.result;
-}
+import { redis, URL_KV, corpo, responder } from './_kv.js';
 const k = (loja, x) => `fila:${loja}:${x}`;
 const getJ = async key => { const v = await redis('GET', key); return v ? JSON.parse(v) : null; };
 const setJ = (key, v, ttl = DIA) => redis('SET', key, JSON.stringify(v), 'EX', String(ttl));
@@ -53,14 +29,6 @@ const curto = nome => { const p = nome.split(' ').filter(Boolean); return p.leng
 const rotulo = t => t.tipo === 'papel' ? String(t.n).padStart(3, '0') : 'Q' + String(t.n).padStart(3, '0');
 const ip = req => (req.headers['x-forwarded-for'] || '').split(',')[0].trim() || req.socket?.remoteAddress || 'x';
 
-async function corpo(req){
-  if (req.body && typeof req.body === 'object') return req.body;
-  let s = ''; for await (const c of req) s += c; try { return JSON.parse(s || '{}'); } catch { return {}; }
-}
-function responder(res, status, dados){
-  res.statusCode = status; res.setHeader('Content-Type', 'application/json; charset=utf-8');
-  res.setHeader('Cache-Control', 'no-store'); res.end(JSON.stringify(dados));
-}
 
 async function estadoPublico(loja){
   const cfg = await getJ(k(loja, 'cfg'));

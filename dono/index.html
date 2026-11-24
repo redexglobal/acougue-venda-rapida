@@ -65,10 +65,21 @@
 <header>
   <h1>Painel do dono · <span>Açougue Venda Rápida</span></h1>
   <span class="estado" id="estado" aria-live="polite">Salvo neste aparelho</span>
+  <button type="button" id="btnConta">Entrar na minha conta</button>
   <a class="btn" href="../tv/" target="_blank" rel="noopener">Abrir a TV</a>
   <button class="prim" id="btnLink" type="button">Enviar para a TV</button>
 </header>
 
+<div id="faixaConta" role="status" hidden style="margin:12px 16px 0;padding:10px 14px;border-radius:12px;font-weight:600"></div>
+<dialog id="dEntrar" style="background:#1e1a18;color:#f6efe6;border:1px solid #372f2b;border-radius:14px;max-width:380px;width:92vw">
+  <h2 style="margin:0 0 8px;font:900 19px Archivo,sans-serif">Entrar</h2>
+  <p class="estado" style="margin:0 0 6px">Com a sua conta, os preços ficam guardados na nuvem e a TV atualiza sozinha.</p>
+  <label for="cUsuario">Usuário</label><input type="text" id="cUsuario" autocomplete="username">
+  <label for="cSenha">Senha</label><input type="password" id="cSenha" autocomplete="current-password">
+  <p class="alerta" id="cErro" role="alert"></p>
+  <div class="grupo"><button class="prim" type="button" id="cEntrar">Entrar</button><button type="button" onclick="this.closest('dialog').close()">Cancelar</button></div>
+  <p class="estado" style="margin-top:10px">Ainda não tem conta? <a href="https://wa.me/5562984924326?text=Quero%20assinar%20o%20painel%20de%20pre%C3%A7os" target="_blank" rel="noopener" style="color:#ffb199">Fale com a Kairós</a>.</p>
+</dialog>
 <main>
 <aside aria-label="Ajustes do painel">
   <details open><summary>Modelo e acabamento</summary>
@@ -189,7 +200,7 @@ function salvar(){
     cfg.atualizado = Date.now();
     try { localStorage.setItem(CHAVE, JSON.stringify(cfg)); $('estado').textContent = 'Salvo neste aparelho · ' + new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }); }
     catch { $('estado').textContent = 'Não coube na memória do aparelho: use fotos menores.'; }
-    $('linkArea').hidden = true;
+    if (conta.token) salvarNuvem(); else $('linkArea').hidden = true;
   }, 300);
 }
 function previa(){
@@ -342,6 +353,12 @@ $('btnZerar').onclick = () => { if (confirm('Voltar ao exemplo? Seus preços e f
 // ---------- enviar para a TV ----------
 $('btnLink').onclick = async () => {
   localStorage.setItem(CHAVE, JSON.stringify(cfg));
+  if (conta.token && conta.dados){
+    await salvarNuvem();
+    $('linkTv').value = new URL('../tv/?conta=' + conta.dados.id, location.href).href; $('linkArea').hidden = false;
+    $('linkInfo').textContent = 'Este é o link fixo da sua TV: abra uma vez nela. Cada mudança que você salvar aparece sozinha em até 20 segundos.';
+    $('linkTv').select(); return;
+  }
   const cod = await codificar(cfg);
   const url = new URL('../tv/', location.href).href + '#c=' + cod;
   $('linkTv').value = url; $('linkArea').hidden = false;
@@ -393,6 +410,49 @@ cfg.fila = cfg.fila || { loja: localStorage.getItem('balcao-loja') || '', ativa:
 liga('filaLoja', e => e.value = cfg.fila.loja || '', e => cfg.fila.loja = e.value.trim().toLowerCase());
 liga('filaAtiva', e => e.checked = cfg.fila.ativa !== false, e => cfg.fila.ativa = e.checked, 'change');
 liga('filaVoz', e => e.checked = cfg.fila.voz !== false, e => cfg.fila.voz = e.checked, 'change');
+
+// ---------- conta do cliente (nuvem + pagamento) ----------
+const conta = { token: localStorage.getItem('dono-token') || '', dados: null };
+const brlC = v => Number(v || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+async function apiConta(acao, b = {}){
+  const r = await fetch('/api/conta', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ acao, token: conta.token, ...b }) });
+  const j = await r.json().catch(() => ({})); return { ok: r.ok, status: r.status, ...j };
+}
+function faixa(c){
+  const f = $('faixaConta'); if (!c){ f.hidden = true; return; }
+  const s = c.situacao, cores = { em_dia: ['#0f2219', '#8be0b6'], vencendo: ['#2a2110', '#ffd27a'], carencia: ['#3a1a0c', '#ffb27a'], suspensa: ['#3a0f0f', '#ff9b9b'] }[s.codigo];
+  f.hidden = false; f.style.background = cores[0]; f.style.color = cores[1];
+  const venc = new Date(c.venc).toLocaleDateString('pt-BR');
+  const texto = { em_dia: `${c.loja} · plano ${c.plano_nome} · ${c.tvs} TV(s) · em dia até ${venc}.`,
+    vencendo: `Seu plano vence em ${s.dias} dia(s) (${venc}). Renove para a TV não desligar: ${brlC(c.valorPeriodo)}.`,
+    carencia: `Pagamento atrasado. Você tem ${s.horas} h para pagar; depois disso a TV desliga sozinha até o pagamento.`,
+    suspensa: 'Painel suspenso por falta de pagamento. A TV está desligada e as mudanças não são salvas até o pagamento.' }[s.codigo];
+  f.innerHTML = `${texto} <a href="https://wa.me/5562984924326?text=${encodeURIComponent('Olá! Quero pagar/renovar o painel da ' + c.loja + ' (usuário ' + c.usuario + ').')}" target="_blank" rel="noopener" style="color:inherit;font-weight:800;margin-left:8px">Pagar / falar com a Kairós</a>
+    ${c.instalacao?.quer ? '' : ' <button type="button" id="btnAgendar" style="margin-left:8px">Agendar instalação</button>'}`;
+  const ag = document.getElementById('btnAgendar');
+  if (ag) ag.onclick = async () => { const data = prompt('Qual dia e horário é melhor para a instalação? (ex.: quinta às 9h)'); if (!data) return; const r = await apiConta('agendar', { data }); toast(r.ok ? 'Pedido de instalação enviado. A Kairós confirma pelo WhatsApp.' : r.erro); if (r.ok){ conta.dados.instalacao = { quer: true, data }; faixa(conta.dados); } };
+}
+let tNuvem = null;
+function salvarNuvem(){
+  clearTimeout(tNuvem);
+  return new Promise(ok => { tNuvem = setTimeout(async () => {
+    const r = await apiConta('salvar', { cfg });
+    $('estado').textContent = r.ok ? 'Salvo na nuvem · a TV atualiza sozinha · ' + new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }) : (r.erro || 'Não salvou na nuvem; ficou neste aparelho.');
+    if (r.status === 401){ conta.token = ''; localStorage.removeItem('dono-token'); botaoConta(); }
+    ok(r);
+  }, 900); });
+}
+function botaoConta(){ $('btnConta').textContent = conta.token ? 'Sair da conta' : 'Entrar na minha conta'; if (!conta.token) faixa(null); }
+$('btnConta').onclick = () => { if (conta.token){ conta.token = ''; conta.dados = null; localStorage.removeItem('dono-token'); botaoConta(); toast('Você saiu. O painel continua salvo neste aparelho.'); } else { $('cErro').textContent = ''; $('dEntrar').showModal(); $('cUsuario').focus(); } };
+$('cEntrar').onclick = async () => {
+  const r = await apiConta('entrar', { usuario: $('cUsuario').value, senha: $('cSenha').value });
+  if (!r.ok){ $('cErro').textContent = r.status === 503 ? 'O sistema de contas está sendo ligado. Tente mais tarde.' : (r.erro || 'Não deu certo.'); return; }
+  conta.token = r.token; conta.dados = r.conta; localStorage.setItem('dono-token', r.token); $('cSenha').value = ''; $('dEntrar').close();
+  if (r.cfg){ cfg = { ...padrao(), ...r.cfg }; localStorage.setItem(CHAVE, JSON.stringify(cfg)); location.reload(); return; }
+  cfg.loja = cfg.loja === padrao().loja ? r.conta.loja : cfg.loja; botaoConta(); faixa(r.conta); salvarNuvem(); previa(); toast('Conta conectada. Seus preços agora vão para a nuvem.');
+};
+$('cSenha').onkeydown = e => e.key === 'Enter' && $('cEntrar').click();
+(async () => { botaoConta(); if (!conta.token) return; const r = await apiConta('minha'); if (r.ok){ conta.dados = r.conta; faixa(r.conta); } else if (r.status === 401){ conta.token = ''; localStorage.removeItem('dono-token'); botaoConta(); } })();
 
 itens(); previa();
 addEventListener('resize', () => previa());

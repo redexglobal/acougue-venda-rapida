@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Administração · Açougue Venda Rápida</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@700;900&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{--f:#0f1115;--c:#171a21;--l:#2a2f3a;--t:#eef1f6;--s:#9aa4b5;--b:#b3341f;--o:#e8b04b;--ok:#3fb27f;--av:#f4b740;--er:#ff5d5d}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--f);color:var(--t);font:15px/1.5 Inter,system-ui,sans-serif}
+  :focus-visible{outline:3px solid var(--o);outline-offset:2px}
+  header{display:flex;gap:10px;align-items:center;flex-wrap:wrap;padding:12px 18px;border-bottom:1px solid var(--l);position:sticky;top:0;background:rgba(15,17,21,.96);z-index:5}
+  h1{font:900 18px Archivo,sans-serif;margin:0 auto 0 0}
+  main{max-width:1300px;margin:0 auto;padding:18px}
+  button,.btn{font:600 14px Inter,sans-serif;border-radius:9px;border:1px solid var(--l);background:#20242d;color:var(--t);padding:8px 12px;cursor:pointer;text-decoration:none;display:inline-flex;gap:6px;align-items:center}
+  .prim{background:var(--b);border-color:var(--b);color:#fff}
+  input,select,textarea{font:inherit;background:#0c0e12;border:1px solid var(--l);color:var(--t);border-radius:9px;padding:9px 10px;width:100%}
+  label{display:block;font-size:13px;color:var(--s);margin:8px 0 3px}
+  .kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px;margin-bottom:16px}
+  .kpi{background:var(--c);border:1px solid var(--l);border-radius:12px;padding:12px}
+  .kpi b{display:block;font:900 26px Archivo,sans-serif}.kpi span{color:var(--s);font-size:13px}
+  .ferr{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px}.ferr input{max-width:280px}.ferr select{max-width:200px}
+  table{width:100%;border-collapse:collapse;background:var(--c);border:1px solid var(--l);border-radius:12px;overflow:hidden}
+  th,td{text-align:left;padding:10px;border-bottom:1px solid var(--l);vertical-align:top}
+  th{color:var(--s);font-size:12px;text-transform:uppercase;letter-spacing:.05em;cursor:pointer;user-select:none}
+  td small{color:var(--s);display:block}
+  .chip{display:inline-block;border-radius:999px;padding:2px 9px;font-size:12px;font-weight:700}
+  .em_dia{background:rgba(63,178,127,.15);color:#7fe0b2}.vencendo{background:rgba(244,183,64,.15);color:#ffd27a}
+  .carencia{background:rgba(255,140,60,.18);color:#ffb27a}.suspensa{background:rgba(255,93,93,.15);color:#ff9b9b}
+  .acoes{display:flex;gap:6px;flex-wrap:wrap}
+  dialog{background:var(--c);color:var(--t);border:1px solid var(--l);border-radius:14px;max-width:720px;width:94vw;padding:18px}
+  dialog::backdrop{background:rgba(0,0,0,.6)}
+  .lado{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .senha{background:#0c0e12;border:1px dashed var(--o);border-radius:10px;padding:12px;font:700 18px ui-monospace,monospace;margin:8px 0}
+  .ao-vivo{aspect-ratio:16/9;width:100%;border:0;border-radius:10px;background:#000}
+  .aviso{background:#2a2110;border:1px solid #6b5420;color:#f3d79a;border-radius:10px;padding:10px 12px;margin-bottom:14px}
+  #entrar{max-width:380px;margin:70px auto;background:var(--c);border:1px solid var(--l);border-radius:14px;padding:22px}
+  .erro{color:#ff9b9b;min-height:20px}
+  @media (max-width:760px){.lado{grid-template-columns:1fr} table, thead, tbody, tr, td{display:block} thead{display:none} td{border:0;padding:6px 10px} tr{border-bottom:1px solid var(--l);padding:8px 0}}
+</style>
+</head>
+<body>
+<header><h1>Administração · Açougue Venda Rápida</h1><span id="estado" style="color:var(--s);font-size:13px"></span><button id="btnNovo" class="prim" hidden>+ Novo cliente</button><button id="btnSair" hidden>Sair</button></header>
+
+<section id="entrar" hidden>
+  <h2 style="margin:0 0 10px;font:900 20px Archivo,sans-serif">Entrar</h2>
+  <label for="senhaAdmin">Senha do administrador</label><input type="password" id="senhaAdmin" autocomplete="current-password">
+  <p class="erro" id="erroEntrar" role="alert"></p>
+  <button class="prim" id="btnEntrar" style="width:100%;justify-content:center">Entrar</button>
+</section>
+
+<main id="painel" hidden>
+  <div class="aviso" id="avisoBanco" hidden></div>
+  <div class="kpis" id="kpis"></div>
+  <div class="ferr">
+    <input type="search" id="busca" placeholder="Buscar loja, dono, usuário…" aria-label="Buscar cliente">
+    <select id="filtro" aria-label="Filtrar por situação"><option value="">Todas as situações</option><option value="em_dia">Em dia</option><option value="vencendo">Vencendo (7 dias)</option><option value="carencia">Em carência (48 h)</option><option value="suspensa">Suspensas</option></select>
+    <select id="ordem" aria-label="Ordenar"><option value="venc">Vencimento mais próximo</option><option value="loja">Nome da loja</option><option value="criada">Mais recentes</option><option value="valor">Maior valor</option></select>
+  </div>
+  <table><thead><tr><th>Loja</th><th>Plano</th><th>Vencimento</th><th>Situação</th><th>Ações</th></tr></thead><tbody id="linhas"></tbody></table>
+</main>
+
+<dialog id="dNovo"><form method="dialog" id="fNovo">
+  <h2 style="margin:0 0 6px;font:900 19px Archivo,sans-serif">Novo cliente</h2>
+  <div class="lado"><div><label for="nLoja">Nome da loja</label><input id="nLoja" required maxlength="60"></div><div><label for="nNome">Responsável</label><input id="nNome" maxlength="60"></div></div>
+  <div class="lado"><div><label for="nContato">WhatsApp</label><input id="nContato" maxlength="40" inputmode="tel"></div><div><label for="nUsuario">Usuário (opcional)</label><input id="nUsuario" maxlength="24" placeholder="gerado pelo nome da loja"></div></div>
+  <div class="lado"><div><label for="nPlano">Plano</label><select id="nPlano"></select></div><div><label for="nTvs">Quantas TVs</label><input id="nTvs" type="number" min="1" max="50" value="1"></div></div>
+  <div class="lado"><div><label for="nTeste">Dias grátis de teste</label><input id="nTeste" type="number" min="0" max="30" value="0"></div><div><label for="nInst">Instalação</label><select id="nInst"><option value="">Ele mesmo instala (link da TV)</option><option value="1">Agendar instalação comigo</option></select></div></div>
+  <label for="nObs">Observações</label><textarea id="nObs" rows="2" maxlength="300"></textarea>
+  <p id="nValor" style="color:var(--o);font-weight:700"></p>
+  <p class="erro" id="erroNovo" role="alert"></p>
+  <div class="acoes"><button class="prim" id="btnCriar" value="ok">Criar e gerar senha</button><button value="cancel" formnovalidate>Cancelar</button></div>
+</form></dialog>
+
+<dialog id="dAcesso"><h2 style="margin:0 0 6px;font:900 19px Archivo,sans-serif">Acesso do cliente</h2>
+  <p style="color:var(--s);margin:0">A senha aparece só agora. Copie e mande para o cliente.</p>
+  <div class="senha" id="acessoTxt"></div>
+  <div class="acoes"><button class="prim" id="btnCopiarAcesso">Copiar mensagem</button><a class="btn" id="btnZap" target="_blank" rel="noopener">Enviar pelo WhatsApp</a><button onclick="this.closest('dialog').close()">Fechar</button></div>
+</dialog>
+
+<dialog id="dCliente"><div id="cliConteudo"></div></dialog>
+
+<script type="module">
+const $ = id => document.getElementById(id);
+const brl = v => Number(v || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+const data = ts => new Date(ts).toLocaleDateString('pt-BR');
+const esc = t => String(t ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+let token = sessionStorage.getItem('admin-token') || '', dados = null;
+async function api(acao, b = {}){
+  const r = await fetch('/api/conta', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ acao, token, ...b }) });
+  const j = await r.json().catch(() => ({ erro: 'Resposta inválida.' })); if (r.status === 401){ sair(); } return { ok: r.ok, status: r.status, ...j };
+}
+function sair(){ token = ''; sessionStorage.removeItem('admin-token'); $('painel').hidden = true; $('btnNovo').hidden = $('btnSair').hidden = true; $('entrar').hidden = false; }
+$('btnSair').onclick = sair;
+$('btnEntrar').onclick = async () => {
+  const r = await api('admin-entrar', { senha: $('senhaAdmin').value });
+  if (!r.ok){ $('erroEntrar').textContent = r.erro; return; }
+  token = r.token; sessionStorage.setItem('admin-token', token); $('senhaAdmin').value = ''; carregar();
+};
+$('senhaAdmin').onkeydown = e => e.key === 'Enter' && $('btnEntrar').click();
+
+async function carregar(){
+  const r = await api('admin-listar');
+  if (r.status === 503){ $('entrar').hidden = false; $('erroEntrar').textContent = r.erro; return; }
+  if (!r.ok){ if (r.status !== 401) $('estado').textContent = r.erro; return; }
+  dados = r; $('entrar').hidden = true; $('painel').hidden = false; $('btnNovo').hidden = $('btnSair').hidden = false;
+  $('estado').textContent = 'Atualizado ' + new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+  const s = r.resumo;
+  $('kpis').innerHTML = [['Clientes', s.total], ['Ativos', s.ativas], ['TVs ligadas', s.tvs], ['Receita mensal recorrente', brl(s.mrr)], ['Atrasados', s.atrasadas]]
+    .map(([t, v]) => `<div class="kpi"><span>${t}</span><b>${v}</b></div>`).join('');
+  if (!$('nPlano').options.length) Object.entries(r.planos).forEach(([k, p]) => $('nPlano').append(new Option(`${p.nome} · ${brl(p.porMes)}/mês por TV`, k)));
+  desenhar();
+}
+function desenhar(){
+  const b = $('busca').value.toLowerCase(), f = $('filtro').value, o = $('ordem').value;
+  let l = dados.contas.filter(c => !c.arquivada && (!f || c.situacao.codigo === f) && (!b || [c.loja, c.nome, c.usuario, c.contato].join(' ').toLowerCase().includes(b)));
+  l.sort((a, z) => o === 'loja' ? a.loja.localeCompare(z.loja) : o === 'criada' ? z.criada - a.criada : o === 'valor' ? z.valorPeriodo - a.valorPeriodo : a.venc - z.venc);
+  $('linhas').innerHTML = l.length ? '' : '<tr><td colspan="5" style="color:var(--s)">Nenhum cliente aqui ainda. Toque em "+ Novo cliente".</td></tr>';
+  l.forEach(c => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td><b>${esc(c.loja)}</b><small>${esc(c.nome)} · ${esc(c.contato)} · usuário ${esc(c.usuario)}</small>${c.instalacao?.quer ? `<small>Instalação: ${esc(c.instalacao.data || 'a combinar')}</small>` : ''}</td>
+      <td>${esc(c.plano_nome)} · ${c.tvs} TV${c.tvs > 1 ? 's' : ''}<small>${brl(c.valorPeriodo)} por período</small></td>
+      <td>${data(c.venc)}</td><td><span class="chip ${c.situacao.codigo}">${esc(c.situacao.texto)}</span></td>
+      <td class="acoes"><button data-a="ver">Ver ao vivo</button><button data-a="pagar" class="prim">Registrar pagamento</button><button data-a="mais">Mais</button></td>`;
+    tr.querySelector('[data-a=ver]').onclick = () => verAoVivo(c);
+    tr.querySelector('[data-a=pagar]').onclick = () => pagar(c);
+    tr.querySelector('[data-a=mais]').onclick = () => detalhes(c);
+    $('linhas').append(tr);
+  });
+}
+['busca', 'filtro', 'ordem'].forEach(id => $(id).addEventListener('input', () => dados && desenhar()));
+
+// ---------- novo cliente ----------
+const atualizaValor = () => { const p = dados?.planos[$('nPlano').value]; if (p) $('nValor').textContent = `${brl(p.porMes * p.meses * Math.max(1, +$('nTvs').value || 1))} a cada ${p.meses === 1 ? 'mês' : p.meses + ' meses'}`; };
+['nPlano', 'nTvs'].forEach(id => $(id).addEventListener('input', atualizaValor));
+$('btnNovo').onclick = () => { $('fNovo').reset(); $('erroNovo').textContent = ''; atualizaValor(); $('dNovo').showModal(); };
+$('btnCriar').onclick = async e => {
+  e.preventDefault();
+  const r = await api('admin-criar', { loja: $('nLoja').value, nome: $('nNome').value, contato: $('nContato').value, usuario: $('nUsuario').value, plano: $('nPlano').value, tvs: $('nTvs').value, diasTeste: $('nTeste').value, instalacao: !!$('nInst').value, obs: $('nObs').value });
+  if (!r.ok){ $('erroNovo').textContent = r.erro; return; }
+  $('dNovo').close(); mostrarAcesso(r); carregar();
+};
+function mostrarAcesso(r){
+  const base = location.origin;
+  const msg = `Olá! Seu painel de preços está pronto.\n\nEditor (celular ou computador): ${base}/dono/\nUsuário: ${r.usuario}\nSenha: ${r.senha}\n\nLink da TV: ${base}/tv/?conta=${r.conta.id}\n\nPlano ${r.conta.plano_nome} · ${r.conta.tvs} TV(s) · vence em ${data(r.conta.venc)}.`;
+  $('acessoTxt').textContent = msg; $('dAcesso').showModal();
+  $('btnCopiarAcesso').onclick = async () => { try { await navigator.clipboard.writeText(msg); $('btnCopiarAcesso').textContent = 'Copiado'; } catch {} };
+  const fone = (r.conta.contato || '').replace(/\D/g, '');
+  $('btnZap').href = `https://wa.me/${fone.length >= 10 ? (fone.startsWith('55') ? fone : '55' + fone) : ''}?text=${encodeURIComponent(msg)}`;
+}
+
+// ---------- ações ----------
+async function pagar(c){
+  const plano = prompt(`Pagamento de ${c.loja}.\nPlano: mensal, semestral ou anual?`, c.plano); if (!plano) return;
+  const forma = prompt('Forma de pagamento (Pix, boleto, dinheiro, cartão):', 'Pix') || 'Pix';
+  const r = await api('admin-pagamento', { id: c.id, plano: plano.trim().toLowerCase(), forma });
+  if (!r.ok) return alert(r.erro);
+  $('estado').textContent = `Pagamento registrado: ${c.loja} agora vence em ${data(r.conta.venc)}.`; carregar();
+}
+function verAoVivo(c){
+  $('cliConteudo').innerHTML = `<h2 style="margin:0 0 8px;font:900 19px Archivo,sans-serif">${esc(c.loja)} · ao vivo</h2>
+    <iframe class="ao-vivo" src="/tv/?conta=${encodeURIComponent(c.id)}" title="TV de ${esc(c.loja)}"></iframe>
+    <p style="color:var(--s)">É exatamente o que aparece na TV dele agora. Último salvamento: ${c.cfgEm ? new Date(c.cfgEm).toLocaleString('pt-BR') : 'ainda não salvou'}.</p>
+    <div class="acoes"><a class="btn" href="/tv/?conta=${encodeURIComponent(c.id)}" target="_blank" rel="noopener">Abrir em tela cheia</a><button onclick="this.closest('dialog').close()">Fechar</button></div>`;
+  $('dCliente').showModal();
+}
+function detalhes(c){
+  const pags = (c.pagamentos || []).slice().reverse().map(p => `<li>${data(p.ts)} · ${brl(p.valor)} · ${esc(p.plano)} · ${esc(p.forma)}</li>`).join('') || '<li>Nenhum pagamento registrado.</li>';
+  $('cliConteudo').innerHTML = `<h2 style="margin:0 0 8px;font:900 19px Archivo,sans-serif">${esc(c.loja)}</h2>
+    <div class="lado"><div><label>Loja</label><input id="eLoja" value="${esc(c.loja)}"></div><div><label>Responsável</label><input id="eNome" value="${esc(c.nome)}"></div></div>
+    <div class="lado"><div><label>WhatsApp</label><input id="eContato" value="${esc(c.contato)}"></div><div><label>TVs</label><input id="eTvs" type="number" min="1" max="50" value="${c.tvs}"></div></div>
+    <div class="lado"><div><label>Vencimento</label><input id="eVenc" type="date" value="${new Date(c.venc - 3 * 3600e3).toISOString().slice(0, 10)}"></div><div><label>Instalação (data)</label><input id="eInst" value="${esc(c.instalacao?.data || '')}" placeholder="ex.: 26/11 às 9h"></div></div>
+    <label>Observações</label><textarea id="eObs" rows="2">${esc(c.obs || '')}</textarea>
+    <h3 style="font-size:14px;margin:12px 0 4px">Pagamentos</h3><ul style="margin:0;padding-left:18px;color:var(--s)">${pags}</ul>
+    <div class="acoes" style="margin-top:12px"><button class="prim" id="bSalvar">Salvar</button><button id="bSenha">Gerar nova senha</button>
+      <button id="bBloq">${c.bloqueioManual ? 'Reativar' : 'Suspender agora'}</button><button id="bArq">Arquivar cliente</button><button onclick="this.closest('dialog').close()">Fechar</button></div>`;
+  $('dCliente').showModal();
+  $('bSalvar').onclick = async () => { const r = await api('admin-editar', { id: c.id, loja: $('eLoja').value, nome: $('eNome').value, contato: $('eContato').value, tvs: $('eTvs').value, venc: $('eVenc').value, obs: $('eObs').value, instalacao: { quer: !!$('eInst').value, data: $('eInst').value } }); if (!r.ok) return alert(r.erro); $('dCliente').close(); carregar(); };
+  $('bSenha').onclick = async () => { if (!confirm('Gerar uma senha nova? A antiga para de funcionar.')) return; const r = await api('admin-nova-senha', { id: c.id }); if (!r.ok) return alert(r.erro); $('dCliente').close(); mostrarAcesso(r); };
+  $('bBloq').onclick = async () => { const r = await api('admin-bloquear', { id: c.id, bloquear: !c.bloqueioManual }); if (!r.ok) return alert(r.erro); $('dCliente').close(); carregar(); };
+  $('bArq').onclick = async () => { if (!confirm(`Arquivar ${c.loja}? A TV dele desliga. Os dados ficam guardados.`)) return; const r = await api('admin-arquivar', { id: c.id }); if (!r.ok) return alert(r.erro); $('dCliente').close(); carregar(); };
+}
+if (token) carregar(); else $('entrar').hidden = false;
+setInterval(() => token && !document.querySelector('dialog[open]') && carregar(), 60000);
+</script>
+</body>
+</html>
