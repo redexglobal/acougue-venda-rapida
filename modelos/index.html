@@ -89,7 +89,7 @@ function montarCartao(m){
   const base = { ...padrao(), loja: 'Casa de Carnes do Bairro', atualizado: null };
   let cfg = aplicarModelo(base, m, { manterItens: false });
   cfg.movimento = 'parado'; cfg.promo = { ...cfg.promo, inicio: '', fim: '' };
-  if (m.cfg.fotosItens) cfg.itens.forEach(it => it.foto = fotoPara(it.n) || fotoGrande('carne-crua').replace('.webp', '-p.webp'));
+  if (m.cfg.fotosItens) cfg.itens.forEach(it => it.foto = fotoPara(it.n, it.c) || fotoGrande('carne-crua').replace('.webp', '-p.webp'));
   if (m.cfg.fotoLojaFundo) cfg.fotoLoja = fotoGrande('fogo-de-chao');
   const FOTO_SEG = { natal: 'carre-cordeiro', madeira: 'bife-tabua', tech: 'bifes-marmorizados', churrasco: 'fogo-de-chao', gourmet: 'tomahawk-tabua', rustico: 'fogo-de-chao-2', mercado: 'bifes-marmorizados', pequeno: 'picanha-grelha', bairro: 'picanha-fatiada', foto: 'carne-na-brasa' };
   const promoItem = { natal: ['Carré de cordeiro', 129.9], madeira: ['Bife ancho', 99.9], tech: ['Contrafilé', 52.9], gourmet: ['Tomahawk', 129.9], churrasco: ['Costela fogo de chão', 39.9], rustico: ['Costela fogo de chão', 39.9], mercado: ['Contrafilé', 52.9] }[m.segmento] || ['Picanha', 69.9];

@@ -74,6 +74,11 @@
 </header>
 
 <div id="faixaConta" role="status" hidden style="margin:12px 16px 0;padding:10px 14px;border-radius:12px;font-weight:600"></div>
+<dialog id="dFoto" style="background:#1e1a18;color:#f6efe6;border:1px solid #372f2b;border-radius:14px;max-width:640px;width:94vw">
+  <div style="display:flex;gap:12px;align-items:center;margin-bottom:10px"><div id="dfAtual" style="width:64px;height:64px;border-radius:10px;background:#120f0e center/cover;display:grid;place-items:center;font-size:11px;color:#a99"></div><div><h2 style="margin:0;font:900 19px Archivo,sans-serif">Foto de <span id="dfNome"></span></h2><p style="margin:2px 0 0;font-size:13px;color:#c9b8ab">Toque numa foto da galeria, envie a sua ou deixe sem foto.</p></div></div>
+  <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px"><label class="btn prim" style="margin:0;cursor:pointer">Enviar foto minha<input type="file" id="dfArq" accept="image/*" hidden></label><button type="button" id="dfTira">Deixar sem foto</button><button type="button" id="dfFecha">Fechar</button></div>
+  <div id="dfGrade" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:6px;max-height:56vh;overflow:auto"></div>
+</dialog>
 <dialog id="dEntrar" style="background:#1e1a18;color:#f6efe6;border:1px solid #372f2b;border-radius:14px;max-width:380px;width:92vw">
   <h2 style="margin:0 0 8px;font:900 19px Archivo,sans-serif">Entrar</h2>
   <p class="estado" style="margin:0 0 6px">Com a sua conta, os preços ficam guardados na nuvem e a TV atualiza sozinha.</p>
@@ -123,7 +128,7 @@
     <p class="estado" style="margin:0 0 6px">Modelo atual: <b id="modeloNome">personalizado</b>. <a href="../modelos/" style="color:#ffb199">Ver os 22 modelos</a></p>
     <label for="estilo">Estilo das linhas e da letra</label><select id="estilo"></select>
     <label>Acabamento</label>
-    <div class="grupo"><button type="button" id="tHalo">Halo (brilho)</button><button type="button" id="tMold">Moldura</button><button type="button" id="tFotos">Foto em cada corte</button><button type="button" id="tFotosAuto">Pôr fotos prontas nos cortes</button></div>
+    <div class="grupo"><button type="button" id="tHalo">Halo (brilho)</button><button type="button" id="tMold">Moldura</button><button type="button" id="tFotos">Foto em cada corte</button><button type="button" id="tFotosAuto">Pôr fotos prontas nos cortes</button><button type="button" id="tFotosTrocar">Atualizar para as fotos indicadas</button><button type="button" id="tFotosTodas">Tirar todas as fotos</button></div>
     <label>Colunas de preços</label><div class="grupo" id="colunas"><button type="button" data-v="1">1</button><button type="button" data-v="2">2</button><button type="button" data-v="3">3</button></div>
     <label for="fotoLoja">Foto da loja (fachada ou balcão)</label><input type="file" id="fotoLoja" accept="image/*">
     <div class="grupo" style="margin-top:6px"><button type="button" id="tFundo">Usar a foto de fundo</button><button type="button" id="fotoLojaTira">Tirar foto da loja</button></div>
@@ -300,13 +305,13 @@ function itens(){ setTimeout(() => typeof semana === 'function' && semana());
       <button type="button" title="Remover" aria-label="Remover ${it.n}">✕</button>
       <span></span><select class="cat" aria-label="Categoria de ${it.n}">${CATEGORIAS.map(c => `<option${c === it.c ? ' selected' : ''}>${c}</option>`).join('')}</select>
       <input type="number" class="de" step="0.01" min="0" inputmode="decimal" placeholder="de R$" title="Preço antigo: aparece riscado (de/por)" aria-label="Preço antigo de ${it.n} (de/por)" value="${it.de || ''}">
-      <label class="btn fc${it.foto ? ' tem' : ''}" title="Foto deste corte">${it.foto ? 'Foto ✓' : 'Foto'}<input type="file" accept="image/*" hidden aria-label="Foto de ${it.n}"></label>
+      <button type="button" class="btn fc${it.foto ? ' tem' : ''}" title="Escolher, trocar ou tirar a foto" aria-label="Foto de ${it.n}" style="${it.foto ? `background:url('${it.foto}') left center/26px 100% no-repeat;padding-left:28px` : ''}">${it.foto ? 'Trocar' : 'Foto'}</button>
       <span></span><select class="sl" aria-label="Selo de destaque de ${it.n}"><option value="">Sem selo</option>${Object.entries(SELOS).map(([k, z]) => `<option value="${k}"${(it.selo || (it.of ? 'oferta' : '')) === k ? ' selected' : ''}>${z.txt}</option>`).join('')}</select>
       <input type="text" class="ds" maxlength="60" placeholder="o que vem no combo (opcional)" aria-label="Descrição de ${it.n}" value="${(it.desc || '').replace(/"/g, '&quot;')}">`;
     const [alca, nome, preco, un, of, es, rem, , cat, de, fc, , sl, ds] = d.children;
     sl.onchange = () => { it.selo = sl.value || undefined; it.of = !!sl.value; of.setAttribute('aria-pressed', it.of); mudou(); };
     ds.oninput = () => { it.desc = ds.value; mudou(); };
-    fc.querySelector('input').onchange = async ev => { const f = ev.target.files[0]; if (!f) return; try { it.foto = await reduzirImagem(f, 160, .8); if (!cfg.fotosItens){ cfg.fotosItens = true; acab(); } itens(); mudou(); } catch (er) { toast(er.message); } };
+    fc.onclick = () => escolherFoto(it);
     de.oninput = () => { it.de = parseFloat(de.value.replace(',', '.')) || 0; mudou(); };
     nome.oninput = () => { it.n = nome.value; mudou(); };
     preco.oninput = () => { it.p = parseFloat(preco.value.replace(',', '.')) || 0; mudou(); };
@@ -641,7 +646,25 @@ try { const a = sessionStorage.getItem('dono-aviso'); if (a){ sessionStorage.rem
 FOTOS.forEach(f => { const b = document.createElement('button'); b.type = 'button'; b.title = f.nome; b.setAttribute('aria-label', 'Usar a foto ' + f.nome);
   b.style.cssText = `aspect-ratio:1;padding:0;border-radius:8px;background:url(${fotoPequena(f.id)}) center/cover`;
   b.onclick = () => { cfg.promo.foto = fotoGrande(f.id); mudou(); toast('Foto da promoção trocada.'); }; $('promoProntas').append(b); });
-$('tFotosAuto').onclick = () => { let n = 0; cfg.itens.forEach(it => { if (!it.foto){ const f = fotoPara(it.n); if (f){ it.foto = f; n++; } } }); cfg.fotosItens = true; acab(); itens(); mudou(); toast(n ? `${n} corte(s) ganharam foto pronta. Os que ficaram sem foto você coloca a sua.` : 'Nenhum corte novo com foto pronta parecida.'); };
+// 26/11/2026: escolher a foto de cada corte (galeria pronta, foto própria ou sem foto)
+let fotoDe = null;
+function escolherFoto(it){
+  fotoDe = it; $('dfNome').textContent = it.n;
+  $('dfAtual').style.backgroundImage = it.foto ? `url('${it.foto}')` : 'none'; $('dfAtual').textContent = it.foto ? '' : 'sem foto';
+  $('dfTira').hidden = !it.foto;
+  const sug = fotoPara(it.n, it.c);
+  const lista = [...FOTOS].sort((a, b) => (fotoPequena(b.id) === sug) - (fotoPequena(a.id) === sug));
+  $('dfGrade').innerHTML = lista.map(f => `<button type="button" data-id="${f.id}" title="${f.nome}" aria-label="Usar foto: ${f.nome}" style="position:relative;padding:0;aspect-ratio:1;border-radius:9px;background:url('${fotoPequena(f.id)}') center/cover;${fotoPequena(f.id) === it.foto ? 'outline:3px solid var(--o);' : ''}">${fotoPequena(f.id) === sug ? '<span style="position:absolute;left:3px;top:3px;background:#f2b630;color:#111;font-size:10px;font-weight:800;padding:1px 5px;border-radius:5px">indicada</span>' : ''}<span style="position:absolute;left:0;right:0;bottom:0;background:rgba(0,0,0,.65);color:#fff;font-size:11px;padding:2px 3px;border-radius:0 0 9px 9px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${f.nome}</span></button>`).join('');
+  $('dFoto').showModal();
+}
+function fotoPronta(){ if (!cfg.fotosItens){ cfg.fotosItens = true; acab(); } itens(); mudou(); $('dFoto').close(); }
+$('dfGrade').onclick = e => { const b = e.target.closest('button'); if (!b || !fotoDe) return; fotoDe.foto = fotoPequena(b.dataset.id); fotoPronta(); toast(`Foto de ${fotoDe.n} trocada.`); };
+$('dfArq').onchange = async e => { const f = e.target.files[0]; e.target.value = ''; if (!f || !fotoDe) return; try { fotoDe.foto = await reduzirImagem(f, 200, .82); fotoPronta(); toast(`Sua foto entrou em ${fotoDe.n}.`); } catch (er) { toast(er.message); } };
+$('dfTira').onclick = () => { if (!fotoDe) return; delete fotoDe.foto; itens(); mudou(); $('dFoto').close(); toast(`${fotoDe.n} ficou sem foto.`); };
+$('dfFecha').onclick = () => $('dFoto').close();
+$('tFotosTrocar').onclick = () => { let n = 0; cfg.itens.forEach(it => { if (it.foto && it.foto.startsWith('data:')) return; const f = fotoPara(it.n, it.c); if (f && f !== it.foto){ it.foto = f; n++; } }); cfg.fotosItens = true; acab(); itens(); mudou(); toast(n ? `${n} foto(s) atualizadas. As fotos que você mesmo enviou ficaram.` : 'Todas já estão com a foto indicada.'); };
+$('tFotosTodas').onclick = () => { const n = cfg.itens.filter(i => i.foto).length; if (!n) return toast('Nenhum corte tem foto.'); cfg.itens.forEach(i => delete i.foto); itens(); mudou(); toast(`Fotos tiradas de ${n} corte(s). Para voltar: "Pôr fotos prontas nos cortes".`); };
+$('tFotosAuto').onclick = () => { let n = 0; cfg.itens.forEach(it => { if (!it.foto){ const f = fotoPara(it.n, it.c); if (f){ it.foto = f; n++; } } }); cfg.fotosItens = true; acab(); itens(); mudou(); toast(n ? `${n} corte(s) ganharam foto pronta. Os que ficaram sem foto você coloca a sua.` : 'Nenhum corte novo com foto pronta parecida.'); };
 
 // ---------- painel da semana ----------
 function proximo(d){ const h = new Date(); h.setHours(12, 0, 0, 0); h.setDate(h.getDate() + ((d - h.getDay() + 7) % 7)); return h; }
