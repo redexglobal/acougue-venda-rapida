@@ -44,17 +44,20 @@ let atual = null, assinatura = '';
 
 // de onde vem a configuração: 1) ?loja= na nuvem  2) #c= no link  3) o que o editor salvou neste aparelho
 const q = new URLSearchParams(location.search), conta = q.get('conta');
-let faixaConta = null, ultimaBoa = null;
+let faixaConta = null, ultimaBoa = null, versao = 0, rapido = false;
 // 24/11/2026: TV de cliente pagante (?conta=): preços da nuvem + situação do pagamento
 async function ler(){
   if (conta){
     try {
-      const r = await fetch(`/api/conta?acao=tv&id=${encodeURIComponent(conta)}`, { cache: 'no-store' });
+      const r = await fetch(`/api/conta?acao=tv&id=${encodeURIComponent(conta)}${ultimaBoa ? '&desde=' + versao : ''}`, { cache: 'no-store' });
       const j = await r.json();
       if (r.status === 503){ mostrarAviso('O sistema está sendo ligado. Volte em instantes.'); return null; }
       if (!r.ok){ mostrarAviso(j.erro || 'Painel não encontrado. Confira o link com a Kairós.'); return null; }
       if (j.situacao.codigo === 'suspensa'){ suspensa(j); return null; }
       faixaConta = j.situacao.codigo === 'carencia' ? `Pagamento em atraso: o painel desliga em ${j.situacao.horas} h. Regularize com a Kairós.` : null;
+      rapido = !!j.rapido;
+      if (j.igual && ultimaBoa) return ultimaBoa;   // nada mudou: não baixa o painel de novo
+      versao = j.cfgEm || 0;
       ultimaBoa = { ...padrao(), loja: j.loja, ...(j.cfg || {}) };   // o que faltar vem do padrão: nunca tela em branco
       return ultimaBoa;
     } catch { return ultimaBoa; }   // sem internet: continua mostrando os últimos preços
@@ -92,7 +95,8 @@ async function atualizar(){
   atual = desenhar(tela, cfg, { forcarMovimento: true });
 }
 atualizar();
-setInterval(atualizar, 20000);                                  // nuvem: confere a cada 20 s
+// 26/11/2026: tempo real. Dono com o editor aberto = confere a cada 2,5 s; senão a cada 20 s.
+(function ciclo(){ setTimeout(async () => { try { await atualizar(); } catch {} ciclo(); }, conta && rapido ? 2500 : 20000); })();
 addEventListener('storage', e => { if (e.key === 'acougue-painel') atualizar(); });   // mesmo aparelho: na hora
 addEventListener('hashchange', atualizar);
 addEventListener('resize', () => { assinatura = ''; atualizar(); });

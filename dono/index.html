@@ -161,6 +161,8 @@
 
   <details><summary>Horário e rodapé</summary>
     <label><input type="checkbox" id="relogio"> Relógio</label><label><input type="checkbox" id="data"> Data</label>
+    <label for="horaTam">Tamanho do relógio</label><input type="range" id="horaTam" min="60" max="300" step="10">
+    <p class="estado" style="margin:2px 0 6px">Arraste o relógio na prévia para mudar de lugar. <button type="button" id="horaVolta" style="padding:3px 8px">Voltar ao canto</button></p>
     <label for="horario">Horário de funcionamento</label><input type="text" id="horario" maxlength="60">
     <label for="rodape">Faixa do rodapé</label><input type="text" id="rodape" maxlength="60">
     <label style="margin-top:14px"><input type="checkbox" id="tvAtiva"> Liga e desliga a TV no horário</label>
@@ -355,6 +357,8 @@ temas(); pintaCores();
 
 // ---------- horário ----------
 liga('relogio', e => e.checked = cfg.relogio, e => cfg.relogio = e.checked, 'change');
+liga('horaTam', e => e.value = cfg.horaTam || 100, e => cfg.horaTam = +e.value, 'input');
+$('horaVolta').onclick = () => { delete cfg.horaPos; cfg.horaTam = 100; $('horaTam').value = 100; salvar(); previa(); };
 liga('data', e => e.checked = cfg.data, e => cfg.data = e.checked, 'change');
 liga('horario', e => e.value = cfg.horario || '', e => cfg.horario = e.value);
 liga('rodape', e => e.value = cfg.faixaRodape || '', e => cfg.faixaRodape = e.value);
@@ -452,6 +456,9 @@ function faixa(c){
   if (ag) ag.onclick = async () => { const data = prompt('Qual dia e horário é melhor para a instalação? (ex.: quinta às 9h)'); if (!data) return; const r = await apiConta('agendar', { data }); toast(r.ok ? 'Pedido de instalação enviado. A Kairós confirma pelo WhatsApp.' : r.erro); if (r.ok){ conta.dados.instalacao = { quer: true, data }; faixa(conta.dados); } };
 }
 let tNuvem = null;
+// 26/11/2026: editor aberto = TV no modo rápido (confere a cada 2,5 s)
+setInterval(() => { if (conta.token && document.visibilityState === 'visible') apiConta('vivo'); }, 240000);
+document.addEventListener('visibilitychange', () => { if (conta.token && document.visibilityState === 'visible') apiConta('vivo'); });
 function salvarNuvem(){
   clearTimeout(tNuvem);
   return new Promise(ok => { tNuvem = setTimeout(async () => {
@@ -459,7 +466,7 @@ function salvarNuvem(){
     $('estado').textContent = r.ok ? 'Salvo na nuvem · a TV atualiza sozinha · ' + new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }) : (r.erro || 'Não salvou na nuvem; ficou neste aparelho.');
     if (r.status === 401){ conta.token = ''; localStorage.removeItem('dono-token'); botaoConta(); }
     ok(r);
-  }, 900); });
+  }, 400); });
 }
 function botaoConta(){ $('btnConta').textContent = conta.token ? 'Sair da conta' : 'Entrar na minha conta'; if (!conta.token) faixa(null); }
 $('btnConta').onclick = () => { if (conta.token){ conta.token = ''; conta.dados = null; localStorage.removeItem('dono-token'); botaoConta(); toast('Você saiu. O painel continua salvo neste aparelho.'); } else { $('cErro').textContent = ''; $('dEntrar').showModal(); $('cUsuario').focus(); } };
@@ -471,7 +478,7 @@ $('cEntrar').onclick = async () => {
   cfg.loja = cfg.loja === padrao().loja ? r.conta.loja : cfg.loja; botaoConta(); faixa(r.conta); salvarNuvem(); previa(); toast('Conta conectada. Seus preços agora vão para a nuvem.');
 };
 $('cSenha').onkeydown = e => e.key === 'Enter' && $('cEntrar').click();
-(async () => { botaoConta(); if (!conta.token) return; const r = await apiConta('minha'); if (r.ok){ conta.dados = r.conta; faixa(r.conta); } else if (r.status === 401){ conta.token = ''; localStorage.removeItem('dono-token'); botaoConta(); } })();
+(async () => { botaoConta(); if (!conta.token) return; const r = await apiConta('minha'); if (r.ok){ conta.dados = r.conta; faixa(r.conta); apiConta('vivo'); } else if (r.status === 401){ conta.token = ''; localStorage.removeItem('dono-token'); botaoConta(); } })();
 
 // ---------- fotos prontas (reais, licença livre) ----------
 FOTOS.forEach(f => { const b = document.createElement('button'); b.type = 'button'; b.title = f.nome; b.setAttribute('aria-label', 'Usar a foto ' + f.nome);

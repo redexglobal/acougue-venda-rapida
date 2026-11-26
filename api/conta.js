@@ -67,7 +67,11 @@ export default async function handler(req, res){
       const c = await getJ('conta:' + txt(q.id, 40)); if (!c) return responder(res, 404, { erro: 'Painel não encontrado.' });
       const s = situacao(c);
       if (s.codigo === 'suspensa') return responder(res, 200, { situacao: s, loja: c.loja });
-      return responder(res, 200, { situacao: s, loja: c.loja, cfg: await getJ('cfg:' + c.id), cfgEm: c.cfgEm || 0 });
+      // 26/11/2026: tempo real. Com o dono mexendo no editor (sinal "vivo" nos últimos 10 min) a TV confere a cada 2,5 s;
+      // fora disso, a cada 20 s. Se nada mudou desde a versão que a TV já tem, não manda o painel de novo (economiza banco).
+      const rapido = !!(await redis('GET', 'vivo:' + c.id));
+      if (q.desde && Number(q.desde) === (c.cfgEm || 0)) return responder(res, 200, { igual: true, situacao: s, loja: c.loja, cfgEm: c.cfgEm || 0, rapido });
+      return responder(res, 200, { situacao: s, loja: c.loja, cfg: await getJ('cfg:' + c.id), cfgEm: c.cfgEm || 0, rapido });
     }
 
     // ---------- admin ----------
@@ -145,8 +149,10 @@ export default async function handler(req, res){
       if (!b.cfg || !Array.isArray(b.cfg.itens) || !b.cfg.itens.length) return responder(res, 400, { erro: 'O painel precisa de pelo menos um corte com preço.' });
       const json = JSON.stringify(b.cfg); if (json.length > LIMITE_CFG) return responder(res, 413, { erro: 'O painel ficou grande demais (fotos). Use fotos menores ou menos fotos.' });
       await redis('SET', 'cfg:' + c.id, json); c.cfgEm = Date.now(); await setJ('conta:' + c.id, c);
+      await redis('SET', 'vivo:' + c.id, '1', 'EX', '600');
       return responder(res, 200, { ok: true, salvoEm: c.cfgEm });
     }
+    if (acao === 'vivo'){ await redis('SET', 'vivo:' + c.id, '1', 'EX', '600'); return responder(res, 200, { ok: true }); }   // editor aberto: TV fica no modo rápido
     if (acao === 'agendar'){
       c.instalacao = { quer: true, data: txt(b.data, 20), obs: txt(b.obs, 200), pedidoEm: Date.now() }; await setJ('conta:' + c.id, c);
       return responder(res, 200, { ok: true });

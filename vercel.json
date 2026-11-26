@@ -1,0 +1,7 @@
+{
+  "redirects": [
+    { "source": "/md", "destination": "/tv/?conta=M6nlpVJr", "permanent": false },
+    { "source": "/md/tv", "destination": "/tv/?conta=M6nlpVJr", "permanent": false },
+    { "source": "/md/dono", "destination": "/dono/", "permanent": false }
+  ]
+}

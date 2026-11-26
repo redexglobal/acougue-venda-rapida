@@ -96,7 +96,7 @@ const CSS = `
 .pn .loja{font-weight:900;font-size:min(6cqh,6.2cqw);max-width:70cqw;text-align:center;text-transform:uppercase;letter-spacing:.06em;line-height:1}
 .pn .sub{font-size:min(2.3cqh,3.4cqw);opacity:.85;margin-top:.6cqh}
 .pn .hora{position:absolute;top:3cqh;font-weight:800;font-size:min(3.6cqh,4cqw);text-align:right;line-height:1.1}
-.pn .hora small{display:block;font-size:min(2cqh,2.6cqw);font-weight:600;opacity:.85}
+.pn .hora small{display:block;font-size:.56em;font-weight:600;opacity:.85}
 .pn .corpo{position:absolute;left:2cqw;right:2cqw;top:14cqh;bottom:8cqh;display:flex;gap:1.6cqw}
 .pn .corpo.col{flex-direction:column;gap:1.6cqh}
 .pn .promo{position:relative;border-radius:2cqh;overflow:hidden;display:flex;flex-direction:column;justify-content:flex-end;min-width:0;min-height:0}
@@ -127,6 +127,7 @@ const CSS = `
 .pn .logo{position:absolute;z-index:3;cursor:default;touch-action:none}
 .pn .logo.topo-l img{max-height:min(9cqh,calc(13cqh - var(--ly,4cqh)));width:auto;max-width:100%}
 .pn .logo img{width:100%;height:auto;display:block;filter:drop-shadow(0 .6cqh 1.4cqh rgba(0,0,0,.35))}
+.pn.editavel .hora{cursor:grab;outline:.3cqh dashed rgba(255,255,255,.45);outline-offset:.4cqh;border-radius:.6cqh}
 .pn.editavel .logo{cursor:grab;outline:.3cqh dashed rgba(255,255,255,.55);outline-offset:.4cqh}
 .pn .div{position:absolute;z-index:4;background:rgba(255,255,255,.0)}
 .pn.editavel .div{background:rgba(255,255,255,.25);border-radius:1cqh}
@@ -253,6 +254,10 @@ export function desenhar(alvo, cfgBase, opcoes = {}){
   const hora = document.createElement('div'); hora.className = 'hora';
   hora.style[cfg.logoPos?.canto?.endsWith('d') && (cfg.logoPos.canto[0] === 's') ? 'left' : 'right'] = '2.4cqw';
   pn.append(hora);
+  // 26/11/2026: relógio com posição e tamanho livres (o dono arrasta na prévia)
+  if (cfg.horaTam && cfg.horaTam !== 100) hora.style.fontSize = `calc(min(3.6cqh,4cqw) * ${cfg.horaTam / 100})`;
+  if (cfg.horaPos){ hora.style.left = cfg.horaPos.x + '%'; hora.style.top = cfg.horaPos.y + '%'; hora.style.right = 'auto'; hora.style.textAlign = 'center'; }
+  if (opcoes.editavel && (cfg.relogio || cfg.data)) arrastarLivre(pn, hora, p => { cfgBase.horaPos = cfg.horaPos = p; }, opcoes.mudou);
   const tic = () => {
     const d = new Date();
     hora.innerHTML = `${cfg.relogio ? d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }) : ''}${cfg.data ? `<small>${d.toLocaleDateString('pt-BR', { weekday: 'short', day: '2-digit', month: '2-digit' })}</small>` : ''}`;
@@ -329,7 +334,7 @@ export function desenhar(alvo, cfgBase, opcoes = {}){
     lg.style.setProperty('--ly', (cfg.logoPos?.y ?? 4) + 'cqh');
     lg.classList.toggle('topo-l', (cfg.logoPos?.canto || 'se')[0] === 's' && (cfg.logoPos?.y ?? 4) < 12);
     pn.append(lg);
-    if (opcoes.editavel) arrastarLogo(pn, lg, cfg, opcoes.mudou);
+    if (opcoes.editavel) arrastarLogo(pn, lg, cfgBase, opcoes.mudou);   // grava no cfg do dono, não na cópia do dia
   }
 
   // divisória arrastável entre promoção e lista
@@ -346,7 +351,7 @@ export function desenhar(alvo, cfgBase, opcoes = {}){
       const mover = ev => {
         let f = coluna ? (ev.clientY - r.top) / r.height : (ev.clientX - r.left) / r.width;
         if (ordem[0] !== promoEl) f = 1 - f;
-        cfg.divisao = Math.round(Math.min(75, Math.max(20, f * 100)));
+        cfgBase.divisao = cfg.divisao = Math.round(Math.min(75, Math.max(20, f * 100)));
         promoEl.style.flex = `0 0 ${cfg.divisao}%`; pos();
       };
       const soltar = () => { dv.removeEventListener('pointermove', mover); opcoes.mudou?.(); };
@@ -355,6 +360,21 @@ export function desenhar(alvo, cfgBase, opcoes = {}){
   }
 
   return { parar(){ clearInterval(relogio); anim?.parar(); } };
+}
+
+function arrastarLivre(pn, el, salvar, mudou){
+  el.addEventListener('pointerdown', e => {
+    e.preventDefault(); el.setPointerCapture(e.pointerId);
+    const b = pn.getBoundingClientRect(), r = el.getBoundingClientRect(), dx = e.clientX - r.left, dy = e.clientY - r.top;
+    const mover = ev => {
+      const x = Math.min(100 - r.width / b.width * 100, Math.max(0, (ev.clientX - dx - b.left) / b.width * 100));
+      const y = Math.min(100 - r.height / b.height * 100, Math.max(0, (ev.clientY - dy - b.top) / b.height * 100));
+      const p = { x: Math.round(x * 10) / 10, y: Math.round(y * 10) / 10 };
+      el.style.left = p.x + '%'; el.style.top = p.y + '%'; el.style.right = 'auto'; salvar(p);
+    };
+    const soltar = () => { el.removeEventListener('pointermove', mover); mudou?.(); };
+    el.addEventListener('pointermove', mover); el.addEventListener('pointerup', soltar, { once: true });
+  });
 }
 
 function posicionarLogo(lg, pos = {}){
