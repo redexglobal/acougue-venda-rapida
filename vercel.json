@@ -1,6 +1,28 @@
 {
   "redirects": [
     {
+      "source": "/",
+      "has": [
+        {
+          "type": "host",
+          "value": "painelcasadecarnesmd2.vercel.app"
+        }
+      ],
+      "destination": "/tv/?conta=M6nlpVJr&tela=2",
+      "permanent": false
+    },
+    {
+      "source": "/",
+      "has": [
+        {
+          "type": "host",
+          "value": "painelcasadecarnesmd1.vercel.app"
+        }
+      ],
+      "destination": "/tv/?conta=M6nlpVJr",
+      "permanent": false
+    },
+    {
       "source": "/md",
       "destination": "/tv/?conta=M6nlpVJr",
       "permanent": false
