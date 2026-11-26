@@ -93,8 +93,8 @@ const CSS = `
 .pn{position:relative;width:100%;height:100%;overflow:hidden;font-family:Archivo,Inter,system-ui,sans-serif;container-type:size}
 .pn *{box-sizing:border-box}
 .pn .topo{position:absolute;left:0;right:0;top:0;height:13cqh;display:flex;align-items:center;justify-content:center;flex-direction:column;z-index:2}
-.pn .loja{font-weight:900;font-size:min(6cqh,6.2cqw);max-width:70cqw;text-align:center;text-transform:uppercase;letter-spacing:.06em;line-height:1}
-.pn .sub{font-size:min(2.3cqh,3.4cqw);opacity:.85;margin-top:.6cqh}
+.pn .loja{font-weight:900;font-size:calc(min(6cqh,6.2cqw) * var(--tt,1));max-width:70cqw;text-align:center;text-transform:uppercase;letter-spacing:.06em;line-height:1}
+.pn .sub{font-size:calc(min(2.3cqh,3.4cqw) * var(--tt,1));opacity:.85;margin-top:.6cqh}
 .pn .hora{position:absolute;top:3cqh;font-weight:800;font-size:min(3.6cqh,4cqw);text-align:right;line-height:1.1}
 .pn .hora small{display:block;font-size:.56em;font-weight:600;opacity:.85}
 .pn .corpo{position:absolute;left:2cqw;right:2cqw;top:14cqh;bottom:8cqh;display:flex;gap:1.6cqw}
@@ -103,11 +103,11 @@ const CSS = `
 .pn .promo .foto{position:absolute;inset:0;background-size:cover;background-position:center}
 .pn .promo .semfoto{position:absolute;inset:0;display:grid;place-items:center;font-size:2.4cqh;opacity:.6;text-align:center;padding:4cqh}
 .pn .promo .cx{position:relative;padding:2.6cqh 2.4cqh;background:linear-gradient(0deg,rgba(0,0,0,.82),rgba(0,0,0,.35) 70%,transparent);color:#fff}
-.pn .promo .rot{display:inline-block;font-weight:900;font-size:2.4cqh;text-transform:uppercase;letter-spacing:.08em;padding:.5cqh 1.4cqh;border-radius:1cqh}
-.pn .promo .pit{font-weight:900;font-size:min(6cqh,9cqw);line-height:1;margin-top:1cqh}
-.pn .promo .pr{font-weight:900;font-size:min(9cqh,13cqw);line-height:1}
-.pn .promo .pr small{font-size:3cqh}
-.pn .promo .val{font-size:2.3cqh;opacity:.9;margin-top:.6cqh}
+.pn .promo .rot{display:inline-block;font-weight:900;font-size:calc(2.4cqh * var(--pt,1));text-transform:uppercase;letter-spacing:.08em;padding:.5cqh 1.4cqh;border-radius:1cqh}
+.pn .promo .pit{font-weight:900;font-size:calc(min(6cqh,9cqw) * var(--pt,1));line-height:1;margin-top:1cqh}
+.pn .promo .pr{font-weight:900;font-size:calc(min(9cqh,13cqw) * var(--pt,1));line-height:1}
+.pn .promo .pr small{font-size:calc(3cqh * var(--pt,1))}
+.pn .promo .val{font-size:calc(2.3cqh * var(--pt,1));opacity:.9;margin-top:.6cqh}
 .pn .lista{position:relative;flex:1;min-width:0;min-height:0;overflow:hidden;border-radius:2cqh}
 .pn .trilho{position:absolute;left:0;right:0;top:0;will-change:transform}
 .pn .trilho.lado{display:flex;height:100%;align-items:center;gap:2cqw;width:max-content}
@@ -123,7 +123,7 @@ const CSS = `
 .pn .li.combo{align-items:center}
 .pn .li.esg{opacity:.45}.pn .li.esg .pp{text-decoration:line-through}
 .pn .trilho.lado .li{margin:0;padding:2cqh 2.4cqh;flex-direction:column;align-items:flex-start;min-width:28cqw}
-.pn .rod{position:absolute;left:0;right:0;bottom:0;height:7cqh;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:min(2.8cqh,2.9cqw);gap:3cqw;flex-wrap:wrap;text-align:center;padding:0 2cqw;line-height:1.2}
+.pn .rod{position:absolute;left:0;right:0;bottom:0;height:7cqh;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:calc(min(2.8cqh,2.9cqw) * var(--rt,1));gap:3cqw;flex-wrap:wrap;text-align:center;padding:0 2cqw;line-height:1.2}
 .pn .logo{position:absolute;z-index:3;cursor:default;touch-action:none}
 .pn .logo.topo-l img{max-height:min(9cqh,calc(13cqh - var(--ly,4cqh)));width:auto;max-width:100%}
 .pn .logo img{width:100%;height:auto;display:block;filter:drop-shadow(0 .6cqh 1.4cqh rgba(0,0,0,.35))}
@@ -132,6 +132,11 @@ const CSS = `
 .pn .div{position:absolute;z-index:4;background:rgba(255,255,255,.0)}
 .pn.editavel .div{background:rgba(255,255,255,.25);border-radius:1cqh}
 .pn.editavel .div:hover{background:rgba(255,255,255,.55)}
+/* 26/11/2026: seta de tamanho de cada bloco (só no editor) */
+.pn .alca-tam{position:absolute;z-index:6;width:4.2cqh;height:4.2cqh;min-width:22px;min-height:22px;padding:0;border-radius:50%;border:.25cqh solid #fff;background:#f2b630;color:#111;font:900 2.6cqh/1 system-ui,sans-serif;display:grid;place-items:center;cursor:nwse-resize;touch-action:none;box-shadow:0 .4cqh 1.2cqh rgba(0,0,0,.5);transform:translate(-50%,-50%)}
+.pn .alca-tam:hover,.pn .alca-tam:focus-visible{background:#fff;outline:.3cqh solid #f2b630}
+.pn .alca-tam .vl{position:absolute;top:110%;left:50%;transform:translateX(-50%);background:#111;color:#fff;font-size:1.8cqh;padding:.3cqh .8cqh;border-radius:.6cqh;white-space:nowrap;pointer-events:none;opacity:0}
+.pn .alca-tam.ativa .vl,.pn .alca-tam:hover .vl{opacity:1}
 
 /* ---- 23/11/2026: estilos, halo, moldura, colunas, fotos ---- */
 .pn{--d:#ff6a3d;--ft:Archivo;--fx:Archivo}
@@ -139,7 +144,7 @@ const CSS = `
 .pn .li,.pn .cat,.pn .rod,.pn .hora,.pn .promo .cx{font-family:var(--fx)}
 .pn .promo .pit,.pn .promo .pr{font-family:var(--ft)}
 .pn .li .dots{display:none;flex:1;border-bottom:.35cqh dotted currentColor;opacity:.45;margin:0 .4em .25em;min-width:.4em}
-.pn .li .ft{width:1.9em;height:1.9em;border-radius:.4em;object-fit:cover;flex:none;margin-right:.5em;align-self:center}
+.pn .li .ft{width:calc(1.9em * var(--ft,1));height:calc(1.9em * var(--ft,1));border-radius:.4em;object-fit:cover;flex:none;margin-right:.5em;align-self:center}
 .pn .li .esq{display:flex;align-items:center;min-width:0;flex:0 1 auto}
 .pn .li .pp{flex:none}
 .pn .li .dots{flex:1 1 0}
@@ -244,6 +249,7 @@ export function desenhar(alvo, cfgBase, opcoes = {}){
   pn.style.backgroundColor = cor.fundo; pn.style.color = cor.texto;
   pn.style.setProperty('--d', cor.destaque); pn.style.setProperty('--dt', contraste(cor.destaque, '#000000') > contraste(cor.destaque, '#ffffff') ? '#111' : '#fff'); pn.style.setProperty('--ft', `'${est.tit}'`); pn.style.setProperty('--fx', `'${est.txt}'`);
   if (cfg.fotoLojaFundo && cfg.fotoLoja){ const fl = document.createElement('div'); fl.className = 'fundoLoja'; fl.style.backgroundImage = `url('${cfg.fotoLoja}')`; pn.append(fl); }
+  [['--tt', 'tituloTam'], ['--pt', 'promoTam'], ['--rt', 'rodTam'], ['--ft', 'fotoTam']].forEach(([v, k]) => { if (cfg[k] && cfg[k] !== 100) pn.style.setProperty(v, cfg[k] / 100); });
   pn.setAttribute('role', 'img'); pn.setAttribute('aria-label', `Painel de preços de ${cfg.loja}`);
   alvo.append(pn);
 
@@ -277,7 +283,7 @@ export function desenhar(alvo, cfgBase, opcoes = {}){
     promoEl = document.createElement('div'); promoEl.className = 'promo';
     promoEl.style.background = cor.faixa;
     const p = cfg.promo;
-    promoEl.innerHTML = `${p.foto ? `<div class="foto" style="background-image:url('${p.foto}')"></div>` : `<div class="semfoto">${opcoes.editavel ? 'Toque em "Foto da promoção" para colocar a foto da semana' : ''}</div>`}
+    promoEl.innerHTML = `${p.foto ? `<div class="foto" style="background-image:url('${p.foto}')"></div>` : `<div class="semfoto">${opcoes.editavel ? 'Toque aqui para colocar a foto da semana' : ''}</div>`}
       <div class="cx"><span class="rot" style="background:${cor.destaque};color:${contraste(cor.destaque, '#000000') > contraste(cor.destaque, '#ffffff') ? '#000' : '#fff'}">${esc(p.titulo || 'Promoção')}</span>
       ${p.item ? `<div class="pit">${esc(p.item)}</div>` : ''}
       ${p.preco ? `<div class="pr">R$ ${brl(p.preco)}<small>/${esc(p.unidade || 'kg')}</small></div>` : ''}
@@ -303,7 +309,7 @@ export function desenhar(alvo, cfgBase, opcoes = {}){
     const seloDe = it => { const k = it.selo || (it.of ? 'oferta' : ''); if (!k) return ''; const z = SELOS[k] || { txt: String(k).toUpperCase().slice(0, 22) };
       const bg = z.bg || cor.destaque, fg = z.fg || (contraste(cor.destaque, '#000000') > contraste(cor.destaque, '#ffffff') ? '#000' : '#fff');
       return `<span class="selo" style="background:${bg};color:${fg};${z.borda ? `box-shadow:0 0 0 .12em ${z.borda} inset;` : ''}">${esc(z.txt)}</span>`; };
-    const linha = it => `<div class="li${it.of || it.selo ? ' of' : ''}${it.esg ? ' esg' : ''}${it.desc ? ' combo' : ''}" style="font-size:${fs}cqh;background:rgba(255,255,255,.05);outline-color:${(SELOS[it.selo]?.bg) || cor.destaque}">
+    const linha = it => `<div class="li${it.of || it.selo ? ' of' : ''}${it.esg ? ' esg' : ''}${it.desc ? ' combo' : ''}" style="font-size:calc(${fs}cqh * var(--lf,1));background:rgba(255,255,255,.05);outline-color:${(SELOS[it.selo]?.bg) || cor.destaque}">
         <span class="esq">${cfg.fotosItens && it.foto ? `<img class="ft" src="${it.foto}" alt="">` : ''}<span class="nmw"><span class="nm">${esc(it.n)}</span>${seloDe(it)}${it.desc ? `<span class="desc">${esc(it.desc)}</span>` : ''}</span></span><span class="dots"></span><span class="pp" style="color:${cor.preco}">${!it.esg && it.de > it.p ? `<s style="font-size:.55em;opacity:.7;margin-right:.4em">de R$ ${brl(it.de)}</s>` : ''}${it.esg ? 'esgotado' : (it.de > it.p ? 'por ' : '') + 'R$ ' + brl(it.p)}<small>/${esc(it.u || 'kg')}</small></span></div>`;
     const itens = (cfg.itens || []).filter(i => i.n);
     let html = '';
@@ -359,7 +365,12 @@ export function desenhar(alvo, cfgBase, opcoes = {}){
     });
   }
 
-  return { parar(){ clearInterval(relogio); anim?.parar(); } };
+  let reposAlcas = null;
+  if (opcoes.editavel) reposAlcas = alcasDeTamanho(pn, cfgBase, cfg, opcoes.mudou, {
+    titulo: pn.querySelector('.topo .loja'), hora: pn.querySelector('.hora'), logo: pn.querySelector('.logo'),
+    promo: promoEl, lista: listaEl, rod: pn.querySelector('.rod') });
+
+  return { parar(){ clearInterval(relogio); anim?.parar(); reposAlcas?.parar(); } };
 }
 
 function arrastarLivre(pn, el, salvar, mudou){
@@ -466,4 +477,58 @@ export function reduzirImagem(arquivo, lado = 900, qualidade = .78){
     img.onerror = () => erro(new Error('Não consegui abrir essa imagem.'));
     img.src = url;
   });
+}
+
+// ---- 26/11/2026: setas de tamanho. O dono arrasta a seta (ou usa as setas do teclado) e o bloco cresce ou diminui na hora ----
+const TAMANHOS = {
+  titulo: { chave: 'tituloTam', base: 100, min: 50, max: 200, nome: 'Tamanho do nome da loja' },
+  hora:   { chave: 'horaTam',   base: 100, min: 60, max: 300, nome: 'Tamanho do relógio' },
+  logo:   { chave: 'logoTam',   base: 14,  min: 6,  max: 35,  nome: 'Tamanho da logo', unid: '%' },
+  promo:  { chave: 'promoTam',  base: 100, min: 50, max: 170, nome: 'Tamanho do texto da promoção' },
+  lista:  { chave: 'tamFonte',  base: 100, min: 50, max: 170, nome: 'Tamanho da letra dos preços' },
+  rod:    { chave: 'rodTam',    base: 100, min: 50, max: 170, nome: 'Tamanho do rodapé' },
+};
+export const CHAVES_TAMANHO = Object.values(TAMANHOS).map(t => t.chave).concat('fotoTam');
+
+function alcasDeTamanho(pn, cfgBase, cfg, mudou, alvos){
+  const alcas = [];
+  const aplicar = {
+    titulo: v => pn.style.setProperty('--tt', v / 100),
+    hora: v => { alvos.hora.style.fontSize = `calc(min(3.6cqh,4cqw) * ${v / 100})`; },
+    logo: v => { alvos.logo.style.width = v + '%'; },
+    promo: v => pn.style.setProperty('--pt', v / 100),
+    lista: (v, v0) => alvos.lista.style.setProperty('--lf', v / v0),   // ao soltar, redesenha com o tamanho certo
+    rod: v => pn.style.setProperty('--rt', v / 100),
+  };
+  Object.entries(alvos).forEach(([k, el]) => {
+    if (!el) return;
+    const t = TAMANHOS[k], a = document.createElement('button');
+    a.type = 'button'; a.className = 'alca-tam'; a.innerHTML = '⤡<span class="vl"></span>';
+    a.title = t.nome + ': arraste a seta ou use as setas do teclado';
+    a.setAttribute('aria-label', t.nome);
+    const ler = () => cfgBase[t.chave] ?? t.base;
+    const rotulo = v => { a.querySelector('.vl').textContent = t.unid ? `${v}${t.unid}` : `${v}%`; };
+    const gravar = (v, v0) => { v = Math.round(Math.min(t.max, Math.max(t.min, v))); cfgBase[t.chave] = cfg[t.chave] = v; aplicar[k](v, v0); rotulo(v); pos(); return v; };
+    const pos = () => { const b = pn.getBoundingClientRect(), r = el.getBoundingClientRect(); if (!b.width) return;
+      const x = Math.min(b.width - 8, Math.max(8, r.right - b.left)), y = Math.min(b.height - 8, Math.max(8, r.bottom - b.top));
+      a.style.left = (x / b.width * 100) + '%'; a.style.top = (y / b.height * 100) + '%'; };
+    a.addEventListener('pointerdown', e => {
+      e.preventDefault(); e.stopPropagation(); a.setPointerCapture(e.pointerId); a.classList.add('ativa');
+      const b = pn.getBoundingClientRect(), v0 = ler(), x0 = e.clientX, y0 = e.clientY;
+      const mover = ev => gravar(v0 + ((ev.clientX - x0) + (ev.clientY - y0)) / b.height * (t.max - t.min) * 1.2, v0);
+      const soltar = () => { a.removeEventListener('pointermove', mover); a.classList.remove('ativa'); mudou?.(); };
+      a.addEventListener('pointermove', mover); a.addEventListener('pointerup', soltar, { once: true });
+    });
+    a.addEventListener('keydown', e => {
+      const d = { ArrowUp: 1, ArrowRight: 1, ArrowDown: -1, ArrowLeft: -1 }[e.key]; if (!d) return;
+      e.preventDefault(); const v0 = ler(); gravar(v0 + d * Math.max(1, Math.round((t.max - t.min) / 40)), v0);
+      clearTimeout(a._t); a._t = setTimeout(() => mudou?.(), 500);
+    });
+    rotulo(ler()); pn.append(a); alcas.push(pos);
+  });
+  const todas = () => alcas.forEach(p => p());
+  requestAnimationFrame(todas); const t1 = setTimeout(todas, 300);
+  pn.addEventListener('pointermove', todas);   // a seta acompanha a logo e o relógio quando são arrastados
+  const img = alvos.logo?.querySelector('img'); img?.addEventListener('load', todas);
+  return { parar(){ clearTimeout(t1); } };
 }

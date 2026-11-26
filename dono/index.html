@@ -136,7 +136,13 @@
     <label>Onde fica cada coisa</label><div class="grupo" id="arranjo"></div>
     <label>Como os preços se mexem</label><div class="grupo" id="movimento"></div>
     <label for="vel">Velocidade</label><input type="range" id="vel" min="10" max="120">
-    <label for="fonte">Tamanho da letra</label><input type="range" id="fonte" min="70" max="150">
+    <label for="fonte">Tamanho da letra dos preços</label><input type="range" id="fonte" min="50" max="170">
+    <label for="tituloTam">Tamanho do nome da loja</label><input type="range" id="tituloTam" min="50" max="200" step="5">
+    <label for="promoTam">Tamanho do texto da promoção</label><input type="range" id="promoTam" min="50" max="170" step="5">
+    <label for="fotoTam">Tamanho da foto de cada corte</label><input type="range" id="fotoTam" min="60" max="220" step="10">
+    <label for="rodTam">Tamanho do rodapé</label><input type="range" id="rodTam" min="50" max="170" step="5">
+    <p class="estado" style="margin:6px 0">Dica: na prévia, cada bloco tem uma seta amarela ⤡. Arraste a seta para aumentar ou diminuir, ou clique nela e use as setas do teclado.</p>
+    <button type="button" id="tamVolta">Voltar os tamanhos ao padrão</button>
     <p class="estado">Na prévia, arraste a barra entre a promoção e os preços para mudar o tamanho.</p>
   </details>
 
@@ -185,7 +191,7 @@
 
 <section class="area" aria-label="Prévia da TV">
   <div class="moldura paisagem" id="moldura"><div id="previa" style="width:100%;height:100%"></div></div>
-  <p class="dica">Prévia ao vivo. Arraste a logo e a barra do meio.</p>
+  <p class="dica">Prévia ao vivo. Arraste a logo, o relógio e a barra do meio. A seta amarela ⤡ de cada bloco muda o tamanho.</p>
   <p class="alerta" id="avisoLogo" hidden>A logo está cobrindo o preço da lista — arraste-a para cima, perto do título, ou reduza o tamanho.</p>
   <p class="alerta" id="avisoTela" hidden>Fora do horário de exibição: agora a TV mostra a tela fechada.</p>
   <div id="linkArea" hidden>
@@ -221,7 +227,7 @@ function salvar(){
 }
 function previa(){
   $('moldura').className = 'moldura ' + (cfg.orientacao || 'paisagem');
-  desenho?.parar(); desenho = desenhar($('previa'), cfg, { editavel: true, agora: diaPrevia === null ? new Date() : proximo(diaPrevia), mudou: () => { salvar(); previa(); } });
+  desenho?.parar(); desenho = desenhar($('previa'), cfg, { editavel: true, agora: diaPrevia === null ? new Date() : proximo(diaPrevia), mudou: () => { sincTam(); salvar(); previa(); } });
   avisoContraste(); checarHorario(); checarLogo();
   const img = $('previa').querySelector('.logo img');   // o tamanho da logo só é conhecido depois do load
   img?.addEventListener('load', checarLogo);
@@ -329,6 +335,13 @@ grupo('movimento', MOVIMENTOS, 'movimento');
 grupo('orient', { paisagem: 'Deitada (16:9)', retrato: 'Em pé (9:16)' }, 'orientacao');
 liga('vel', e => e.value = cfg.velocidade, e => cfg.velocidade = +e.value);
 liga('fonte', e => e.value = cfg.tamFonte, e => cfg.tamFonte = +e.value);
+['tituloTam', 'promoTam', 'fotoTam', 'rodTam'].forEach(k => liga(k, e => e.value = cfg[k] || 100, e => cfg[k] = +e.value));
+// a seta da prévia muda o cfg direto: os controles do lado acompanham
+function sincTam(){ const m = { fonte: 'tamFonte', tituloTam: 'tituloTam', promoTam: 'promoTam', fotoTam: 'fotoTam', rodTam: 'rodTam', logoTam: 'logoTam', horaTam: 'horaTam' };
+  Object.entries(m).forEach(([id, k]) => { const e = $(id); if (e) e.value = cfg[k] ?? (k === 'logoTam' ? 14 : 100); }); }
+// tocar na promoção da prévia abre a escolha da foto
+$('previa').addEventListener('click', e => { if (e.target.closest('.alca-tam')) return; if (e.target.closest('.promo .foto, .promo .semfoto')) $('promoFoto').click(); });
+$('tamVolta').onclick = () => { Object.assign(cfg, { tamFonte: 100, tituloTam: 100, promoTam: 100, fotoTam: 100, rodTam: 100, horaTam: 100, logoTam: 14 }); sincTam(); mudou(); toast('Tamanhos de volta ao padrão.'); };
 
 // ---------- logo e identidade ----------
 liga('loja', e => e.value = cfg.loja, e => cfg.loja = e.value);
