@@ -1,3 +1,4 @@
 clientes/*/pinterest
 .env*
 clientes/*/backups
+scripts/tv-build/

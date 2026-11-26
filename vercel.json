@@ -5,10 +5,21 @@
       "has": [
         {
           "type": "host",
-          "value": "painelcasadecarnesmd2.vercel.app"
+          "value": "painel-carnes-md1.vercel.app"
         }
       ],
-      "destination": "/tv/?conta=M6nlpVJr&tela=2",
+      "destination": "/tv1",
+      "permanent": false
+    },
+    {
+      "source": "/",
+      "has": [
+        {
+          "type": "host",
+          "value": "painel-carnes-md2.vercel.app"
+        }
+      ],
+      "destination": "/tv2",
       "permanent": false
     },
     {
@@ -19,7 +30,18 @@
           "value": "painelcasadecarnesmd1.vercel.app"
         }
       ],
-      "destination": "/tv/?conta=M6nlpVJr",
+      "destination": "/tv1",
+      "permanent": false
+    },
+    {
+      "source": "/",
+      "has": [
+        {
+          "type": "host",
+          "value": "painelcasadecarnesmd2.vercel.app"
+        }
+      ],
+      "destination": "/tv2",
       "permanent": false
     },
     {
@@ -36,16 +58,32 @@
       "source": "/md/dono",
       "destination": "/dono/",
       "permanent": false
+    }
+  ],
+  "rewrites": [
+    {
+      "source": "/tv1",
+      "destination": "/tv/index.html"
+    },
+    {
+      "source": "/tv2",
+      "destination": "/tv/index.html"
     },
     {
       "source": "/md1",
-      "destination": "/tv/?conta=M6nlpVJr",
-      "permanent": false
+      "destination": "/tv/index.html"
     },
     {
       "source": "/md2",
-      "destination": "/tv/?conta=M6nlpVJr&tela=2",
-      "permanent": false
+      "destination": "/tv/index.html"
+    },
+    {
+      "source": "/TV1",
+      "destination": "/tv/index.html"
+    },
+    {
+      "source": "/TV2",
+      "destination": "/tv/index.html"
     }
   ]
 }

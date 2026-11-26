@@ -114,15 +114,15 @@ const CSS = `
 .pn .li-logo{display:flex;justify-content:center;align-items:center;padding:1.2cqh 0;margin:.5cqh 0}
 .pn .li-logo img{height:12cqh;width:auto;max-width:80%;object-fit:contain;filter:drop-shadow(0 .6cqh 1.4cqh rgba(0,0,0,.45))}
 .pn .trilho.lado .li-logo{padding:0 2cqw}
-.pn .nv-neve{position:absolute;inset:0;pointer-events:none;z-index:5;overflow:hidden}
+.pn .nv-neve{position:absolute;top:0;right:0;bottom:0;left:0;pointer-events:none;z-index:5;overflow:hidden}
 .pn .nv-neve i{position:absolute;left:0;right:0;top:-100cqh;height:200cqh;background-image:radial-gradient(rgba(255,255,255,.9) .22cqh,transparent .3cqh),radial-gradient(rgba(255,255,255,.6) .15cqh,transparent .2cqh);background-size:11cqh 11cqh,6cqh 7cqh;background-position:0 0,3cqh 2cqh;animation:nvCai 22s linear infinite}
 .pn .nv-neve i+i{background-size:17cqh 15cqh,9cqh 10cqh;opacity:.7;animation-duration:34s}
 @keyframes nvCai{to{transform:translateY(100cqh)}}
 .pn .nv-luzes{position:absolute;left:0;right:0;top:0;height:3cqh;display:flex;justify-content:space-around;align-items:flex-start;pointer-events:none;z-index:5;border-top:.3cqh solid #1e4d2b}
 .pn .nv-luzes b{width:1.1cqh;height:1.7cqh;border-radius:50% 50% 45% 45%;background:var(--c);box-shadow:0 0 1.2cqh var(--c);margin-top:.5cqh;animation:nvPisca 1.6s ease-in-out infinite}
 @keyframes nvPisca{50%{opacity:.35;box-shadow:none}}
-.pn.nv-borda::after{content:'';position:absolute;inset:0;pointer-events:none;z-index:5;border:1.1cqh solid transparent;border-image:repeating-linear-gradient(45deg,#c81e1e 0 2cqh,#fff 2cqh 4cqh,#1f7a3a 4cqh 6cqh,#fff 6cqh 8cqh) 12}
-.pn .nv-estrelas{position:absolute;inset:0;pointer-events:none;z-index:1}
+.pn.nv-borda::after{content:'';position:absolute;top:0;right:0;bottom:0;left:0;pointer-events:none;z-index:5;border:1.1cqh solid transparent;border-image:repeating-linear-gradient(45deg,#c81e1e 0 2cqh,#fff 2cqh 4cqh,#1f7a3a 4cqh 6cqh,#fff 6cqh 8cqh) 12}
+.pn .nv-estrelas{position:absolute;top:0;right:0;bottom:0;left:0;pointer-events:none;z-index:1}
 .pn .nv-estrelas b{position:absolute;width:1.2cqh;height:1.2cqh;background:#ffe08a;clip-path:polygon(50% 0,61% 38%,100% 50%,61% 62%,50% 100%,39% 62%,0 50%,39% 38%);animation:nvPisca 2.4s ease-in-out infinite}
 .pn .nv-bolas{position:absolute;left:0;right:0;top:0;height:0;pointer-events:none;z-index:5}
 .pn .nv-bolas b{position:absolute;top:0;width:.25cqh;height:var(--h);background:rgba(255,255,255,.6)}
@@ -133,10 +133,10 @@ const CSS = `
 .pn .corpo{position:absolute;left:2cqw;right:2cqw;top:calc(var(--ta,13cqh) + 1cqh);bottom:calc(var(--ra,7cqh) + 1cqh);display:flex;gap:1.6cqw}
 .pn .corpo.col{flex-direction:column;gap:1.6cqh}
 .pn .promo{position:relative;border-radius:2cqh;overflow:hidden;display:flex;flex-direction:column;justify-content:flex-end;min-width:0;min-height:0}
-.pn .promo .foto{position:absolute;inset:0;background-size:cover;background-position:center}
-.pn .promo .escuro{position:absolute;inset:0;pointer-events:none}
+.pn .promo .foto{position:absolute;top:0;right:0;bottom:0;left:0;background-size:cover;background-position:center}
+.pn .promo .escuro{position:absolute;top:0;right:0;bottom:0;left:0;pointer-events:none}
 .pn.editavel .promo .foto{cursor:grab;touch-action:none}
-.pn .promo .semfoto{position:absolute;inset:0;display:grid;place-items:center;font-size:2.4cqh;opacity:.6;text-align:center;padding:4cqh}
+.pn .promo .semfoto{position:absolute;top:0;right:0;bottom:0;left:0;display:grid;place-items:center;font-size:2.4cqh;opacity:.6;text-align:center;padding:4cqh}
 .pn .promo .cx{position:relative;padding:2.6cqh 2.4cqh;background:linear-gradient(0deg,rgba(0,0,0,.82),rgba(0,0,0,.35) 70%,transparent);color:#fff}
 .pn .promo .rot{display:inline-block;font-weight:900;font-size:calc(2.4cqh * var(--pt,1));text-transform:uppercase;letter-spacing:.08em;padding:.5cqh 1.4cqh;border-radius:1cqh}
 .pn .promo .pit{font-weight:900;font-size:calc(min(6cqh,9cqw) * var(--pt,1));line-height:1;margin-top:1cqh}
@@ -216,8 +216,8 @@ const CSS = `
 .pn.halo .li.of{box-shadow:0 0 2cqh var(--d),inset 0 0 1cqh var(--d)}
 .pn.halo .promo{box-shadow:0 0 3cqh -0.5cqh var(--d)}
 /* moldura */
-.pn.moldura::before{content:'';position:absolute;inset:1.1cqh;border:.45cqh double var(--d);border-radius:1.4cqh;pointer-events:none;z-index:5;opacity:.85}
-.pn.moldura::after{content:'';position:absolute;inset:2.1cqh;border:.15cqh solid var(--d);border-radius:1cqh;pointer-events:none;z-index:5;opacity:.35}
+.pn.moldura::before{content:'';position:absolute;top:1.1cqh;right:1.1cqh;bottom:1.1cqh;left:1.1cqh;border:.45cqh double var(--d);border-radius:1.4cqh;pointer-events:none;z-index:5;opacity:.85}
+.pn.moldura::after{content:'';position:absolute;top:2.1cqh;right:2.1cqh;bottom:2.1cqh;left:2.1cqh;border:.15cqh solid var(--d);border-radius:1cqh;pointer-events:none;z-index:5;opacity:.35}
 /* texturas */
 .pn.t-madeira{background-image:repeating-linear-gradient(92deg,rgba(0,0,0,.18) 0 .3cqw,transparent .3cqw 2.2cqw,rgba(255,255,255,.035) 2.2cqw 2.5cqw,transparent 2.5cqw 5.6cqw),repeating-linear-gradient(180deg,rgba(0,0,0,.28) 0 .35cqh,transparent .35cqh 16cqh)}
 .pn.t-lousa{background-image:radial-gradient(ellipse at 30% 20%,rgba(255,255,255,.07),transparent 60%),radial-gradient(ellipse at 80% 90%,rgba(255,255,255,.05),transparent 55%)}
@@ -228,8 +228,8 @@ const CSS = `
 .pn.t-grade{background-image:linear-gradient(rgba(255,43,214,.08) .15cqh,transparent .15cqh),linear-gradient(90deg,rgba(77,252,255,.07) .15cqh,transparent .15cqh);background-size:6cqh 6cqh}
 .pn.t-brasa{background-image:radial-gradient(ellipse at 50% 120%,rgba(255,90,31,.45),transparent 60%),radial-gradient(ellipse at 10% 110%,rgba(255,160,40,.25),transparent 45%)}
 /* foto da loja no fundo */
-.pn .fundoLoja{position:absolute;inset:0;background-size:cover;background-position:center;z-index:0}
-.pn .fundoLoja::after{content:'';position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.72),rgba(0,0,0,.55) 40%,rgba(0,0,0,.78))}
+.pn .fundoLoja{position:absolute;top:0;right:0;bottom:0;left:0;background-size:cover;background-position:center;z-index:0}
+.pn .fundoLoja::after{content:'';position:absolute;top:0;right:0;bottom:0;left:0;background:linear-gradient(180deg,rgba(0,0,0,.72),rgba(0,0,0,.55) 40%,rgba(0,0,0,.78))}
 .pn .topo,.pn .corpo,.pn .rod,.pn .hora{z-index:2}
 .pn.comFundo .lista{background:rgba(0,0,0,.35)!important;backdrop-filter:blur(2px)}
 @media (prefers-reduced-motion:reduce){.pn.l-brilho .li::before{animation:none;display:none}}
@@ -250,7 +250,47 @@ const CSS = `
 
 `;
 let cssPosto = false;
-function porCss(){ if (cssPosto) return; const s = document.createElement('style'); s.textContent = CSS; document.head.append(s); cssPosto = true; }
+function porCss(){ if (cssPosto) return; const s = document.createElement('style'); s.textContent = cq(CSS); document.head.append(s); cssPosto = true; if (!CQ_OK) ligarCompat(); }
+
+// ---------- 26/11/2026: TV com navegador antigo (sem cqh/cqw nem min()) ----------
+// Converte as medidas para variáveis --cqh/--cqw (px do painel) e resolve min()/max()/clamp() com o tamanho atual.
+const CQ_OK = (() => { try { return !/[?&]compat=1/.test(location.search) && CSS.supports('height', '1cqh') && CSS.supports('height', 'min(1px, 2px)'); } catch (e) { return false; } })();
+function tamBase(){ const pn = document.querySelector('.pn'); const r = pn && pn.getBoundingClientRect(); return { h: (r && r.height) || window.innerHeight, w: (r && r.width) || window.innerWidth }; }
+function semCq(t){
+  const { h, w } = tamBase();
+  const px = a => { const m = String(a).trim().match(/^(-?[\d.]+)(cqh|cqw|vh|vw|px)?$/); if (!m) return NaN; const n = +m[1]; return m[2] === 'cqh' || m[2] === 'vh' ? n * h / 100 : m[2] === 'cqw' || m[2] === 'vw' ? n * w / 100 : n; };
+  let guarda = 0;
+  for (;;){
+    const re = /(^|[^a-zA-Z-])(min|max|clamp)\(/g; let m, ult = null;
+    while ((m = re.exec(t))) ult = m;
+    if (!ult || ++guarda > 500) break;
+    const ini = ult.index + ult[1].length, abre = ini + ult[2].length; let prof = 0, fim = -1;
+    for (let i = abre; i < t.length; i++){ if (t[i] === '(') prof++; else if (t[i] === ')'){ prof--; if (!prof){ fim = i; break; } } }
+    if (fim < 0) break;
+    const dentro = t.slice(abre + 1, fim), args = []; let d = 0, de = 0;
+    for (let i = 0; i < dentro.length; i++){ const c = dentro[i]; if (c === '(') d++; else if (c === ')') d--; else if (c === ',' && !d){ args.push(dentro.slice(de, i).trim()); de = i + 1; } }
+    args.push(dentro.slice(de).trim());
+    const escolhe = (lista, maior) => { let melhor = null, v0 = NaN; lista.forEach(a => { const v = px(a); if (!isNaN(v) && (isNaN(v0) || (maior ? v > v0 : v < v0))){ v0 = v; melhor = a; } }); return melhor || lista[0]; };
+    let r;
+    if (ult[2] === 'clamp' && args.length === 3){ const meio = escolhe([args[1], args[2]], false); r = escolhe([args[0], meio], true); }
+    else r = escolhe(args, ult[2] === 'max');
+    if (!/^calc\(/.test(r) && /[+*/]|\s-\s/.test(r)) r = 'calc(' + r + ')';
+    t = t.slice(0, ini) + r + t.slice(fim + 1);
+  }
+  return t.replace(/(-?\d*\.?\d+)cq(h|w)\b/g, (_, n, u) => `calc(${n} * var(--cq${u}))`).replace(/calc\(\s*calc\(/g, 'calc((');
+}
+const cq = t => CQ_OK ? t : semCq(t);
+const PRECISA = /\dcq[hw]|(^|[^a-zA-Z-])(min|max|clamp)\(/;
+function ligarCompat(){
+  const raiz = document.documentElement;
+  const medir = () => { const { h, w } = tamBase(); raiz.style.setProperty('--cqh', (h / 100) + 'px'); raiz.style.setProperty('--cqw', (w / 100) + 'px'); };
+  const arruma = el => { if (el.nodeType !== 1) return; const st = el.getAttribute('style'); if (st && PRECISA.test(st)) el.setAttribute('style', semCq(st)); };
+  const tudo = n => { if (n.nodeType !== 1) return; arruma(n); n.querySelectorAll('[style]').forEach(arruma); };
+  medir(); tudo(document.body);
+  new MutationObserver(lista => lista.forEach(m => { if (m.type === 'attributes') arruma(m.target); else m.addedNodes.forEach(tudo); if (m.addedNodes.length) medir(); }))
+    .observe(raiz, { subtree: true, childList: true, attributes: true, attributeFilter: ['style'] });
+  window.addEventListener('resize', medir);
+}
 
 // desenha; devolve { parar() } para cancelar animações
 
@@ -303,10 +343,10 @@ export function desenhar(alvo, cfgBase, opcoes = {}){
   topo.innerHTML = `<div class="loja">${esc(cfg.loja)}</div>${cfg.subtitulo ? `<div class="sub">${esc(cfg.subtitulo)}</div>` : ''}`;
   pn.append(topo);
   const hora = document.createElement('div'); hora.className = 'hora';
-  hora.style[cfg.logoPos?.canto?.endsWith('d') && (cfg.logoPos.canto[0] === 's') ? 'left' : 'right'] = '2.4cqw';
+  hora.style[cfg.logoPos?.canto?.endsWith('d') && (cfg.logoPos.canto[0] === 's') ? 'left' : 'right'] = cq('2.4cqw');
   pn.append(hora);
   // 26/11/2026: relógio com posição e tamanho livres (o dono arrasta na prévia)
-  if (cfg.horaTam && cfg.horaTam !== 100) hora.style.fontSize = `calc(min(3.6cqh,4cqw) * ${cfg.horaTam / 100})`;
+  if (cfg.horaTam && cfg.horaTam !== 100) hora.style.fontSize = cq(`calc(min(3.6cqh,4cqw) * ${cfg.horaTam / 100})`);
   if (cfg.horaPos){ hora.style.left = cfg.horaPos.x + '%'; hora.style.top = cfg.horaPos.y + '%'; hora.style.right = 'auto'; hora.style.textAlign = 'center'; }
   if (opcoes.editavel && (cfg.relogio || cfg.data)) arrastarLivre(pn, hora, p => { cfgBase.horaPos = cfg.horaPos = p; }, opcoes.mudou);
   // 26/11/2026: jeitos de escrever a hora + frase (bíblica ou da loja) passando embaixo do relógio
@@ -353,8 +393,8 @@ export function desenhar(alvo, cfgBase, opcoes = {}){
     if (nt.enfeites !== false){ const o = document.createElement('div'); o.className = 'nv-bolas'; o.innerHTML = '<b style="left:1.2%;--c:#d92b2b;--h:6cqh"></b><b style="right:1.2%;--c:#e8c35a;--h:6cqh"></b>'; pn.append(o); }
   }
   if (msgs.length){
-    corpo.style.bottom = temRod ? 'calc(var(--ra,7cqh) + 7.4cqh)' : '7.4cqh';
-    const fx = document.createElement('div'); fx.className = 'nv-faixa'; fx.style.bottom = temRod ? 'var(--ra,7cqh)' : '0';
+    corpo.style.bottom = cq(temRod ? 'calc(var(--ra,7cqh) + 7.4cqh)' : '7.4cqh');
+    const fx = document.createElement('div'); fx.className = 'nv-faixa'; fx.style.bottom = cq(temRod ? 'var(--ra,7cqh)' : '0');
     fx.style.background = nt.corFaixa || '#b3261e'; fx.innerHTML = `<span>${esc(msgs[0])}</span>`;
     pn.append(fx);
     if (msgs.length > 1){ let k = 0; trocaMsg = setInterval(() => { const sp = fx.firstChild; sp.style.opacity = 0; setTimeout(() => { k = (k + 1) % msgs.length; sp.textContent = msgs[k]; sp.style.opacity = 1; }, 600); }, 9000); }
@@ -505,7 +545,7 @@ export function desenhar(alvo, cfgBase, opcoes = {}){
       const ch = qual === 'topo' ? 'topoAlt' : 'rodAlt', min = qual === 'topo' ? 8 : 4, max = qual === 'topo' ? 40 : 16, pad = qual === 'topo' ? 13 : 7;
       el.title = qual === 'topo' ? 'Arraste para aumentar ou diminuir a faixa de cima (logo, nome e relógio)' : 'Arraste para aumentar ou diminuir o rodapé';
       const pos = () => { const H = pn.clientHeight; const v = qual === 'topo' ? (cfgBase.topoAlt || pad) : (cfgBase.rodAlt || pad);
-        el.style.top = qual === 'topo' ? `calc(${v}cqh - .8cqh)` : ''; el.style.bottom = qual === 'rod' ? `calc(${v}cqh - .8cqh)` : '';
+        el.style.top = qual === 'topo' ? cq(`calc(${v}cqh - .8cqh)`) : ''; el.style.bottom = qual === 'rod' ? cq(`calc(${v}cqh - .8cqh)`) : '';
         el.querySelector('.vl').textContent = (qual === 'topo' ? 'Faixa de cima ' : 'Rodapé ') + Math.round(v) + '%'; };
       el.addEventListener('pointerdown', e => {
         e.preventDefault(); e.stopPropagation(); el.setPointerCapture(e.pointerId); el.classList.add('ativa');
@@ -652,7 +692,7 @@ function alcasDeTamanho(pn, cfgBase, cfg, mudou, alvos, encaixarTopo){
   const alcas = [];
   const aplicar = {
     titulo: v => pn.style.setProperty('--tt', v / 100),
-    hora: v => { alvos.hora.style.fontSize = `calc(min(3.6cqh,4cqw) * ${v / 100})`; cfgBase.topoAuto = cfg.topoAuto = true; pn.classList.add('topoAuto'); encaixarTopo?.(); },
+    hora: v => { alvos.hora.style.fontSize = cq(`calc(min(3.6cqh,4cqw) * ${v / 100})`); cfgBase.topoAuto = cfg.topoAuto = true; pn.classList.add('topoAuto'); encaixarTopo?.(); },
     logo: v => { alvos.logo.style.width = v + '%'; cfgBase.topoAuto = cfg.topoAuto = true; pn.classList.add('topoAuto'); encaixarTopo?.(); },
     promo: v => pn.style.setProperty('--pt', v / 100),
     lista: (v, v0) => alvos.lista.style.setProperty('--lf', v / v0),   // ao soltar, redesenha com o tamanho certo
