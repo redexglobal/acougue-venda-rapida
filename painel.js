@@ -134,6 +134,8 @@ const CSS = `
 .pn .corpo.col{flex-direction:column;gap:1.6cqh}
 .pn .promo{position:relative;border-radius:2cqh;overflow:hidden;display:flex;flex-direction:column;justify-content:flex-end;min-width:0;min-height:0}
 .pn .promo .foto{position:absolute;inset:0;background-size:cover;background-position:center}
+.pn .promo .escuro{position:absolute;inset:0;pointer-events:none}
+.pn.editavel .promo .foto{cursor:grab;touch-action:none}
 .pn .promo .semfoto{position:absolute;inset:0;display:grid;place-items:center;font-size:2.4cqh;opacity:.6;text-align:center;padding:4cqh}
 .pn .promo .cx{position:relative;padding:2.6cqh 2.4cqh;background:linear-gradient(0deg,rgba(0,0,0,.82),rgba(0,0,0,.35) 70%,transparent);color:#fff}
 .pn .promo .rot{display:inline-block;font-weight:900;font-size:calc(2.4cqh * var(--pt,1));text-transform:uppercase;letter-spacing:.08em;padding:.5cqh 1.4cqh;border-radius:1cqh}
@@ -364,7 +366,7 @@ export function desenhar(alvo, cfgBase, opcoes = {}){
     promoEl = document.createElement('div'); promoEl.className = 'promo';
     promoEl.style.background = cor.faixa;
     const p = cfg.promo;
-    promoEl.innerHTML = `${p.foto ? `<div class="foto" style="background-image:url('${p.foto}')"></div>` : `<div class="semfoto">${opcoes.editavel ? 'Toque aqui para colocar a foto da semana' : ''}</div>`}
+    promoEl.innerHTML = `${p.foto ? `<div class="foto" style="background-image:url('${p.foto}');background-position:${p.fx ?? 50}% ${p.fy ?? 50}%;${(p.zoom || 100) !== 100 ? `transform:scale(${p.zoom / 100});transform-origin:${p.fx ?? 50}% ${p.fy ?? 50}%;` : ''}${p.brilho && p.brilho !== 100 ? `filter:brightness(${p.brilho / 100}) saturate(${p.sat ?? 100}%);` : (p.sat && p.sat !== 100 ? `filter:saturate(${p.sat}%);` : '')}"></div>${p.escuro ? `<div class="escuro" style="background:rgba(0,0,0,${p.escuro / 100})"></div>` : ''}` : `<div class="semfoto">${opcoes.editavel ? 'Toque aqui para colocar a foto da semana' : ''}</div>`}
       <div class="cx"><span class="rot" style="background:${cor.destaque};color:${contraste(cor.destaque, '#000000') > contraste(cor.destaque, '#ffffff') ? '#000' : '#fff'}">${esc(p.titulo || 'Promoção')}</span>
       ${p.item ? `<div class="pit">${esc(p.item)}</div>` : ''}
       ${p.preco ? `<div class="pr">R$ ${brl(p.preco)}<small>/${esc(p.unidade || 'kg')}</small></div>` : ''}
@@ -428,6 +430,25 @@ export function desenhar(alvo, cfgBase, opcoes = {}){
     lg.classList.toggle('topo-l', (cfg.logoPos?.canto || 'se')[0] === 's' && (cfg.logoPos?.y ?? 4) < 12);
     pn.append(lg);
     if (opcoes.editavel) arrastarLogo(pn, lg, cfgBase, opcoes.mudou);   // grava no cfg do dono, não na cópia do dia
+  }
+
+  // 26/11/2026: no editor, arrastar a foto da promoção enquadra; a rodinha do mouse (ou pinça) dá zoom
+  const fotoEl = promoEl?.querySelector('.foto');
+  if (opcoes.editavel && fotoEl){
+    const P = () => cfgBase.promo;
+    const aplicaF = () => { const p = P(); fotoEl.style.backgroundPosition = `${p.fx ?? 50}% ${p.fy ?? 50}%`; fotoEl.style.transformOrigin = `${p.fx ?? 50}% ${p.fy ?? 50}%`; fotoEl.style.transform = `scale(${(p.zoom || 100) / 100})`; };
+    promoEl.style.touchAction = 'none'; promoEl.style.cursor = 'grab';
+    promoEl.addEventListener('pointerdown', e => {
+      if (e.target.closest('.alca-tam')) return;
+      const x0 = e.clientX, y0 = e.clientY, p0 = { x: P().fx ?? 50, y: P().fy ?? 50 }, r = fotoEl.getBoundingClientRect(); let mexeu = false;
+      promoEl.setPointerCapture(e.pointerId); promoEl.style.cursor = 'grabbing';
+      const mover = ev => { const dx = ev.clientX - x0, dy = ev.clientY - y0; if (Math.abs(dx) + Math.abs(dy) > 4) mexeu = true; if (!mexeu) return;
+        P().fx = Math.round(Math.min(100, Math.max(0, p0.x - dx / r.width * 100))); P().fy = Math.round(Math.min(100, Math.max(0, p0.y - dy / r.height * 100))); aplicaF(); };
+      const soltar = () => { promoEl.removeEventListener('pointermove', mover); promoEl.style.cursor = 'grab'; if (mexeu){ fotoEl.dataset.arrastou = '1'; setTimeout(() => delete fotoEl.dataset.arrastou, 300); opcoes.mudou?.(); } };
+      promoEl.addEventListener('pointermove', mover); promoEl.addEventListener('pointerup', soltar, { once: true });
+    });
+    let tz = null;
+    promoEl.addEventListener('wheel', e => { e.preventDefault(); const p = P(); p.zoom = Math.round(Math.min(300, Math.max(100, (p.zoom || 100) - Math.sign(e.deltaY) * 5))); aplicaF(); clearTimeout(tz); tz = setTimeout(() => opcoes.mudou?.(), 400); }, { passive: false });
   }
 
   // divisória arrastável entre promoção e lista

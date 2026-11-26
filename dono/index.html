@@ -192,7 +192,17 @@
     <label><input type="checkbox" id="promoAtiva"> Mostrar promoção</label>
     <label for="promoFoto">Foto da promoção</label><input type="file" id="promoFoto" accept="image/*">
     <button type="button" id="promoTira" style="margin-top:6px">Tirar foto</button>
-    <label>Ou escolha uma foto pronta</label><div id="promoProntas" style="display:grid;grid-template-columns:repeat(6,1fr);gap:4px"></div>
+    <div style="margin-top:10px;padding:10px;background:#171311;border:1px solid var(--l);border-radius:12px">
+      <b style="font:800 14px Archivo,sans-serif">Enquadrar a foto</b>
+      <p class="estado" style="margin:4px 0 0">Na prévia: arraste a foto para mover e use a rodinha do mouse para zoom. Ou use os controles:</p>
+      <label for="pfZoom">Zoom</label><input type="range" id="pfZoom" min="100" max="300" step="5">
+      <div class="lado"><div><label for="pfX">Mover para o lado</label><input type="range" id="pfX" min="0" max="100"></div><div><label for="pfY">Mover para cima/baixo</label><input type="range" id="pfY" min="0" max="100"></div></div>
+      <div class="lado"><div><label for="pfBri">Brilho</label><input type="range" id="pfBri" min="50" max="150" step="5"></div><div><label for="pfSat">Cor (saturação)</label><input type="range" id="pfSat" min="0" max="180" step="5"></div></div>
+      <label for="pfEsc">Escurecer a foto (para o preço aparecer mais)</label><input type="range" id="pfEsc" min="0" max="70" step="5">
+      <button type="button" id="pfVolta" style="margin-top:8px">Voltar o enquadramento ao normal</button>
+    </div>
+    <label>Ou escolha uma foto pronta (✕ esconde da lista)</label><div id="promoProntas" style="display:grid;grid-template-columns:repeat(6,1fr);gap:4px"></div>
+    <button type="button" id="promoProntasVer" hidden style="margin-top:6px"></button>
     <div class="lado"><div><label for="promoTitulo">Chamada</label><input type="text" id="promoTitulo" maxlength="30" list="chamadas"><datalist id="chamadas"><option>Promoção da semana</option><option>Oportunidade</option><option>Oferta de Natal</option><option>Especial para a ceia</option><option>Combo da semana</option><option>Só hoje</option><option>Churrasco da virada</option></datalist></div><div><label for="promoItem">Produto</label><input type="text" id="promoItem" maxlength="30"></div></div>
     <div class="lado"><div><label for="promoPreco">Preço (R$)</label><input type="number" id="promoPreco" step="0.01" min="0" inputmode="decimal"></div><div><label for="promoUn">Unidade</label><select id="promoUn"><option>kg</option><option>un</option><option>bandeja</option><option>100 g</option></select></div></div>
     <label for="promoVal">Texto da validade</label><input type="text" id="promoVal" maxlength="40">
@@ -319,7 +329,7 @@ function salvar(){
 function previa(){
   $('moldura').className = 'moldura ' + (cfg.orientacao || 'paisagem');
   desenho?.parar(); desenho = desenhar($('previa'), cfg, { editavel: true, agora: diaPrevia === null ? new Date() : proximo(diaPrevia), mudou: () => { sincTam(); salvar(); previa(); } });
-  avisoContraste(); checarHorario(); checarLogo(); if (typeof rapido === 'function') try { rapido(); } catch {}
+  avisoContraste(); checarHorario(); checarLogo(); if (typeof rapido === 'function') try { rapido(); } catch {} try { sincPF(); } catch {}
   const img = $('previa').querySelector('.logo img');   // o tamanho da logo só é conhecido depois do load
   img?.addEventListener('load', checarLogo);
 }
@@ -439,7 +449,7 @@ liga('promoUn', e => e.value = cfg.promo.unidade || 'kg', e => cfg.promo.unidade
 liga('promoIni', e => e.value = cfg.promo.inicio || '', e => cfg.promo.inicio = e.value, 'change');
 liga('promoFim', e => e.value = cfg.promo.fim || '', e => cfg.promo.fim = e.value, 'change');
 liga('promoVal', e => e.value = cfg.promo.validade || '', e => cfg.promo.validade = e.value);
-$('promoFoto').onchange = async e => { const f = e.target.files[0]; if (!f) return; try { cfg.promo.foto = await reduzirImagem(f, 1100, .74); mudou(); toast('Foto da promoção colocada.'); } catch (er) { toast(er.message); } };
+$('promoFoto').onchange = async e => { const f = e.target.files[0]; if (!f) return; try { cfg.promo = { ...(cfg.promo || {}), ativa: true, foto: await reduzirImagem(f, 1400, .8), fx: 50, fy: 50, zoom: 100 }; mudou(); toast('Foto da promoção colocada.'); } catch (er) { toast(er.message); } };
 $('promoTira').onclick = () => { cfg.promo.foto = null; mudou(); };
 
 // ---------- layout ----------
@@ -462,7 +472,7 @@ liga('fcTam', e => e.value = cfg.fotoTam || 100, e => { cfg.fotoTam = +e.value; 
 function sincTam(){ const m = { eTopo: 'topoAlt', eLogo: 'logoTam', eHora: 'horaTam', ePromo: 'divisao', eRod: 'rodAlt', fcTam: 'fotoTam', fonte: 'tamFonte', tituloTam: 'tituloTam', promoTam: 'promoTam', fotoTam: 'fotoTam', rodTam: 'rodTam', logoTam: 'logoTam', horaTam: 'horaTam' };
   Object.entries(m).forEach(([id, k]) => { const e = $(id); if (e && document.activeElement !== e) e.value = cfg[k] ?? ({ logoTam: 14, topoAlt: 13, rodAlt: 7, divisao: 42 }[k] ?? 100); }); }
 // tocar na promoção da prévia abre a escolha da foto
-$('previa').addEventListener('click', e => { if (e.target.closest('.alca-tam')) return; if (e.target.closest('.promo .foto, .promo .semfoto')) $('promoFoto').click(); });
+$('previa').addEventListener('click', e => { if (e.target.closest('.alca-tam')) return; if (e.target.closest('.promo .semfoto')) $('promoFoto').click(); });
 $('tamVolta').onclick = () => { Object.assign(cfg, { tamFonte: 100, tituloTam: 100, promoTam: 100, fotoTam: 100, rodTam: 100, horaTam: 100, logoTam: 14, divisao: 42 }); delete cfg.topoAlt; delete cfg.rodAlt; delete cfg.topoAuto; sincTam(); mudou(); toast('Tamanhos de volta ao padrão.'); };
 
 // ---------- logo e identidade ----------
@@ -721,9 +731,28 @@ async function trocarTela(t){
 try { const a = sessionStorage.getItem('dono-aviso'); if (a){ sessionStorage.removeItem('dono-aviso'); setTimeout(() => toast(a), 300); } } catch {}
 
 // ---------- fotos prontas (reais, licença livre) ----------
-[['promo-ancho', 'Bife ancho'], ['promo-contrafile', 'Contrafilé'], ['promo-file-mignon', 'Filé mignon']].map(([id, nome]) => ({ id, nome, so: true })).concat(FOTOS.filter(f => FOTOS_HQ.includes(f.id))).forEach(f => { const b = document.createElement('button'); b.type = 'button'; b.title = f.nome; b.setAttribute('aria-label', 'Usar a foto ' + f.nome);
-  b.style.cssText = `aspect-ratio:1;padding:0;border-radius:8px;background:url(${f.so ? fotoGrande(f.id) : fotoPequena(f.id)}) center/cover`;
-  b.onclick = () => { cfg.promo.foto = fotoGrande(f.id); mudou(); toast('Foto da promoção trocada.'); }; $('promoProntas').append(b); });
+// fotos prontas da promoção: ✕ esconde da lista (cfg.fotosEscondidas), dá para ver e voltar as escondidas
+let promoVerEsc = false;
+function promoGaleria(){
+  const esc = cfg.fotosEscondidas || [];
+  const todas = [['promo-ancho', 'Bife ancho'], ['promo-contrafile', 'Contrafilé'], ['promo-file-mignon', 'Filé mignon']].map(([id, nome]) => ({ id, nome, so: true })).concat(FOTOS.filter(f => FOTOS_HQ.includes(f.id)));
+  const lista = todas.filter(f => promoVerEsc ? esc.includes(f.id) : !esc.includes(f.id));
+  $('promoProntas').innerHTML = lista.map(f => `<div style="position:relative"><button type="button" data-p="${f.id}" title="${f.nome}" aria-label="Usar a foto ${f.nome}" style="display:block;width:100%;aspect-ratio:1;padding:0;border-radius:8px;background:url(${f.so ? fotoGrande(f.id) : fotoPequena(f.id)}) center/cover;${cfg.promo?.foto === fotoGrande(f.id) ? 'outline:3px solid var(--o)' : ''}"></button><button type="button" data-${promoVerEsc ? 'pv' : 'px'}="${f.id}" title="${promoVerEsc ? 'Voltar para a lista' : 'Esconder da lista'}" aria-label="${promoVerEsc ? 'Voltar' : 'Esconder'} ${f.nome}" style="position:absolute;right:2px;top:2px;width:20px;height:20px;padding:0;border-radius:50%;background:rgba(0,0,0,.75);color:#fff;font-size:11px;border:1px solid rgba(255,255,255,.5)">${promoVerEsc ? '↺' : '✕'}</button></div>`).join('');
+  const n = todas.filter(f => esc.includes(f.id)).length;
+  $('promoProntasVer').hidden = !promoVerEsc && !n; $('promoProntasVer').textContent = promoVerEsc ? 'Voltar para a lista' : `Ver escondidas (${n})`;
+}
+$('promoProntas').onclick = e => { const b = e.target.closest('button'); if (!b) return;
+  if (b.dataset.px){ cfg.fotosEscondidas = [...(cfg.fotosEscondidas || []), b.dataset.px]; promoGaleria(); mudou(); return; }
+  if (b.dataset.pv){ cfg.fotosEscondidas = (cfg.fotosEscondidas || []).filter(x => x !== b.dataset.pv); promoGaleria(); mudou(); return; }
+  if (b.dataset.p){ cfg.promo = { ...(cfg.promo || {}), ativa: true, foto: fotoGrande(b.dataset.p), fx: 50, fy: 50, zoom: 100 }; promoGaleria(); mudou(); toast('Foto da promoção trocada. Arraste na prévia para enquadrar.'); } };
+$('promoProntasVer').onclick = () => { promoVerEsc = !promoVerEsc; promoGaleria(); };
+promoGaleria();
+// enquadramento da foto da promoção
+const PF = [['pfZoom', 'zoom', 100], ['pfX', 'fx', 50], ['pfY', 'fy', 50], ['pfBri', 'brilho', 100], ['pfSat', 'sat', 100], ['pfEsc', 'escuro', 0]];
+function sincPF(){ PF.forEach(([id, k, d]) => { const e = $(id); if (e && document.activeElement !== e) e.value = cfg.promo?.[k] ?? d; }); }
+PF.forEach(([id, k]) => $(id).addEventListener('input', e => { cfg.promo = { ...(cfg.promo || {}) }; cfg.promo[k] = +e.target.value; mudou(); }));
+$('pfVolta').onclick = () => { ['zoom', 'fx', 'fy', 'brilho', 'sat', 'escuro'].forEach(k => delete cfg.promo[k]); mudou(); toast('Foto de volta ao normal.'); };
+sincPF();
 // 26/11/2026: escolher a foto de cada corte (galeria pronta, foto própria ou sem foto)
 let fotoDe = null, verEscondidas = false;
 // galeria: fotos prontas (alta resolução) que o dono não escondeu + as fotos que ele mesmo enviou (cfg.galeria)
