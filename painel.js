@@ -144,8 +144,8 @@ const CSS = `
 .pn .li .pp{flex:none}
 .pn .li .dots{flex:1 1 0}
 .pn.comFotos .li{align-items:center}
-.pn .trilho.col2{column-count:2;column-gap:1.4cqw}.pn .trilho.col3{column-count:3;column-gap:1.2cqw}
-.pn .trilho.col2 .li,.pn .trilho.col3 .li,.pn .trilho.col2 .cat,.pn .trilho.col3 .cat{break-inside:avoid}
+.pn .trilho.col2,.pn .trilho .col2{column-count:2;column-gap:1.4cqw}.pn .trilho.col3,.pn .trilho .col3{column-count:3;column-gap:1.2cqw}
+.pn .trilho .col2 .li,.pn .trilho .col3 .li,.pn .trilho.col2 .li,.pn .trilho.col3 .li,.pn .trilho.col2 .cat,.pn .trilho.col3 .cat,.pn .trilho .col2 .cat,.pn .trilho .col3 .cat{break-inside:avoid}
 /* forma das linhas */
 .pn.l-pontilhado .li{background:none!important;border-radius:0;padding:.55cqh 1.2cqh;margin:.2cqh 0}
 .pn.l-pontilhado .li .dots{display:block}
@@ -412,7 +412,13 @@ function movimentar(caixa, trilho, cfg, opcoes){
   // duplica o conteúdo para a volta ser contínua
   const original = trilho.innerHTML;
   const precisa = () => lado ? trilho.scrollWidth > caixa.clientWidth : trilho.scrollHeight > caixa.clientHeight;
-  if (mov !== 'paginas' && precisa()) trilho.innerHTML = original + '<div style="height:4cqh;width:4cqw"></div>' + original;
+  // com colunas, cada cópia leva as próprias colunas (senão a cópia cai na 2ª coluna e a lista aparece repetida lado a lado)
+  if (mov !== 'paginas' && precisa()){
+    const cc = [...trilho.classList].find(c => /^col\d$/.test(c));
+    const bloco = h => cc ? `<div class="${cc}">${h}</div>` : h;
+    if (cc) trilho.classList.remove(cc);
+    trilho.innerHTML = bloco(original) + '<div style="height:4cqh;width:4cqw"></div>' + bloco(original);
+  }
   const passo = now => {
     const dt = (now - t0) / 1000;
     if (mov === 'paginas'){
