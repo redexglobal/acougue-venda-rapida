@@ -47,11 +47,22 @@ export function situacao(c, agora = Date.now()){
   if (resta > 0){ const horas = Math.ceil(resta / H); return { codigo: 'carencia', texto: `Vencida: ${horas} h para pagar antes de desligar`, horas }; }
   return { codigo: 'suspensa', texto: 'Suspensa por falta de pagamento', horas: 0 };
 }
+// 26/11/2026: dia fixo de renovação (ex.: todo dia 26). Vence às 23:59 de Brasília desse dia.
+const fimDoDia = (ano, mes, dia) => Date.UTC(ano, mes, dia, 26, 59, 0);   // 23:59 em Brasília (UTC-3)
+function vencNoDia(base, dia, meses){
+  const d = new Date(base - 3 * H); return fimDoDia(d.getUTCFullYear(), d.getUTCMonth() + meses, dia);
+}
 const valorPlano = (plano, tvs) => PLANOS[plano].porMes * PLANOS[plano].meses * Math.max(1, tvs);
 function publica(c){
   const { senha, ...resto } = c;
-  return { ...resto, situacao: situacao(c), valorPeriodo: valorPlano(c.plano, c.tvs), plano_nome: PLANOS[c.plano]?.nome };
+  return { ...resto, situacao: situacao(c), valorPeriodo: valorPlano(c.plano, c.tvs), plano_nome: PLANOS[c.plano]?.nome, diaVenc: c.diaVenc || null };
 }
+// 26/11/2026: uma conta pode ter várias TVs (c.tvs). TV 1 fica em cfg:<id> (como sempre); TV 2 em diante em cfg:<id>:<n>.
+const chaveCfg = (id, t) => t > 1 ? `cfg:${id}:${t}` : 'cfg:' + id;
+const nTelas = c => Math.min(50, Math.max(1, c.tvs || 1));
+const telaDe = (v, c) => { const n = parseInt(v, 10) || 1; return n >= 1 && n <= nTelas(c) ? n : 0; };
+const versaoDe = (c, t) => t > 1 ? (c.cfgEmT?.[t] || 0) : (c.cfgEm || 0);
+
 async function listaIds(){ return (await getJ('contas:ids')) || []; }
 
 export default async function handler(req, res){
@@ -70,8 +81,10 @@ export default async function handler(req, res){
       // 26/11/2026: tempo real. Com o dono mexendo no editor (sinal "vivo" nos últimos 10 min) a TV confere a cada 2,5 s;
       // fora disso, a cada 20 s. Se nada mudou desde a versão que a TV já tem, não manda o painel de novo (economiza banco).
       const rapido = !!(await redis('GET', 'vivo:' + c.id));
-      if (q.desde && Number(q.desde) === (c.cfgEm || 0)) return responder(res, 200, { igual: true, situacao: s, loja: c.loja, cfgEm: c.cfgEm || 0, rapido });
-      return responder(res, 200, { situacao: s, loja: c.loja, cfg: await getJ('cfg:' + c.id), cfgEm: c.cfgEm || 0, rapido });
+      const t = telaDe(q.tela, c); if (!t) return responder(res, 404, { erro: `A TV ${txt(q.tela, 3)} não está no plano desta loja. Fale com a Kairós.` });
+      const v = versaoDe(c, t);
+      if (q.desde && Number(q.desde) === v) return responder(res, 200, { igual: true, situacao: s, loja: c.loja, cfgEm: v, rapido, tela: t });
+      return responder(res, 200, { situacao: s, loja: c.loja, cfg: (await getJ(chaveCfg(c.id, t))) || (t > 1 ? await getJ(chaveCfg(c.id, 1)) : null), cfgEm: v, rapido, tela: t });
     }
 
     // ---------- admin ----------
@@ -110,7 +123,8 @@ export default async function handler(req, res){
       if (acao === 'admin-pagamento'){
         const plano = PLANOS[b.plano] ? b.plano : c.plano; const p = PLANOS[plano];
         const base = Math.max(c.venc, Date.now());   // pagou adiantado soma; pagou atrasado conta de hoje
-        c.plano = plano; c.venc = base + p.dias * D; c.bloqueioManual = false;
+        c.plano = plano; c.venc = c.diaVenc ? vencNoDia(c.venc, c.diaVenc, p.meses) : base + p.dias * D; c.bloqueioManual = false;
+        if (c.diaVenc && c.venc < Date.now()) while (c.venc < Date.now()) c.venc = vencNoDia(c.venc, c.diaVenc, 1);   // atrasou mais de um mês: anda até o próximo dia fixo
         c.pagamentos = [...(c.pagamentos || []), { ts: Date.now(), valor: Number(b.valor) || valorPlano(plano, c.tvs), plano, forma: txt(b.forma, 20) || 'Pix', obs: txt(b.obs, 120) }].slice(-60);
       } else if (acao === 'admin-editar'){
         if (b.loja !== undefined) c.loja = txt(b.loja); if (b.nome !== undefined) c.nome = txt(b.nome);
@@ -118,6 +132,7 @@ export default async function handler(req, res){
         if (b.tvs !== undefined) c.tvs = Math.min(50, Math.max(1, parseInt(b.tvs, 10) || 1));
         if (PLANOS[b.plano]) c.plano = b.plano;
         if (b.venc) { const t = Date.parse(b.venc + 'T23:59:00-03:00'); if (t) c.venc = t; }
+        if (b.diaVenc !== undefined){ const d = parseInt(b.diaVenc, 10); c.diaVenc = d >= 1 && d <= 28 ? d : null; }
         if (b.instalacao) c.instalacao = { quer: !!b.instalacao.quer, data: txt(b.instalacao.data, 20), obs: txt(b.instalacao.obs, 200) };
       } else if (acao === 'admin-bloquear'){
         c.bloqueioManual = !!b.bloquear;
@@ -144,13 +159,21 @@ export default async function handler(req, res){
     if (tok?.papel !== 'dono') return responder(res, 401, { erro: 'Entre de novo com seu usuário e senha.' });
     const c = await getJ('conta:' + tok.id); if (!c) return responder(res, 404, { erro: 'Conta não encontrada.' });
     if (acao === 'minha') return responder(res, 200, { conta: publica(c), planos: PLANOS });
+    if (acao === 'painel'){   // o dono escolheu qual TV editar
+      const t = telaDe(b.tela, c); if (!t) return responder(res, 404, { erro: 'Essa TV não está no seu plano.' });
+      const cfg = await getJ(chaveCfg(c.id, t));
+      return responder(res, 200, { tela: t, telas: nTelas(c), cfg: cfg || (t > 1 ? await getJ(chaveCfg(c.id, 1)) : null), copia: !cfg && t > 1 });
+    }
     if (acao === 'salvar'){
       if (situacao(c).codigo === 'suspensa') return responder(res, 402, { erro: 'Painel suspenso por falta de pagamento. Fale com a Kairós para reativar.' });
       if (!b.cfg || !Array.isArray(b.cfg.itens) || !b.cfg.itens.length) return responder(res, 400, { erro: 'O painel precisa de pelo menos um corte com preço.' });
       const json = JSON.stringify(b.cfg); if (json.length > LIMITE_CFG) return responder(res, 413, { erro: 'O painel ficou grande demais (fotos). Use fotos menores ou menos fotos.' });
-      await redis('SET', 'cfg:' + c.id, json); c.cfgEm = Date.now(); await setJ('conta:' + c.id, c);
+      const t = telaDe(b.tela, c); if (!t) return responder(res, 404, { erro: 'Essa TV não está no seu plano.' });
+      await redis('SET', chaveCfg(c.id, t), json);
+      if (t > 1) c.cfgEmT = { ...(c.cfgEmT || {}), [t]: Date.now() }; else c.cfgEm = Date.now();
+      await setJ('conta:' + c.id, c);
       await redis('SET', 'vivo:' + c.id, '1', 'EX', '600');
-      return responder(res, 200, { ok: true, salvoEm: c.cfgEm });
+      return responder(res, 200, { ok: true, tela: t, salvoEm: versaoDe(c, t) });
     }
     if (acao === 'vivo'){ await redis('SET', 'vivo:' + c.id, '1', 'EX', '600'); return responder(res, 200, { ok: true }); }   // editor aberto: TV fica no modo rápido
     if (acao === 'agendar'){

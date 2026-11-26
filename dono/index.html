@@ -12,6 +12,7 @@
   *{box-sizing:border-box}
   body{margin:0;background:var(--f);color:var(--t);font:15px/1.5 Inter,system-ui,sans-serif}
   :focus-visible{outline:3px solid var(--o);outline-offset:2px}
+  .telas{display:none;align-items:center;gap:4px;padding:3px;border:1px solid var(--l);border-radius:12px}.telas.on{display:inline-flex}.telas b{font-size:13px;opacity:.8;padding:0 6px}.telas button{min-width:64px;font-weight:800}.telas button[aria-pressed=true]{background:#f2b630;color:#111;border-color:#f2b630}
   header{position:sticky;top:0;z-index:10;display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:10px 16px;background:rgba(20,17,16,.95);border-bottom:1px solid var(--l)}
   header h1{font:900 17px Archivo,sans-serif;margin:0 auto 0 0}header h1 span{color:#ff6a3d}
   .estado{font-size:13px;color:var(--s)}
@@ -66,8 +67,9 @@
 <header>
   <h1>Painel do dono · <span>Açougue Venda Rápida</span></h1>
   <span class="estado" id="estado" aria-live="polite">Salvo neste aparelho</span>
+  <div class="telas" id="telas" role="group" aria-label="Qual TV você está editando"><b>Editando:</b></div>
   <button type="button" id="btnConta">Entrar na minha conta</button>
-  <a class="btn" href="../tv/" target="_blank" rel="noopener">Abrir a TV</a>
+  <a class="btn" id="abrirTv" href="../tv/" target="_blank" rel="noopener">Abrir a TV</a>
   <button class="prim" id="btnLink" type="button">Enviar para a TV</button>
 </header>
 
@@ -211,7 +213,10 @@ import { ESTILOS, MODELOS, BIBLIOTECA } from '../modelos.js';
 import { FOTOS, fotoGrande, fotoPequena, fotoPara } from '../fotos.js';
 const $ = id => document.getElementById(id);
 const CHAVE = 'acougue-painel';
-let cfg; try { cfg = JSON.parse(localStorage.getItem(CHAVE)) || padrao(); } catch { cfg = padrao(); }
+// 26/11/2026: loja com 2 ou mais TVs. Cada TV tem o seu painel; o dono escolhe qual editar no topo.
+let telaAtual = Math.max(1, parseInt(localStorage.getItem('dono-tela'), 10) || 1);
+const chave = () => telaAtual > 1 ? CHAVE + ':' + telaAtual : CHAVE;
+let cfg; try { cfg = JSON.parse(localStorage.getItem(chave())) || padrao(); } catch { cfg = padrao(); }
 let desenho = null, tSalvar = null, diaPrevia = null;
 
 function toast(t){ const e = $('toast'); e.textContent = t; e.style.display = 'block'; clearTimeout(e._t); e._t = setTimeout(() => e.style.display = 'none', 2600); }
@@ -220,7 +225,7 @@ function salvar(){
   clearTimeout(tSalvar);
   tSalvar = setTimeout(() => {
     cfg.atualizado = Date.now();
-    try { localStorage.setItem(CHAVE, JSON.stringify(cfg)); $('estado').textContent = 'Salvo neste aparelho · ' + new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }); }
+    try { localStorage.setItem(chave(), JSON.stringify(cfg)); $('estado').textContent = 'Salvo neste aparelho · ' + new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }); }
     catch { $('estado').textContent = 'Não coube na memória do aparelho: use fotos menores.'; }
     if (conta.token) salvarNuvem(); else $('linkArea').hidden = true;
   }, 300);
@@ -383,16 +388,16 @@ $('agrupar').checked = !!cfg.agruparCategoria;
 
 // ---------- cópia de segurança ----------
 $('btnExp').onclick = () => { const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([JSON.stringify(cfg, null, 1)], { type: 'application/json' })); a.download = `painel-${(cfg.loja || 'acougue').toLowerCase().replace(/\W+/g, '-')}.json`; a.click(); };
-$('imp').onchange = async e => { try { cfg = { ...padrao(), ...JSON.parse(await e.target.files[0].text()) }; localStorage.setItem(CHAVE, JSON.stringify(cfg)); location.reload(); } catch { toast('Esse arquivo não é uma cópia do painel.'); } };
-$('btnZerar').onclick = () => { if (confirm('Voltar ao exemplo? Seus preços e fotos deste aparelho serão substituídos.')){ localStorage.removeItem(CHAVE); location.reload(); } };
+$('imp').onchange = async e => { try { cfg = { ...padrao(), ...JSON.parse(await e.target.files[0].text()) }; localStorage.setItem(chave(), JSON.stringify(cfg)); location.reload(); } catch { toast('Esse arquivo não é uma cópia do painel.'); } };
+$('btnZerar').onclick = () => { if (confirm('Voltar ao exemplo? Seus preços e fotos deste aparelho serão substituídos.')){ localStorage.removeItem(chave()); location.reload(); } };
 
 // ---------- enviar para a TV ----------
 $('btnLink').onclick = async () => {
-  localStorage.setItem(CHAVE, JSON.stringify(cfg));
+  localStorage.setItem(chave(), JSON.stringify(cfg));
   if (conta.token && conta.dados){
     await salvarNuvem();
-    $('linkTv').value = new URL('../tv/?conta=' + conta.dados.id, location.href).href; $('linkArea').hidden = false;
-    $('linkInfo').textContent = 'Este é o link fixo da sua TV: abra uma vez nela. Cada mudança que você salvar aparece sozinha em até 20 segundos.';
+    $('linkTv').value = linkDaTv(); $('linkArea').hidden = false;
+    $('linkInfo').textContent = (conta.dados.tvs > 1 ? `Link fixo da TV ${telaAtual}` : 'Este é o link fixo da sua TV') + ': abra uma vez nela. Cada mudança que você salvar aparece sozinha em até 20 segundos.';
     $('linkTv').select(); return;
   }
   const cod = await codificar(cfg);
@@ -458,9 +463,10 @@ function faixa(c){
   const f = $('faixaConta'); if (!c){ f.hidden = true; return; }
   const s = c.situacao, cores = { em_dia: ['#0f2219', '#8be0b6'], vencendo: ['#2a2110', '#ffd27a'], carencia: ['#3a1a0c', '#ffb27a'], suspensa: ['#3a0f0f', '#ff9b9b'] }[s.codigo];
   f.hidden = false; f.style.background = cores[0]; f.style.color = cores[1];
-  const venc = new Date(c.venc).toLocaleDateString('pt-BR');
-  const texto = { em_dia: `${c.loja} · plano ${c.plano_nome} · ${c.tvs} TV(s) · em dia até ${venc}.`,
-    vencendo: `Seu plano vence em ${s.dias} dia(s) (${venc}). Renove para a TV não desligar: ${brlC(c.valorPeriodo)}.`,
+  const venc = new Date(c.venc).toLocaleDateString('pt-BR', { timeZone: 'America/Sao_Paulo' });
+  const fixo = c.diaVenc ? ` Renovação todo dia ${c.diaVenc}.` : '';
+  const texto = { em_dia: `${c.loja} · plano ${c.plano_nome} · ${c.tvs} TV(s) · próxima renovação: ${venc} (${brlC(c.valorPeriodo)}).${fixo}`,
+    vencendo: `Seu plano vence em ${s.dias} dia(s), em ${venc}.${fixo} Renove para a TV não desligar: ${brlC(c.valorPeriodo)}.`,
     carencia: `Pagamento atrasado. Você tem ${s.horas} h para pagar; depois disso a TV desliga sozinha até o pagamento.`,
     suspensa: 'Painel suspenso por falta de pagamento. A TV está desligada e as mudanças não são salvas até o pagamento.' }[s.codigo];
   f.innerHTML = `${texto} <a href="https://wa.me/5562984924326?text=${encodeURIComponent('Olá! Quero pagar/renovar o painel da ' + c.loja + ' (usuário ' + c.usuario + ').')}" target="_blank" rel="noopener" style="color:inherit;font-weight:800;margin-left:8px">Pagar / falar com a Kairós</a>
@@ -475,14 +481,14 @@ document.addEventListener('visibilitychange', () => { if (conta.token && documen
 function salvarNuvem(){
   clearTimeout(tNuvem);
   return new Promise(ok => { tNuvem = setTimeout(async () => {
-    const r = await apiConta('salvar', { cfg });
+    const r = await apiConta('salvar', { cfg, tela: telaAtual });
     $('estado').textContent = r.ok ? 'Salvo na nuvem · a TV atualiza sozinha · ' + new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }) : (r.erro || 'Não salvou na nuvem; ficou neste aparelho.');
     if (r.status === 401){ conta.token = ''; localStorage.removeItem('dono-token'); botaoConta(); }
     ok(r);
   }, 400); });
 }
 function botaoConta(){ $('btnConta').textContent = conta.token ? 'Sair da conta' : 'Entrar na minha conta'; if (!conta.token) faixa(null); }
-$('btnConta').onclick = () => { if (conta.token){ conta.token = ''; conta.dados = null; localStorage.removeItem('dono-token'); botaoConta(); toast('Você saiu. O painel continua salvo neste aparelho.'); } else { $('cErro').textContent = ''; $('dEntrar').showModal(); $('cUsuario').focus(); } };
+$('btnConta').onclick = () => { if (conta.token){ conta.token = ''; conta.dados = null; localStorage.removeItem('dono-token'); telaAtual = 1; localStorage.setItem('dono-tela', '1'); botaoConta(); telas(); toast('Você saiu. O painel continua salvo neste aparelho.'); } else { $('cErro').textContent = ''; $('dEntrar').showModal(); $('cUsuario').focus(); } };
 $('cVer').onclick = () => { const e = $('cSenha'), ver = e.type === 'password'; e.type = ver ? 'text' : 'password'; $('cVer').textContent = ver ? 'Ocultar' : 'Mostrar'; e.focus(); };
 $('cSenha').addEventListener('keydown', e => { if (e.key === 'Enter') $('cEntrar').click(); });
 $('cUsuario').addEventListener('keydown', e => { if (e.key === 'Enter') $('cSenha').focus(); });
@@ -490,10 +496,33 @@ $('cEntrar').onclick = async () => {
   const r = await apiConta('entrar', { usuario: $('cUsuario').value, senha: $('cSenha').value });
   if (!r.ok){ $('cErro').textContent = r.status === 503 ? 'O sistema de contas está sendo ligado. Tente mais tarde.' : (r.erro || 'Não deu certo.'); return; }
   conta.token = r.token; conta.dados = r.conta; localStorage.setItem('dono-token', r.token); $('cSenha').value = ''; $('dEntrar').close();
-  if (r.cfg){ cfg = { ...padrao(), ...r.cfg }; localStorage.setItem(CHAVE, JSON.stringify(cfg)); location.reload(); return; }
+  telaAtual = 1; localStorage.setItem('dono-tela', '1');
+  if (r.cfg){ cfg = { ...padrao(), ...r.cfg }; localStorage.setItem(chave(), JSON.stringify(cfg)); location.reload(); return; }
   cfg.loja = cfg.loja === padrao().loja ? r.conta.loja : cfg.loja; botaoConta(); faixa(r.conta); salvarNuvem(); previa(); toast('Conta conectada. Seus preços agora vão para a nuvem.');
 };
-(async () => { botaoConta(); if (!conta.token) return; const r = await apiConta('minha'); if (r.ok){ conta.dados = r.conta; faixa(r.conta); apiConta('vivo'); } else if (r.status === 401){ conta.token = ''; localStorage.removeItem('dono-token'); botaoConta(); } })();
+(async () => { botaoConta(); if (!conta.token){ telas(); return; } const r = await apiConta('minha'); if (r.ok){ conta.dados = r.conta; faixa(r.conta); apiConta('vivo'); telas(); } else if (r.status === 401){ conta.token = ''; localStorage.removeItem('dono-token'); botaoConta(); } })();
+
+// ---------- várias TVs ----------
+function linkDaTv(){ return conta.dados ? new URL('../tv/?conta=' + conta.dados.id + (telaAtual > 1 ? '&tela=' + telaAtual : ''), location.href).href : new URL('../tv/', location.href).href; }
+function telas(){
+  const box = $('telas'), n = conta.token && conta.dados ? Math.max(1, conta.dados.tvs || 1) : 1;
+  if (telaAtual > n){ telaAtual = 1; localStorage.setItem('dono-tela', '1'); }
+  $('abrirTv').href = linkDaTv();
+  box.classList.toggle('on', n > 1); box.querySelectorAll('button').forEach(b => b.remove()); if (n < 2) return;
+  for (let t = 1; t <= n; t++){ const b = document.createElement('button'); b.type = 'button'; b.textContent = 'TV ' + t; b.setAttribute('aria-pressed', t === telaAtual);
+    b.title = t === telaAtual ? 'Você está editando esta TV' : 'Editar a TV ' + t; b.onclick = () => trocarTela(t); box.append(b); }
+}
+async function trocarTela(t){
+  if (t === telaAtual) return;
+  localStorage.setItem(chave(), JSON.stringify(cfg)); await salvarNuvem();   // guarda a TV atual antes de trocar
+  const r = await apiConta('painel', { tela: t });
+  if (!r.ok){ toast(r.erro || 'Não consegui abrir essa TV.'); return; }
+  telaAtual = t; localStorage.setItem('dono-tela', String(t));
+  if (r.cfg) localStorage.setItem(chave(), JSON.stringify({ ...padrao(), ...r.cfg }));
+  sessionStorage.setItem('dono-aviso', r.copia ? `TV ${t}: começou como cópia da TV 1. Mude o que quiser; a TV 1 não muda.` : `Agora você está editando a TV ${t}.`);
+  location.reload();
+}
+try { const a = sessionStorage.getItem('dono-aviso'); if (a){ sessionStorage.removeItem('dono-aviso'); setTimeout(() => toast(a), 300); } } catch {}
 
 // ---------- fotos prontas (reais, licença livre) ----------
 FOTOS.forEach(f => { const b = document.createElement('button'); b.type = 'button'; b.title = f.nome; b.setAttribute('aria-label', 'Usar a foto ' + f.nome);
