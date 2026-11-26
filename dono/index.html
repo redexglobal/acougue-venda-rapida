@@ -480,7 +480,6 @@ $('cEntrar').onclick = async () => {
   if (r.cfg){ cfg = { ...padrao(), ...r.cfg }; localStorage.setItem(CHAVE, JSON.stringify(cfg)); location.reload(); return; }
   cfg.loja = cfg.loja === padrao().loja ? r.conta.loja : cfg.loja; botaoConta(); faixa(r.conta); salvarNuvem(); previa(); toast('Conta conectada. Seus preços agora vão para a nuvem.');
 };
-$('cSenha').onkeydown = e => e.key === 'Enter' && $('cEntrar').click();
 (async () => { botaoConta(); if (!conta.token) return; const r = await apiConta('minha'); if (r.ok){ conta.dados = r.conta; faixa(r.conta); apiConta('vivo'); } else if (r.status === 401){ conta.token = ''; localStorage.removeItem('dono-token'); botaoConta(); } })();
 
 // ---------- fotos prontas (reais, licença livre) ----------
