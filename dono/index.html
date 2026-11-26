@@ -249,7 +249,7 @@
 import { SELOS, DIAS } from '../painel.js';
 import { desenhar, padrao, TEMAS, ARRANJOS, MOVIMENTOS, HORA_FORMATOS, CATEGORIAS, coresDe, contraste, codificar, reduzirImagem, telaFechada } from '../painel.js';
 import { ESTILOS, MODELOS, BIBLIOTECA } from '../modelos.js';
-import { FOTOS, fotoGrande, fotoPequena, fotoPara } from '../fotos.js';
+import { FOTOS, FOTOS_HQ, fotoGrande, fotoPequena, fotoPara } from '../fotos.js';
 const $ = id => document.getElementById(id);
 const CHAVE = 'acougue-painel';
 // 26/11/2026: loja com 2 ou mais TVs. Cada TV tem o seu painel; o dono escolhe qual editar no topo.
@@ -541,7 +541,7 @@ $('rNatalMsg').oninput = () => { natalCfg().mensagem = $('rNatalMsg').value; mud
 clique('rNatalCor', b => natalCfg().corFaixa = b.dataset.v);
 $('rNatalCores').onclick = () => { if (!cfg.coresAntesNatal) cfg.coresAntesNatal = { cores: cfg.cores || null, tema: cfg.tema, estilo: cfg.estilo || 'padrao' }; cfg.cores = { fundo: '#7a0d12', texto: '#fff6e6', destaque: '#e8c35a', preco: '#ffe08a', faixa: '#5e080c' }; cfg.estilo = 'natal'; natalCfg().ativo = true; mudou(); toast('Cores de Natal no painel.'); };
 $('rNatalVolta').onclick = () => { const a = cfg.coresAntesNatal; if (!a) return; cfg.cores = a.cores; cfg.tema = a.tema; cfg.estilo = a.estilo; delete cfg.coresAntesNatal; mudou(); toast('Cores de antes de volta.'); };
-function fotosPromo(){ let id = null; try { id = conta.dados?.id; } catch {} const lista = [...FOTOS_PROMO, ...(FOTOS_DA_LOJA[id] || [])]; $('rFotosPromo').innerHTML = lista.map(([u, t]) => `<button type="button" data-u="${u}" title="${t}" style="padding:0;aspect-ratio:1;background:url('${u}') center/cover;border-radius:8px" aria-label="Usar foto: ${t}"></button>`).join(''); }
+function fotosPromo(){ let id = null; try { id = conta.dados?.id; } catch {} const lista = [...FOTOS_PROMO, ...(FOTOS_DA_LOJA[id] || []), ...FOTOS.filter(f => FOTOS_HQ.includes(f.id)).map(f => [fotoGrande(f.id), f.nome])]; $('rFotosPromo').innerHTML = lista.map(([u, t]) => `<button type="button" data-u="${u}" title="${t}" style="padding:0;aspect-ratio:1;background:url('${u}') center/cover;border-radius:8px" aria-label="Usar foto: ${t}"></button>`).join(''); }
 $('rFotosPromo').onclick = e => { const b = e.target.closest('button'); if (!b) return; cfg.promo = { ...(cfg.promo || {}), ativa: true, foto: b.dataset.u }; if (cfg.arranjo === 'so-precos') cfg.arranjo = 'promo-esq'; mudou(); toast('Foto colocada na promoção.'); };
 fotosPromo(); setTimeout(fotosPromo, 2500);
 rapido();
@@ -643,8 +643,8 @@ async function trocarTela(t){
 try { const a = sessionStorage.getItem('dono-aviso'); if (a){ sessionStorage.removeItem('dono-aviso'); setTimeout(() => toast(a), 300); } } catch {}
 
 // ---------- fotos prontas (reais, licença livre) ----------
-FOTOS.forEach(f => { const b = document.createElement('button'); b.type = 'button'; b.title = f.nome; b.setAttribute('aria-label', 'Usar a foto ' + f.nome);
-  b.style.cssText = `aspect-ratio:1;padding:0;border-radius:8px;background:url(${fotoPequena(f.id)}) center/cover`;
+[['promo-ancho', 'Bife ancho'], ['promo-contrafile', 'Contrafilé'], ['promo-file-mignon', 'Filé mignon']].map(([id, nome]) => ({ id, nome, so: true })).concat(FOTOS.filter(f => FOTOS_HQ.includes(f.id))).forEach(f => { const b = document.createElement('button'); b.type = 'button'; b.title = f.nome; b.setAttribute('aria-label', 'Usar a foto ' + f.nome);
+  b.style.cssText = `aspect-ratio:1;padding:0;border-radius:8px;background:url(${f.so ? fotoGrande(f.id) : fotoPequena(f.id)}) center/cover`;
   b.onclick = () => { cfg.promo.foto = fotoGrande(f.id); mudou(); toast('Foto da promoção trocada.'); }; $('promoProntas').append(b); });
 // 26/11/2026: escolher a foto de cada corte (galeria pronta, foto própria ou sem foto)
 let fotoDe = null;
@@ -653,7 +653,7 @@ function escolherFoto(it){
   $('dfAtual').style.backgroundImage = it.foto ? `url('${it.foto}')` : 'none'; $('dfAtual').textContent = it.foto ? '' : 'sem foto';
   $('dfTira').hidden = !it.foto;
   const sug = fotoPara(it.n, it.c);
-  const lista = [...FOTOS].sort((a, b) => (fotoPequena(b.id) === sug) - (fotoPequena(a.id) === sug));
+  const lista = FOTOS.filter(f => FOTOS_HQ.includes(f.id)).sort((a, b) => (fotoPequena(b.id) === sug) - (fotoPequena(a.id) === sug));
   $('dfGrade').innerHTML = lista.map(f => `<button type="button" data-id="${f.id}" title="${f.nome}" aria-label="Usar foto: ${f.nome}" style="position:relative;padding:0;aspect-ratio:1;border-radius:9px;background:url('${fotoPequena(f.id)}') center/cover;${fotoPequena(f.id) === it.foto ? 'outline:3px solid var(--o);' : ''}">${fotoPequena(f.id) === sug ? '<span style="position:absolute;left:3px;top:3px;background:#f2b630;color:#111;font-size:10px;font-weight:800;padding:1px 5px;border-radius:5px">indicada</span>' : ''}<span style="position:absolute;left:0;right:0;bottom:0;background:rgba(0,0,0,.65);color:#fff;font-size:11px;padding:2px 3px;border-radius:0 0 9px 9px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${f.nome}</span></button>`).join('');
   $('dFoto').showModal();
 }
