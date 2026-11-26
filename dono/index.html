@@ -85,6 +85,40 @@
 </dialog>
 <main>
 <aside aria-label="Ajustes do painel">
+  <details open id="rapida"><summary>Escolha rápida</summary>
+    <p class="estado" style="margin:0 0 4px">Tudo o que você mudar aqui aparece na prévia e na TV na hora.</p>
+    <label>Formato da tela</label><div class="grupo" id="rFormato"></div>
+    <label>Colunas de preços</label><div class="grupo" id="rColunas"><button type="button" data-v="1">1 coluna</button><button type="button" data-v="2">2 colunas</button><button type="button" data-v="3">3 colunas</button></div>
+    <label>Como as carnes passam</label><div class="grupo" id="rMov"></div>
+    <label>Velocidade das carnes</label><div class="grupo" id="rVel"><button type="button" data-v="20">Devagar</button><button type="button" data-v="40">Normal</button><button type="button" data-v="70">Rápido</button><button type="button" data-v="100">Bem rápido</button></div>
+    <label for="rPausa">Quando passa de página em página: tempo em cada página</label><select id="rPausa"><option value="5">5 segundos</option><option value="8">8 segundos</option><option value="12">12 segundos</option><option value="20">20 segundos</option><option value="30">30 segundos</option></select>
+    <div style="margin-top:10px"><button type="button" id="rCarnesBtn" aria-expanded="false">Escolher quais carnes passam na TV</button> <span class="estado" id="rCarnesInfo"></span></div>
+    <div id="rCarnes" hidden style="margin-top:8px;background:#120f0e;border:1px solid var(--l);border-radius:10px;padding:8px">
+      <div class="grupo" style="margin-bottom:6px"><button type="button" id="rTodas">Marcar todas</button><button type="button" id="rNenhuma">Desmarcar todas</button></div>
+      <div id="rCarnesLista" style="max-height:260px;overflow:auto;display:grid;grid-template-columns:1fr 1fr;gap:2px 10px;font-size:14px"></div>
+      <p class="estado" style="margin:6px 0 0">Desmarcada sai da TV, mas continua guardada na tabela de preços.</p>
+    </div>
+    <label for="rHora">Jeito de escrever a hora</label><select id="rHora"></select>
+    <label style="margin-top:12px"><input type="checkbox" id="rFrasesOn"> Frases bíblicas passando embaixo da hora</label>
+    <div id="rFrasesBox">
+      <div id="rFrases" style="display:flex;flex-direction:column;gap:3px;font-size:13px;max-height:200px;overflow:auto"></div>
+      <label for="rFrasesMinhas">Suas frases (uma por linha)</label><textarea id="rFrasesMinhas" rows="3" maxlength="900" style="width:100%;background:#120f0e;border:1px solid var(--l);color:var(--t);border-radius:8px;padding:8px;font:14px Inter,sans-serif"></textarea>
+      <label for="rFrasesTempo">Trocar a frase a cada</label><select id="rFrasesTempo"><option value="8">8 segundos</option><option value="12">12 segundos</option><option value="20">20 segundos</option><option value="30">30 segundos</option><option value="60">1 minuto</option></select>
+    </div>
+    <label style="margin-top:12px"><input type="checkbox" id="rLogoOn"> Logo passando no meio das carnes</label>
+    <div class="lado"><div><label for="rLogoCada">Aparece a cada</label><select id="rLogoCada"><option value="4">4 carnes</option><option value="6">6 carnes</option><option value="8">8 carnes</option><option value="12">12 carnes</option></select></div><div><label for="rLogoArq">Outra logo para a lista</label><input type="file" id="rLogoArq" accept="image/*"></div></div>
+    <p class="estado" id="rLogoInfo" style="margin:4px 0 0"></p>
+    <label style="margin-top:14px"><input type="checkbox" id="rNatalOn"> <b>Painel de Natal</b> (vale em qualquer modelo)</label>
+    <div id="rNatalBox">
+      <label>Enfeites</label><div class="grupo" id="rEnfeites"><button type="button" data-k="neve">Neve caindo</button><button type="button" data-k="luzes">Pisca-pisca no topo</button><button type="button" data-k="enfeites">Bolas penduradas</button><button type="button" data-k="estrelas">Estrelinhas</button><button type="button" data-k="borda">Borda de bengala</button><button type="button" data-k="faixa">Faixa com mensagem</button></div>
+      <label for="rNatalMsg">Mensagem para o cliente (separe várias com | )</label><input type="text" id="rNatalMsg" maxlength="220" list="rNatalSug" placeholder="Feliz Natal! Obrigado pela confiança de todo o ano.">
+      <datalist id="rNatalSug"><option>Feliz Natal! Obrigado pela confiança de todo o ano.</option><option>Feliz Natal e um próspero Ano Novo a todos os nossos clientes!</option><option>Encomende já a carne da sua ceia!</option><option>Que o Natal encha sua mesa e sua casa de alegria.</option><option>Feliz Natal! | Encomende a carne da ceia com antecedência | Boas festas e um 2027 abençoado!</option></datalist>
+      <label>Cor da faixa</label><div class="grupo" id="rNatalCor"><button type="button" data-v="#b3261e">Vermelho</button><button type="button" data-v="#1f6b35">Verde</button><button type="button" data-v="#8a6a12">Dourado</button><button type="button" data-v="#141414">Preto</button></div>
+      <div class="grupo" style="margin-top:8px"><button type="button" id="rNatalCores">Pôr cores de Natal no painel</button><button type="button" id="rNatalVolta">Voltar as cores de antes</button></div>
+    </div>
+    <label style="margin-top:14px">Fotos prontas para a promoção (toque para usar)</label>
+    <div id="rFotosPromo" style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px"></div>
+  </details>
   <details open><summary>Modelo e acabamento</summary>
     <p class="estado" style="margin:0 0 6px">Modelo atual: <b id="modeloNome">personalizado</b>. <a href="../modelos/" style="color:#ffb199">Ver os 22 modelos</a></p>
     <label for="estilo">Estilo das linhas e da letra</label><select id="estilo"></select>
@@ -208,7 +242,7 @@
 
 <script type="module">
 import { SELOS, DIAS } from '../painel.js';
-import { desenhar, padrao, TEMAS, ARRANJOS, MOVIMENTOS, CATEGORIAS, coresDe, contraste, codificar, reduzirImagem, telaFechada } from '../painel.js';
+import { desenhar, padrao, TEMAS, ARRANJOS, MOVIMENTOS, HORA_FORMATOS, CATEGORIAS, coresDe, contraste, codificar, reduzirImagem, telaFechada } from '../painel.js';
 import { ESTILOS, MODELOS, BIBLIOTECA } from '../modelos.js';
 import { FOTOS, fotoGrande, fotoPequena, fotoPara } from '../fotos.js';
 const $ = id => document.getElementById(id);
@@ -233,7 +267,7 @@ function salvar(){
 function previa(){
   $('moldura').className = 'moldura ' + (cfg.orientacao || 'paisagem');
   desenho?.parar(); desenho = desenhar($('previa'), cfg, { editavel: true, agora: diaPrevia === null ? new Date() : proximo(diaPrevia), mudou: () => { sincTam(); salvar(); previa(); } });
-  avisoContraste(); checarHorario(); checarLogo();
+  avisoContraste(); checarHorario(); checarLogo(); if (typeof rapido === 'function') try { rapido(); } catch {}
   const img = $('previa').querySelector('.logo img');   // o tamanho da logo só é conhecido depois do load
   img?.addEventListener('load', checarLogo);
 }
@@ -428,6 +462,85 @@ $('colunas').onclick = e => { const b = e.target.closest('button'); if (!b) retu
 $('fotoLoja').onchange = async e => { const f = e.target.files[0]; if (!f) return; try { cfg.fotoLoja = await reduzirImagem(f, 1280, .7); cfg.fotoLojaFundo = true; acab(); mudou(); toast('Foto da loja colocada no fundo.'); } catch (er) { toast(er.message); } };
 $('fotoLojaTira').onclick = () => { cfg.fotoLoja = null; cfg.fotoLojaFundo = false; acab(); mudou(); };
 acab();
+// ---------- 26/11/2026: escolha rápida (formato, velocidade, carnes na TV, hora, frases, logo na lista, Natal, fotos) ----------
+const VERSICULOS = [
+  'O Senhor é o meu pastor; nada me faltará. (Salmos 23:1)',
+  'Tudo posso naquele que me fortalece. (Filipenses 4:13)',
+  'Hoje vos nasceu o Salvador, que é Cristo, o Senhor. (Lucas 2:11)',
+  'Glória a Deus nas alturas, e paz na terra aos homens. (Lucas 2:14)',
+  'Porque um menino nos nasceu, um filho se nos deu. (Isaías 9:6)',
+  'Porque Deus amou o mundo de tal maneira que deu o seu Filho. (João 3:16)',
+  'Entrega o teu caminho ao Senhor, confia nele, e ele tudo fará. (Salmos 37:5)',
+  'O pão nosso de cada dia nos dá hoje. (Mateus 6:11)',
+  'Provai e vede que o Senhor é bom. (Salmos 34:8)',
+  'Se Deus é por nós, quem será contra nós? (Romanos 8:31)',
+  'Em tudo dai graças. (1 Tessalonicenses 5:18)',
+  'Eis que estou convosco todos os dias. (Mateus 28:20)',
+];
+const FOTOS_PROMO = [['/fotos/promo-ancho.webp', 'Bife ancho'], ['/fotos/promo-contrafile.webp', 'Contrafilé'], ['/fotos/promo-file-mignon.webp', 'Filé mignon']];
+const FOTOS_DA_LOJA = { M6nlpVJr: [['/fotos/md/kit-churrasco.webp', 'Kit churrasco MD']] };
+const marca = (g, f) => $(g).querySelectorAll('button').forEach(b => b.setAttribute('aria-pressed', f(b)));
+function botoes(id, opcoes){ $(id).innerHTML = Object.entries(opcoes).map(([v, t]) => `<button type="button" data-v="${v}">${t}</button>`).join(''); }
+botoes('rFormato', ARRANJOS); botoes('rMov', MOVIMENTOS);
+$('rHora').innerHTML = Object.entries(HORA_FORMATOS).map(([v, t]) => `<option value="${v}">${t}</option>`).join('');
+$('rFrases').innerHTML = VERSICULOS.map((v, k) => `<label style="margin:0;color:var(--t)"><input type="checkbox" data-k="${k}"> ${v}</label>`).join('');
+const frasesCfg = () => cfg.frases || (cfg.frases = { ativa: false, marcadas: [0, 1, 2, 3], minhas: '', tempo: 12, lista: [] });
+function montarFrases(){ const f = frasesCfg(); f.lista = [...(f.marcadas || []).map(k => VERSICULOS[k]).filter(Boolean), ...String(f.minhas || '').split('\n').map(x => x.trim()).filter(Boolean)]; }
+const natalCfg = () => cfg.natal || (cfg.natal = { ativo: false, neve: true, luzes: true, enfeites: true, estrelas: false, borda: false, faixa: true, mensagem: '', corFaixa: '#b3261e' });
+function rapido(){
+  const foco = document.activeElement;
+  marca('rFormato', b => b.dataset.v === (cfg.arranjo || 'promo-esq'));
+  marca('rColunas', b => +b.dataset.v === (cfg.colunas || 1));
+  marca('rMov', b => b.dataset.v === (cfg.movimento || 'cima'));
+  marca('rVel', b => Math.abs(+b.dataset.v - (cfg.velocidade || 40)) < 8);
+  $('rPausa').value = String(cfg.pausa || 8); if (!$('rPausa').value) $('rPausa').value = '8';
+  $('rHora').value = cfg.horaFormato || 'padrao';
+  const f = frasesCfg();
+  $('rFrasesOn').checked = !!f.ativa; $('rFrasesBox').style.opacity = f.ativa ? 1 : .55;
+  $('rFrases').querySelectorAll('input').forEach(x => x.checked = (f.marcadas || []).includes(+x.dataset.k));
+  if (foco !== $('rFrasesMinhas')) $('rFrasesMinhas').value = f.minhas || '';
+  $('rFrasesTempo').value = String(f.tempo || 12);
+  $('rLogoOn').checked = !!cfg.logoNaLista; $('rLogoCada').value = String(cfg.logoListaCada || 6);
+  $('rLogoInfo').textContent = cfg.logoLista ? 'Usando a logo própria da lista.' : cfg.logo ? 'Usando a mesma logo do topo.' : 'Coloque uma logo (aqui ou em "Logo e identidade").';
+  const n = natalCfg();
+  $('rNatalOn').checked = !!n.ativo; $('rNatalBox').style.opacity = n.ativo ? 1 : .55;
+  marca('rEnfeites', b => n[b.dataset.k] !== false && (b.dataset.k === 'estrelas' || b.dataset.k === 'borda' ? !!n[b.dataset.k] : true));
+  if (foco !== $('rNatalMsg')) $('rNatalMsg').value = n.mensagem || '';
+  marca('rNatalCor', b => b.dataset.v === (n.corFaixa || '#b3261e'));
+  $('rNatalVolta').hidden = !cfg.coresAntesNatal;
+  const vis = cfg.itens.filter(i => i.n && !i.oculto).length;
+  $('rCarnesInfo').textContent = `${vis} de ${cfg.itens.filter(i => i.n).length} passando`;
+}
+function carnesLista(){ $('rCarnesLista').innerHTML = cfg.itens.map((it, k) => it.n ? `<label style="margin:0;color:var(--t)"><input type="checkbox" data-k="${k}" ${it.oculto ? '' : 'checked'}> ${it.n.replace(/</g, '&lt;')}</label>` : '').join(''); }
+const clique = (id, fn) => $(id).addEventListener('click', e => { const b = e.target.closest('button'); if (b) { fn(b); mudou(); } });
+clique('rFormato', b => { cfg.arranjo = b.dataset.v; if (cfg.arranjo !== 'so-precos' && cfg.promo) cfg.promo.ativa = true; });
+clique('rColunas', b => cfg.colunas = +b.dataset.v);
+clique('rMov', b => cfg.movimento = b.dataset.v);
+clique('rVel', b => cfg.velocidade = +b.dataset.v);
+$('rPausa').onchange = () => { cfg.pausa = +$('rPausa').value; mudou(); };
+$('rHora').onchange = () => { cfg.horaFormato = $('rHora').value; if (!cfg.relogio){ cfg.relogio = true; const r = $('relogio'); if (r) r.checked = true; } mudou(); };
+$('rCarnesBtn').onclick = () => { const h = !$('rCarnes').hidden; $('rCarnes').hidden = h; $('rCarnesBtn').setAttribute('aria-expanded', !h); if (!h) carnesLista(); };
+$('rCarnesLista').onchange = e => { const it = cfg.itens[+e.target.dataset.k]; if (!it) return; if (e.target.checked) delete it.oculto; else it.oculto = true; mudou(); };
+$('rTodas').onclick = () => { cfg.itens.forEach(i => delete i.oculto); carnesLista(); mudou(); };
+$('rNenhuma').onclick = () => { cfg.itens.forEach(i => i.oculto = true); carnesLista(); mudou(); toast('Nenhuma carne na TV. Marque as que devem passar.'); };
+$('rFrasesOn').onchange = e => { frasesCfg().ativa = e.target.checked; montarFrases(); if (!cfg.relogio && e.target.checked){ cfg.relogio = true; const r = $('relogio'); if (r) r.checked = true; } mudou(); };
+$('rFrases').onchange = e => { const f = frasesCfg(); f.marcadas = [...$('rFrases').querySelectorAll('input:checked')].map(x => +x.dataset.k); montarFrases(); mudou(); };
+$('rFrasesMinhas').oninput = () => { frasesCfg().minhas = $('rFrasesMinhas').value; montarFrases(); mudou(); };
+$('rFrasesTempo').onchange = () => { frasesCfg().tempo = +$('rFrasesTempo').value; mudou(); };
+$('rLogoOn').onchange = e => { cfg.logoNaLista = e.target.checked; if (e.target.checked && !cfg.logo && !cfg.logoLista) toast('Coloque a logo para ela aparecer na lista.'); mudou(); };
+$('rLogoCada').onchange = () => { cfg.logoListaCada = +$('rLogoCada').value; mudou(); };
+$('rLogoArq').onchange = async e => { const f = e.target.files[0]; if (!f) return; try { cfg.logoLista = await reduzirImagem(f, 420, .9); cfg.logoNaLista = true; mudou(); toast('Logo colocada no meio das carnes.'); } catch (er) { toast(er.message); } };
+$('rNatalOn').onchange = e => { natalCfg().ativo = e.target.checked; mudou(); if (e.target.checked) toast('Natal ligado. Escolha os enfeites e a mensagem.'); };
+clique('rEnfeites', b => { const n = natalCfg(), k = b.dataset.k; const ligado = k === 'estrelas' || k === 'borda' ? !!n[k] : n[k] !== false; n[k] = !ligado; n.ativo = true; });
+$('rNatalMsg').oninput = () => { natalCfg().mensagem = $('rNatalMsg').value; mudou(); };
+clique('rNatalCor', b => natalCfg().corFaixa = b.dataset.v);
+$('rNatalCores').onclick = () => { if (!cfg.coresAntesNatal) cfg.coresAntesNatal = { cores: cfg.cores || null, tema: cfg.tema, estilo: cfg.estilo || 'padrao' }; cfg.cores = { fundo: '#7a0d12', texto: '#fff6e6', destaque: '#e8c35a', preco: '#ffe08a', faixa: '#5e080c' }; cfg.estilo = 'natal'; natalCfg().ativo = true; mudou(); toast('Cores de Natal no painel.'); };
+$('rNatalVolta').onclick = () => { const a = cfg.coresAntesNatal; if (!a) return; cfg.cores = a.cores; cfg.tema = a.tema; cfg.estilo = a.estilo; delete cfg.coresAntesNatal; mudou(); toast('Cores de antes de volta.'); };
+function fotosPromo(){ let id = null; try { id = conta.dados?.id; } catch {} const lista = [...FOTOS_PROMO, ...(FOTOS_DA_LOJA[id] || [])]; $('rFotosPromo').innerHTML = lista.map(([u, t]) => `<button type="button" data-u="${u}" title="${t}" style="padding:0;aspect-ratio:1;background:url('${u}') center/cover;border-radius:8px" aria-label="Usar foto: ${t}"></button>`).join(''); }
+$('rFotosPromo').onclick = e => { const b = e.target.closest('button'); if (!b) return; cfg.promo = { ...(cfg.promo || {}), ativa: true, foto: b.dataset.u }; if (cfg.arranjo === 'so-precos') cfg.arranjo = 'promo-esq'; mudou(); toast('Foto colocada na promoção.'); };
+fotosPromo(); setTimeout(fotosPromo, 2500);
+rapido();
+
 // ---------- biblioteca de cortes ----------
 const cats = [...new Set(BIBLIOTECA.map(i => i.c))];
 cats.forEach(c => { const o = document.createElement('option'); o.value = c; o.textContent = `${c} (${BIBLIOTECA.filter(i => i.c === c).length})`; $('bibCat').append(o); });

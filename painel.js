@@ -18,6 +18,15 @@ export const ARRANJOS = {
   'so-precos':   'Só a tabela de preços',
   'so-promo':    'Só a promoção (tela cheia)',
 };
+export const HORA_FORMATOS = {
+  'padrao':   '14:30 · qui., 26/11',
+  'segundos': '14:30:05 (com segundos)',
+  'extenso':  '14:30 · quinta-feira, 26 de novembro',
+  'texto':    '14h30',
+  'so-hora':  'Só a hora',
+  'digital':  'Letreiro digital',
+  'caixa':    'Hora numa caixa colorida',
+};
 export const MOVIMENTOS = {
   parado: 'Parado (cabe tudo)', cima: 'Rolando para cima', baixo: 'Rolando para baixo',
   lado: 'Deslizando para o lado', paginas: 'Páginas que trocam',
@@ -97,6 +106,30 @@ const CSS = `
 .pn .sub{font-size:calc(min(2.3cqh,3.4cqw) * var(--tt,1));opacity:.85;margin-top:.6cqh}
 .pn .hora{position:absolute;top:3cqh;font-weight:800;font-size:min(3.6cqh,4cqw);text-align:right;line-height:1.1}
 .pn .hora small{display:block;font-size:.56em;font-weight:600;opacity:.85}
+.pn .hora{z-index:4}
+.pn .hora .frase{font-size:1.9cqh;font-weight:600;font-style:italic;max-width:30cqw;margin-top:.8cqh;line-height:1.25;opacity:.95;transition:opacity .6s;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;text-shadow:0 .2cqh .6cqh rgba(0,0,0,.6)}
+.pn .hora.hf-digital .hh{font-family:'Courier New',ui-monospace,monospace;font-weight:900;letter-spacing:.08em;color:#ff4a3d;text-shadow:0 0 .8cqh #ff4a3d,0 0 2cqh rgba(255,74,61,.6);background:rgba(0,0,0,.55);padding:.2em .4em;border-radius:.25em;display:inline-block}
+.pn .hora.hf-caixa .hh{background:var(--d);color:var(--dt);padding:.15em .45em;border-radius:.3em;display:inline-block}
+.pn .hora.hf-extenso small{text-transform:capitalize}
+.pn .li-logo{display:flex;justify-content:center;align-items:center;padding:1.2cqh 0;margin:.5cqh 0}
+.pn .li-logo img{height:12cqh;width:auto;max-width:80%;object-fit:contain;filter:drop-shadow(0 .6cqh 1.4cqh rgba(0,0,0,.45))}
+.pn .trilho.lado .li-logo{padding:0 2cqw}
+.pn .nv-neve{position:absolute;inset:0;pointer-events:none;z-index:5;overflow:hidden}
+.pn .nv-neve i{position:absolute;left:0;right:0;top:-100cqh;height:200cqh;background-image:radial-gradient(rgba(255,255,255,.9) .22cqh,transparent .3cqh),radial-gradient(rgba(255,255,255,.6) .15cqh,transparent .2cqh);background-size:11cqh 11cqh,6cqh 7cqh;background-position:0 0,3cqh 2cqh;animation:nvCai 22s linear infinite}
+.pn .nv-neve i+i{background-size:17cqh 15cqh,9cqh 10cqh;opacity:.7;animation-duration:34s}
+@keyframes nvCai{to{transform:translateY(100cqh)}}
+.pn .nv-luzes{position:absolute;left:0;right:0;top:0;height:3cqh;display:flex;justify-content:space-around;align-items:flex-start;pointer-events:none;z-index:5;border-top:.3cqh solid #1e4d2b}
+.pn .nv-luzes b{width:1.1cqh;height:1.7cqh;border-radius:50% 50% 45% 45%;background:var(--c);box-shadow:0 0 1.2cqh var(--c);margin-top:.5cqh;animation:nvPisca 1.6s ease-in-out infinite}
+@keyframes nvPisca{50%{opacity:.35;box-shadow:none}}
+.pn.nv-borda::after{content:'';position:absolute;inset:0;pointer-events:none;z-index:5;border:1.1cqh solid transparent;border-image:repeating-linear-gradient(45deg,#c81e1e 0 2cqh,#fff 2cqh 4cqh,#1f7a3a 4cqh 6cqh,#fff 6cqh 8cqh) 12}
+.pn .nv-estrelas{position:absolute;inset:0;pointer-events:none;z-index:1}
+.pn .nv-estrelas b{position:absolute;width:1.2cqh;height:1.2cqh;background:#ffe08a;clip-path:polygon(50% 0,61% 38%,100% 50%,61% 62%,50% 100%,39% 62%,0 50%,39% 38%);animation:nvPisca 2.4s ease-in-out infinite}
+.pn .nv-bolas{position:absolute;left:0;right:0;top:0;height:0;pointer-events:none;z-index:5}
+.pn .nv-bolas b{position:absolute;top:0;width:.25cqh;height:var(--h);background:rgba(255,255,255,.6)}
+.pn .nv-bolas b::after{content:'';position:absolute;left:50%;bottom:-3.4cqh;transform:translateX(-50%);width:3cqh;height:3cqh;border-radius:50%;background:radial-gradient(circle at 35% 30%,rgba(255,255,255,.85) 0 .5cqh,var(--c) 1.4cqh);box-shadow:0 .4cqh 1cqh rgba(0,0,0,.4)}
+.pn .nv-faixa{position:absolute;left:0;right:0;height:6cqh;display:flex;align-items:center;justify-content:center;z-index:3;color:#fff8e6;font-weight:900;font-size:calc(min(3cqh,3.2cqw) * var(--rt,1));text-align:center;padding:0 3cqw;border-top:.4cqh solid #e8c35a;border-bottom:.4cqh solid #e8c35a;text-shadow:0 .2cqh .5cqh rgba(0,0,0,.5)}
+.pn .nv-faixa span{transition:opacity .6s;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+@media (prefers-reduced-motion:reduce){.pn .nv-neve i,.pn .nv-luzes b,.pn .nv-estrelas b{animation:none}}
 .pn .corpo{position:absolute;left:2cqw;right:2cqw;top:14cqh;bottom:8cqh;display:flex;gap:1.6cqw}
 .pn .corpo.col{flex-direction:column;gap:1.6cqh}
 .pn .promo{position:relative;border-radius:2cqh;overflow:hidden;display:flex;flex-direction:column;justify-content:flex-end;min-width:0;min-height:0}
@@ -264,11 +297,29 @@ export function desenhar(alvo, cfgBase, opcoes = {}){
   if (cfg.horaTam && cfg.horaTam !== 100) hora.style.fontSize = `calc(min(3.6cqh,4cqw) * ${cfg.horaTam / 100})`;
   if (cfg.horaPos){ hora.style.left = cfg.horaPos.x + '%'; hora.style.top = cfg.horaPos.y + '%'; hora.style.right = 'auto'; hora.style.textAlign = 'center'; }
   if (opcoes.editavel && (cfg.relogio || cfg.data)) arrastarLivre(pn, hora, p => { cfgBase.horaPos = cfg.horaPos = p; }, opcoes.mudou);
+  // 26/11/2026: jeitos de escrever a hora + frase (bíblica ou da loja) passando embaixo do relógio
+  const fmt = HORA_FORMATOS[cfg.horaFormato] ? cfg.horaFormato : 'padrao';
+  if (fmt !== 'padrao') hora.classList.add('hf-' + fmt);
+  hora.innerHTML = '<div class="hr"></div>';
+  const hr = hora.firstChild;
   const tic = () => {
     const d = new Date();
-    hora.innerHTML = `${cfg.relogio ? d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }) : ''}${cfg.data ? `<small>${d.toLocaleDateString('pt-BR', { weekday: 'short', day: '2-digit', month: '2-digit' })}</small>` : ''}`;
+    const h = fmt === 'segundos' ? d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit', second: '2-digit' })
+      : fmt === 'texto' ? `${d.getHours()}h${String(d.getMinutes()).padStart(2, '0')}`
+      : d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+    const dt = fmt === 'extenso' ? d.toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' })
+      : fmt === 'so-hora' ? '' : d.toLocaleDateString('pt-BR', { weekday: 'short', day: '2-digit', month: '2-digit' });
+    hr.innerHTML = `${cfg.relogio ? `<span class="hh">${h}</span>` : ''}${cfg.data && dt ? `<small>${dt}</small>` : ''}`;
   };
-  tic(); const relogio = setInterval(tic, 15000);
+  tic(); const relogio = setInterval(tic, fmt === 'segundos' ? 1000 : 15000);
+  let trocaFrase = null;
+  const frases = cfg.frases?.ativa ? (cfg.frases.lista || []).map(f => String(f || '').trim()).filter(Boolean) : [];
+  if (frases.length){
+    const fr = document.createElement('div'); fr.className = 'frase'; hora.append(fr);
+    let k = Math.floor(Date.now() / 1000 / Math.max(5, cfg.frases.tempo || 12)) % frases.length;
+    fr.textContent = frases[k];
+    if (frases.length > 1) trocaFrase = setInterval(() => { fr.style.opacity = 0; setTimeout(() => { k = (k + 1) % frases.length; fr.textContent = frases[k]; fr.style.opacity = 1; }, 600); }, Math.max(5, cfg.frases.tempo || 12) * 1000);
+  }
 
   // corpo: promoção + lista, conforme o arranjo
   const corpo = document.createElement('div'); corpo.className = 'corpo';
@@ -276,6 +327,26 @@ export function desenhar(alvo, cfgBase, opcoes = {}){
   const coluna = vertical || arr === 'promo-cima' || arr === 'promo-baixo';
   if (coluna) corpo.classList.add('col');
   pn.append(corpo);
+  // 26/11/2026: Natal por cima de qualquer modelo (o dono escolhe os enfeites) + faixa de mensagem
+  const nt = cfg.natal?.ativo ? cfg.natal : null;
+  const temRod = !!(cfg.faixaRodape || cfg.horario || cfg.atualizado);
+  const msgs = nt && nt.faixa !== false ? String(nt.mensagem || 'Feliz Natal! Obrigado pela confiança de todo o ano.').split('|').map(x => x.trim()).filter(Boolean) : [];
+  let trocaMsg = null;
+  if (nt){
+    pn.classList.add('natal-on');
+    if (nt.neve !== false){ const n = document.createElement('div'); n.className = 'nv-neve'; n.innerHTML = '<i></i><i></i>'; pn.append(n); }
+    if (nt.luzes !== false){ const l = document.createElement('div'); l.className = 'nv-luzes'; l.innerHTML = Array.from({ length: 28 }, (_, k) => `<b style="--c:${['#ff3b3b', '#ffd34d', '#3bff7a', '#4db8ff'][k % 4]};animation-delay:${(k % 3) * .5}s"></b>`).join(''); pn.append(l); }
+    if (nt.borda) pn.classList.add('nv-borda');
+    if (nt.estrelas){ const e = document.createElement('div'); e.className = 'nv-estrelas'; e.innerHTML = Array.from({ length: 14 }, (_, k) => `<b style="left:${(k * 37) % 97}%;top:${(k * 53) % 90 + 3}%;animation-delay:${(k % 5) * .7}s"></b>`).join(''); pn.append(e); }
+    if (nt.enfeites !== false){ const o = document.createElement('div'); o.className = 'nv-bolas'; o.innerHTML = '<b style="left:1.2%;--c:#d92b2b;--h:6cqh"></b><b style="right:1.2%;--c:#e8c35a;--h:6cqh"></b>'; pn.append(o); }
+  }
+  if (msgs.length){
+    corpo.style.bottom = `calc(${temRod ? '8cqh' : '1cqh'} + 6.4cqh)`;
+    const fx = document.createElement('div'); fx.className = 'nv-faixa'; fx.style.bottom = temRod ? '7cqh' : '0';
+    fx.style.background = nt.corFaixa || '#b3261e'; fx.innerHTML = `<span>${esc(msgs[0])}</span>`;
+    pn.append(fx);
+    if (msgs.length > 1){ let k = 0; trocaMsg = setInterval(() => { const sp = fx.firstChild; sp.style.opacity = 0; setTimeout(() => { k = (k + 1) % msgs.length; sp.textContent = msgs[k]; sp.style.opacity = 1; }, 600); }, 9000); }
+  }
   const temPromo = (opcoes.editavel ? cfg.promo?.ativa : promoValida(cfg)) && arr !== 'so-precos';
   const temLista = arr !== 'so-promo' || !temPromo;
   let promoEl = null, listaEl = null;
@@ -311,11 +382,17 @@ export function desenhar(alvo, cfgBase, opcoes = {}){
       return `<span class="selo" style="background:${bg};color:${fg};${z.borda ? `box-shadow:0 0 0 .12em ${z.borda} inset;` : ''}">${esc(z.txt)}</span>`; };
     const linha = it => `<div class="li${it.of || it.selo ? ' of' : ''}${it.esg ? ' esg' : ''}${it.desc ? ' combo' : ''}" style="font-size:calc(${fs}cqh * var(--lf,1));background:rgba(255,255,255,.05);outline-color:${(SELOS[it.selo]?.bg) || cor.destaque}">
         <span class="esq">${cfg.fotosItens && it.foto ? `<img class="ft" src="${it.foto}" alt="">` : ''}<span class="nmw"><span class="nm">${esc(it.n)}</span>${seloDe(it)}${it.desc ? `<span class="desc">${esc(it.desc)}</span>` : ''}</span></span><span class="dots"></span><span class="pp" style="color:${cor.preco}">${!it.esg && it.de > it.p ? `<s style="font-size:.55em;opacity:.7;margin-right:.4em">de R$ ${brl(it.de)}</s>` : ''}${it.esg ? 'esgotado' : (it.de > it.p ? 'por ' : '') + 'R$ ' + brl(it.p)}<small>/${esc(it.u || 'kg')}</small></span></div>`;
-    const itens = (cfg.itens || []).filter(i => i.n);
+    const itens = (cfg.itens || []).filter(i => i.n && !i.oculto);   // oculto = o dono tirou da TV sem apagar
+    // 26/11/2026: logo da loja passando no meio das carnes
+    const logoL = cfg.logoNaLista && (cfg.logoLista || cfg.logo);
+    const cada = Math.max(3, cfg.logoListaCada || 6);
+    const logoHtml = logoL ? `<div class="li-logo"><img src="${logoL}" alt=""></div>` : '';
     let html = '';
     if (cfg.agruparCategoria && !lado){
-      [...CATEGORIAS, ...new Set(itens.map(i => i.c).filter(c => !CATEGORIAS.includes(c)))].forEach(c => { const g = itens.filter(i => (i.c || 'Outros') === c); if (g.length) html += `<div class="cat" style="color:${cor.destaque};font-size:${2.4 * escala}cqh">${c}</div>` + g.map(linha).join(''); });
-    } else html = itens.map(linha).join('');
+      [...CATEGORIAS, ...new Set(itens.map(i => i.c).filter(c => !CATEGORIAS.includes(c)))].forEach(c => { const g = itens.filter(i => (i.c || 'Outros') === c); if (g.length) html += `<div class="cat" style="color:${cor.destaque};font-size:${2.4 * escala}cqh">${c}</div>` + g.map(linha).join('') + logoHtml; });
+    } else html = itens.map((it, n) => linha(it) + (logoHtml && (n + 1) % cada === 0 ? logoHtml : '')).join('');
+    if (logoHtml && !html.includes('li-logo')) html += logoHtml;
+    if (!itens.length) html = `<div class="li" style="font-size:${fs}cqh;justify-content:center;opacity:.6">${opcoes.editavel ? 'Nenhuma carne marcada para passar na TV' : ''}</div>`;
     trilho.innerHTML = html;
     listaEl.append(trilho);
     anim = movimentar(listaEl, trilho, cfg, opcoes);
@@ -370,7 +447,7 @@ export function desenhar(alvo, cfgBase, opcoes = {}){
     titulo: pn.querySelector('.topo .loja'), hora: pn.querySelector('.hora'), logo: pn.querySelector('.logo'),
     promo: promoEl, lista: listaEl, rod: pn.querySelector('.rod') });
 
-  return { parar(){ clearInterval(relogio); anim?.parar(); reposAlcas?.parar(); } };
+  return { parar(){ clearInterval(relogio); clearInterval(trocaFrase); clearInterval(trocaMsg); anim?.parar(); reposAlcas?.parar(); } };
 }
 
 function arrastarLivre(pn, el, salvar, mudou){
@@ -434,7 +511,7 @@ function movimentar(caixa, trilho, cfg, opcoes){
     const dt = (now - t0) / 1000;
     if (mov === 'paginas'){
       const alt = caixa.clientHeight, total = trilho.scrollHeight, nPag = Math.max(1, Math.ceil(total / alt));
-      if (now - ultimaTroca > 8000){ pagina = (pagina + 1) % nPag; ultimaTroca = now; trilho.style.transition = 'transform .8s'; trilho.style.transform = `translateY(${-pagina * alt}px)`; }
+      if (now - ultimaTroca > Math.max(3, cfg.pausa || 8) * 1000){ pagina = (pagina + 1) % nPag; ultimaTroca = now; trilho.style.transition = 'transform .8s'; trilho.style.transform = `translateY(${-pagina * alt}px)`; }
     } else if (precisa() || trilho.innerHTML !== original){
       const meio = lado ? trilho.scrollWidth / 2 : trilho.scrollHeight / 2;
       const d = (dt * v) % meio;
