@@ -221,6 +221,14 @@
     <label for="promoTam">Tamanho do texto da promoção</label><input type="range" id="promoTam" min="50" max="170" step="5">
     <label for="fotoTam">Tamanho da foto de cada corte</label><input type="range" id="fotoTam" min="60" max="220" step="10">
     <label for="rodTam">Tamanho do rodapé</label><input type="range" id="rodTam" min="50" max="170" step="5">
+    <div style="margin-top:14px;padding-top:10px;border-top:1px solid var(--l)"><b style="font:800 14px Archivo,sans-serif">Espaços da tela</b>
+    <p class="estado" style="margin:4px 0 0">Na prévia também dá: arraste as barrinhas amarelas embaixo da faixa de cima e em cima do rodapé, e a barra entre a promoção e os preços.</p></div>
+    <label for="eTopo">Altura da faixa de cima (logo, nome e relógio)</label><input type="range" id="eTopo" min="8" max="40" step="1">
+    <label for="eLogo">Tamanho da logo</label><input type="range" id="eLogo" min="6" max="35" step="1">
+    <label for="eHora">Tamanho do relógio</label><input type="range" id="eHora" min="60" max="300" step="10">
+    <label for="ePromo">Tamanho do quadro da promoção</label><input type="range" id="ePromo" min="20" max="75" step="1">
+    <label for="eRod">Altura do rodapé</label><input type="range" id="eRod" min="4" max="16" step="1">
+    <p class="estado" style="margin:4px 0 0">A faixa de cima cresce sozinha quando a logo ou o relógio ficam maiores.</p>
     <p class="estado" style="margin:6px 0">Dica: na prévia, cada bloco tem uma seta amarela ⤡. Arraste a seta para aumentar ou diminuir, ou clique nela e use as setas do teclado.</p>
     <button type="button" id="tamVolta">Voltar os tamanhos ao padrão</button>
     <p class="estado">Na prévia, arraste a barra entre a promoção e os preços para mudar o tamanho.</p>
@@ -448,13 +456,14 @@ grupo('orient', { paisagem: 'Deitada (16:9)', retrato: 'Em pé (9:16)' }, 'orien
 liga('vel', e => e.value = cfg.velocidade, e => cfg.velocidade = +e.value);
 liga('fonte', e => e.value = cfg.tamFonte, e => cfg.tamFonte = +e.value);
 ['tituloTam', 'promoTam', 'fotoTam', 'rodTam'].forEach(k => liga(k, e => e.value = cfg[k] || 100, e => cfg[k] = +e.value));
+[['eTopo', 'topoAlt', 13], ['eLogo', 'logoTam', 14], ['eHora', 'horaTam', 100], ['ePromo', 'divisao', 42], ['eRod', 'rodAlt', 7]].forEach(([id, k, d]) => liga(id, e => e.value = cfg[k] ?? d, e => { cfg[k] = +e.value; if (k !== 'divisao' && k !== 'rodAlt') cfg.topoAuto = true; if (k === 'topoAlt') globalThis.__topoManual = Date.now(); sincTam(); }));
 liga('fcTam', e => e.value = cfg.fotoTam || 100, e => { cfg.fotoTam = +e.value; $('fotoTam').value = e.value; if (!cfg.fotosItens){ cfg.fotosItens = true; acab(); } });
 // a seta da prévia muda o cfg direto: os controles do lado acompanham
-function sincTam(){ const m = { fcTam: 'fotoTam', fonte: 'tamFonte', tituloTam: 'tituloTam', promoTam: 'promoTam', fotoTam: 'fotoTam', rodTam: 'rodTam', logoTam: 'logoTam', horaTam: 'horaTam' };
-  Object.entries(m).forEach(([id, k]) => { const e = $(id); if (e) e.value = cfg[k] ?? (k === 'logoTam' ? 14 : 100); }); }
+function sincTam(){ const m = { eTopo: 'topoAlt', eLogo: 'logoTam', eHora: 'horaTam', ePromo: 'divisao', eRod: 'rodAlt', fcTam: 'fotoTam', fonte: 'tamFonte', tituloTam: 'tituloTam', promoTam: 'promoTam', fotoTam: 'fotoTam', rodTam: 'rodTam', logoTam: 'logoTam', horaTam: 'horaTam' };
+  Object.entries(m).forEach(([id, k]) => { const e = $(id); if (e && document.activeElement !== e) e.value = cfg[k] ?? ({ logoTam: 14, topoAlt: 13, rodAlt: 7, divisao: 42 }[k] ?? 100); }); }
 // tocar na promoção da prévia abre a escolha da foto
 $('previa').addEventListener('click', e => { if (e.target.closest('.alca-tam')) return; if (e.target.closest('.promo .foto, .promo .semfoto')) $('promoFoto').click(); });
-$('tamVolta').onclick = () => { Object.assign(cfg, { tamFonte: 100, tituloTam: 100, promoTam: 100, fotoTam: 100, rodTam: 100, horaTam: 100, logoTam: 14 }); sincTam(); mudou(); toast('Tamanhos de volta ao padrão.'); };
+$('tamVolta').onclick = () => { Object.assign(cfg, { tamFonte: 100, tituloTam: 100, promoTam: 100, fotoTam: 100, rodTam: 100, horaTam: 100, logoTam: 14, divisao: 42 }); delete cfg.topoAlt; delete cfg.rodAlt; delete cfg.topoAuto; sincTam(); mudou(); toast('Tamanhos de volta ao padrão.'); };
 
 // ---------- logo e identidade ----------
 liga('loja', e => e.value = cfg.loja, e => cfg.loja = e.value);
@@ -464,7 +473,7 @@ $('logoTira').onclick = () => { cfg.logo = null; mudou(); };
 $('cantos').onclick = e => { const b = e.target.closest('button'); if (!b) return; cfg.logoPos = { canto: b.dataset.c, x: 3, y: 4 }; marcaCantos(); mudou(); };
 const marcaCantos = () => $('cantos').querySelectorAll('button').forEach(b => b.setAttribute('aria-pressed', b.dataset.c === cfg.logoPos?.canto));
 marcaCantos();
-liga('logoTam', e => e.value = cfg.logoTam, e => cfg.logoTam = +e.value);
+liga('logoTam', e => e.value = cfg.logoTam, e => { cfg.logoTam = +e.value; cfg.topoAuto = true; });
 
 // ---------- cores ----------
 function temas(){
@@ -483,7 +492,7 @@ temas(); pintaCores();
 
 // ---------- horário ----------
 liga('relogio', e => e.checked = cfg.relogio, e => cfg.relogio = e.checked, 'change');
-liga('horaTam', e => e.value = cfg.horaTam || 100, e => cfg.horaTam = +e.value, 'input');
+liga('horaTam', e => e.value = cfg.horaTam || 100, e => { cfg.horaTam = +e.value; cfg.topoAuto = true; }, 'input');
 $('horaVolta').onclick = () => { delete cfg.horaPos; cfg.horaTam = 100; $('horaTam').value = 100; salvar(); previa(); };
 liga('data', e => e.checked = cfg.data, e => cfg.data = e.checked, 'change');
 liga('horario', e => e.value = cfg.horario || '', e => cfg.horario = e.value);
@@ -820,7 +829,7 @@ semana();
     ['Logo e identidade', 'Logo e nome', I('<rect x="4" y="4" width="16" height="16" rx="4"/><path d="M8 15l3-3 2 2 3-4"/>')],
     ['Modelo e acabamento', 'Visual', I('<path d="M4 20l4-1 11-11-3-3L5 16z"/>')],
     ['Cores', 'Cores', I('<circle cx="12" cy="12" r="9"/><circle cx="9" cy="9" r="1.5"/><circle cx="15" cy="9" r="1.5"/><circle cx="9" cy="15" r="1.5"/>')],
-    ['Layout e movimento', 'Tamanhos', I('<path d="M4 9V4h5M20 15v5h-5M4 4l7 7M20 20l-7-7"/>')],
+    ['Layout e movimento', 'Tamanhos e espaços', I('<path d="M4 9V4h5M20 15v5h-5M4 4l7 7M20 20l-7-7"/>')],
     ['Horário e rodapé', 'Horário e rodapé', I('<path d="M3 17h18M3 21h18"/><rect x="5" y="4" width="14" height="9" rx="2"/>')],
     ['Painel da semana', 'Semana', I('<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/>')],
     ['Fila de senhas', 'Senhas', I('<path d="M5 4h14v16l-3-2-2 2-2-2-2 2-2-2-3 2z"/>')],

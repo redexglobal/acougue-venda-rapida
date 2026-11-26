@@ -101,7 +101,7 @@ export function contraste(a, b){
 const CSS = `
 .pn{position:relative;width:100%;height:100%;overflow:hidden;font-family:Archivo,Inter,system-ui,sans-serif;container-type:size}
 .pn *{box-sizing:border-box}
-.pn .topo{position:absolute;left:0;right:0;top:0;height:13cqh;display:flex;align-items:center;justify-content:center;flex-direction:column;z-index:2}
+.pn .topo{position:absolute;left:0;right:0;top:0;height:var(--ta,13cqh);display:flex;align-items:center;justify-content:center;flex-direction:column;z-index:2}
 .pn .loja{font-weight:900;font-size:calc(min(6cqh,6.2cqw) * var(--tt,1));max-width:70cqw;text-align:center;text-transform:uppercase;letter-spacing:.06em;line-height:1}
 .pn .sub{font-size:calc(min(2.3cqh,3.4cqw) * var(--tt,1));opacity:.85;margin-top:.6cqh}
 .pn .hora{position:absolute;top:3cqh;font-weight:800;font-size:min(3.6cqh,4cqw);text-align:right;line-height:1.1}
@@ -130,7 +130,7 @@ const CSS = `
 .pn .nv-faixa{position:absolute;left:0;right:0;height:6cqh;display:flex;align-items:center;justify-content:center;z-index:3;color:#fff8e6;font-weight:900;font-size:calc(min(3cqh,3.2cqw) * var(--rt,1));text-align:center;padding:0 3cqw;border-top:.4cqh solid #e8c35a;border-bottom:.4cqh solid #e8c35a;text-shadow:0 .2cqh .5cqh rgba(0,0,0,.5)}
 .pn .nv-faixa span{transition:opacity .6s;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 @media (prefers-reduced-motion:reduce){.pn .nv-neve i,.pn .nv-luzes b,.pn .nv-estrelas b{animation:none}}
-.pn .corpo{position:absolute;left:2cqw;right:2cqw;top:14cqh;bottom:8cqh;display:flex;gap:1.6cqw}
+.pn .corpo{position:absolute;left:2cqw;right:2cqw;top:calc(var(--ta,13cqh) + 1cqh);bottom:calc(var(--ra,7cqh) + 1cqh);display:flex;gap:1.6cqw}
 .pn .corpo.col{flex-direction:column;gap:1.6cqh}
 .pn .promo{position:relative;border-radius:2cqh;overflow:hidden;display:flex;flex-direction:column;justify-content:flex-end;min-width:0;min-height:0}
 .pn .promo .foto{position:absolute;inset:0;background-size:cover;background-position:center}
@@ -156,9 +156,10 @@ const CSS = `
 .pn .li.combo{align-items:center}
 .pn .li.esg{opacity:.45}.pn .li.esg .pp{text-decoration:line-through}
 .pn .trilho.lado .li{margin:0;padding:2cqh 2.4cqh;flex-direction:column;align-items:flex-start;min-width:28cqw}
-.pn .rod{position:absolute;left:0;right:0;bottom:0;height:7cqh;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:calc(min(2.8cqh,2.9cqw) * var(--rt,1));gap:3cqw;flex-wrap:wrap;text-align:center;padding:0 2cqw;line-height:1.2}
+.pn .rod{position:absolute;left:0;right:0;bottom:0;height:var(--ra,7cqh);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:calc(min(2.8cqh,2.9cqw) * var(--rt,1));gap:3cqw;flex-wrap:wrap;text-align:center;padding:0 2cqw;line-height:1.2}
 .pn .logo{position:absolute;z-index:3;cursor:default;touch-action:none}
-.pn .logo.topo-l img{max-height:min(9cqh,calc(13cqh - var(--ly,4cqh)));width:auto;max-width:100%}
+.pn .logo.topo-l img{max-height:min(9cqh,calc(var(--ta,13cqh) - var(--ly,4cqh) - .4cqh))}
+.pn.topoAuto .logo.topo-l img{max-height:calc(var(--ta,13cqh) - var(--ly,4cqh) - .4cqh);width:auto;max-width:100%}
 .pn .logo img{width:100%;height:auto;display:block;filter:drop-shadow(0 .6cqh 1.4cqh rgba(0,0,0,.35))}
 .pn.editavel .li,.pn.editavel .promo,.pn.editavel .topo .loja,.pn.editavel .rod,.pn.editavel .nv-faixa{cursor:pointer}.pn.editavel .li:hover{outline:.3cqh solid #f2b630!important}
 .pn.editavel .hora{cursor:grab;outline:.3cqh dashed rgba(255,255,255,.45);outline-offset:.4cqh;border-radius:.6cqh}
@@ -166,6 +167,13 @@ const CSS = `
 .pn .div{position:absolute;z-index:4;background:rgba(255,255,255,.0)}
 .pn.editavel .div{background:rgba(255,255,255,.25);border-radius:1cqh}
 .pn.editavel .div:hover{background:rgba(255,255,255,.55)}
+
+/* 26/11/2026: bordas arrastáveis do topo e do rodapé (só no editor) */
+.pn .borda{position:absolute;left:0;right:0;height:1.6cqh;z-index:7;cursor:row-resize;touch-action:none;display:flex;justify-content:center;align-items:center}
+.pn .borda::before{content:'';width:12cqw;height:.7cqh;border-radius:1cqh;background:#f2b630;box-shadow:0 0 0 .25cqh rgba(0,0,0,.5);opacity:.85}
+.pn .borda:hover::before{opacity:1;background:#fff}
+.pn .borda .vl{position:absolute;left:calc(50% + 7cqw);background:#111;color:#fff;font:700 1.7cqh system-ui,sans-serif;padding:.2cqh .7cqh;border-radius:.6cqh;opacity:0;pointer-events:none;white-space:nowrap}
+.pn .borda:hover .vl,.pn .borda.ativa .vl{opacity:1}
 /* 26/11/2026: seta de tamanho de cada bloco (só no editor) */
 .pn .alca-tam{position:absolute;z-index:6;width:4.2cqh;height:4.2cqh;min-width:22px;min-height:22px;padding:0;border-radius:50%;border:.25cqh solid #fff;background:#f2b630;color:#111;font:900 2.6cqh/1 system-ui,sans-serif;display:grid;place-items:center;cursor:nwse-resize;touch-action:none;box-shadow:0 .4cqh 1.2cqh rgba(0,0,0,.5);transform:translate(-50%,-50%)}
 .pn .alca-tam:hover,.pn .alca-tam:focus-visible{background:#fff;outline:.3cqh solid #f2b630}
@@ -178,7 +186,7 @@ const CSS = `
 .pn .li,.pn .cat,.pn .rod,.pn .hora,.pn .promo .cx{font-family:var(--fx)}
 .pn .promo .pit,.pn .promo .pr{font-family:var(--ft)}
 .pn .li .dots{display:none;flex:1;border-bottom:.35cqh dotted currentColor;opacity:.45;margin:0 .4em .25em;min-width:.4em}
-.pn .li .ft{width:calc(1.9em * var(--ft,1));height:calc(1.9em * var(--ft,1));border-radius:.4em;object-fit:cover;flex:none;margin-right:.5em;align-self:center}
+.pn .li .ft{width:calc(1.9em * var(--fz,1));height:calc(1.9em * var(--fz,1));border-radius:.4em;object-fit:cover;flex:none;margin-right:.5em;align-self:center}
 .pn .li .esq{display:flex;align-items:center;min-width:0;flex:0 1 auto}
 .pn .li .pp{flex:none}
 .pn .li .dots{flex:1 1 0}
@@ -283,7 +291,8 @@ export function desenhar(alvo, cfgBase, opcoes = {}){
   pn.style.backgroundColor = cor.fundo; pn.style.color = cor.texto;
   pn.style.setProperty('--d', cor.destaque); pn.style.setProperty('--dt', contraste(cor.destaque, '#000000') > contraste(cor.destaque, '#ffffff') ? '#111' : '#fff'); pn.style.setProperty('--ft', `'${est.tit}'`); pn.style.setProperty('--fx', `'${est.txt}'`);
   if (cfg.fotoLojaFundo && cfg.fotoLoja){ const fl = document.createElement('div'); fl.className = 'fundoLoja'; fl.style.backgroundImage = `url('${cfg.fotoLoja}')`; pn.append(fl); }
-  [['--tt', 'tituloTam'], ['--pt', 'promoTam'], ['--rt', 'rodTam'], ['--ft', 'fotoTam']].forEach(([v, k]) => { if (cfg[k] && cfg[k] !== 100) pn.style.setProperty(v, cfg[k] / 100); });
+  if (cfg.topoAlt) pn.style.setProperty('--ta', cfg.topoAlt + 'cqh'); if (cfg.rodAlt) pn.style.setProperty('--ra', cfg.rodAlt + 'cqh');
+  [['--tt', 'tituloTam'], ['--pt', 'promoTam'], ['--rt', 'rodTam'], ['--fz', 'fotoTam']].forEach(([v, k]) => { if (cfg[k] && cfg[k] !== 100) pn.style.setProperty(v, cfg[k] / 100); });
   pn.setAttribute('role', 'img'); pn.setAttribute('aria-label', `Painel de preços de ${cfg.loja}`);
   alvo.append(pn);
 
@@ -342,8 +351,8 @@ export function desenhar(alvo, cfgBase, opcoes = {}){
     if (nt.enfeites !== false){ const o = document.createElement('div'); o.className = 'nv-bolas'; o.innerHTML = '<b style="left:1.2%;--c:#d92b2b;--h:6cqh"></b><b style="right:1.2%;--c:#e8c35a;--h:6cqh"></b>'; pn.append(o); }
   }
   if (msgs.length){
-    corpo.style.bottom = `calc(${temRod ? '8cqh' : '1cqh'} + 6.4cqh)`;
-    const fx = document.createElement('div'); fx.className = 'nv-faixa'; fx.style.bottom = temRod ? '7cqh' : '0';
+    corpo.style.bottom = temRod ? 'calc(var(--ra,7cqh) + 7.4cqh)' : '7.4cqh';
+    const fx = document.createElement('div'); fx.className = 'nv-faixa'; fx.style.bottom = temRod ? 'var(--ra,7cqh)' : '0';
     fx.style.background = nt.corFaixa || '#b3261e'; fx.innerHTML = `<span>${esc(msgs[0])}</span>`;
     pn.append(fx);
     if (msgs.length > 1){ let k = 0; trocaMsg = setInterval(() => { const sp = fx.firstChild; sp.style.opacity = 0; setTimeout(() => { k = (k + 1) % msgs.length; sp.textContent = msgs[k]; sp.style.opacity = 1; }, 600); }, 9000); }
@@ -443,10 +452,60 @@ export function desenhar(alvo, cfgBase, opcoes = {}){
     });
   }
 
+  // 26/11/2026: a faixa de cima cresce sozinha quando a logo ou o relógio ficam maiores (os quadros de baixo encolhem)
+  if (cfg.topoAuto) pn.classList.add('topoAuto');
+  // quanto a faixa de cima precisa para caber logo e relógio (em cqh)
+  const precisa = () => {
+    const H = pn.clientHeight; if (!H) return null; let need = 0, logo = 0, hora = 0;
+    const lgEl = pn.querySelector('.logo.topo-l'), im = lgEl?.querySelector('img');
+    if (im?.naturalWidth){ logo = lgEl.clientWidth * im.naturalHeight / im.naturalWidth / H * 100; need = Math.max(need, (cfg.logoPos?.y ?? 4) + logo + .6); }
+    const hr = pn.querySelector('.hora');
+    if (hr && (!cfg.horaPos || cfg.horaPos.y < 15)){ hora = (hr.offsetTop + hr.offsetHeight) / H * 100; need = Math.max(need, hora + .8); }
+    return { need, logo, hora };
+  };
+  // só no editor e só depois que o dono mexeu no tamanho: a faixa cresce e o novo tamanho fica gravado (a TV usa o gravado)
+  const encaixar = () => {
+    if (!opcoes.editavel || !cfgBase.topoAuto) return; const m = precisa(); if (!m) return;
+    if (globalThis.__topoManual && Date.now() - globalThis.__topoManual < 2000){   // o dono acabou de mudar a altura da faixa pelo controle: logo e relógio se ajustam a ela
+      globalThis.__topoManual = 0; pn._manual = true; const v = cfgBase.topoAlt || 13, ly = cfg.logoPos?.y ?? 4; let mudou = false;
+      if (m.logo && ly + m.logo + .6 > v + .3){ cfgBase.logoTam = Math.max(6, Math.floor((cfgBase.logoTam || 14) * Math.max(.2, (v - ly - .6) / m.logo))); mudou = true; }
+      if (m.hora && m.hora + .8 > v + .3){ cfgBase.horaTam = Math.max(60, Math.floor((cfgBase.horaTam || 100) * Math.max(.3, (v - 3.8) / (m.hora - 3)))); mudou = true; }
+      if (mudou) setTimeout(() => opcoes.mudou?.(), 50); return;
+    }
+    if (pn._manual) return;
+    const atual = cfgBase.topoAlt || 13;
+    if (m.need > atual + .4){ const v = Math.min(40, Math.ceil(m.need)); cfgBase.topoAlt = cfg.topoAlt = v; pn.style.setProperty('--ta', v + 'cqh'); clearTimeout(pn._salvaTopo); pn._salvaTopo = setTimeout(() => opcoes.mudou?.(), 250); }
+  };
+  requestAnimationFrame(encaixar); pn.querySelector('.logo img')?.addEventListener('load', encaixar);
+  document.fonts?.ready?.then(encaixar);
+  if (opcoes.editavel){
+    const borda = (qual) => {
+      const el = document.createElement('div'); el.className = 'borda'; el.innerHTML = '<span class="vl"></span>';
+      const ch = qual === 'topo' ? 'topoAlt' : 'rodAlt', min = qual === 'topo' ? 8 : 4, max = qual === 'topo' ? 40 : 16, pad = qual === 'topo' ? 13 : 7;
+      el.title = qual === 'topo' ? 'Arraste para aumentar ou diminuir a faixa de cima (logo, nome e relógio)' : 'Arraste para aumentar ou diminuir o rodapé';
+      const pos = () => { const H = pn.clientHeight; const v = qual === 'topo' ? (cfgBase.topoAlt || pad) : (cfgBase.rodAlt || pad);
+        el.style.top = qual === 'topo' ? `calc(${v}cqh - .8cqh)` : ''; el.style.bottom = qual === 'rod' ? `calc(${v}cqh - .8cqh)` : '';
+        el.querySelector('.vl').textContent = (qual === 'topo' ? 'Faixa de cima ' : 'Rodapé ') + Math.round(v) + '%'; };
+      el.addEventListener('pointerdown', e => {
+        e.preventDefault(); e.stopPropagation(); el.setPointerCapture(e.pointerId); el.classList.add('ativa');
+        const b = pn.getBoundingClientRect();
+        const mover = ev => { let v = qual === 'topo' ? (ev.clientY - b.top) / b.height * 100 : (b.bottom - ev.clientY) / b.height * 100;
+          v = Math.round(Math.min(max, Math.max(min, v))); cfgBase[ch] = cfg[ch] = v; if (qual === 'topo'){ cfgBase.topoAuto = cfg.topoAuto = true; pn.classList.add('topoAuto'); } pn.style.setProperty(qual === 'topo' ? '--ta' : '--ra', v + 'cqh'); pos(); };
+        const soltar = () => { el.removeEventListener('pointermove', mover); el.classList.remove('ativa');
+          if (qual === 'topo'){ const v = cfgBase.topoAlt, m = precisa(), ly = cfg.logoPos?.y ?? 4;
+            if (m?.logo && ly + m.logo + .6 > v) cfgBase.logoTam = Math.max(6, Math.floor((cfgBase.logoTam || 14) * Math.max(.2, (v - ly - .6) / m.logo)));
+            if (m?.hora && m.hora + .8 > v) cfgBase.horaTam = Math.max(60, Math.floor((cfgBase.horaTam || 100) * Math.max(.3, (v - 3.8) / (m.hora - 3)))); }
+          opcoes.mudou?.(); };
+        el.addEventListener('pointermove', mover); el.addEventListener('pointerup', soltar, { once: true });
+      });
+      pn.append(el); requestAnimationFrame(pos); setTimeout(pos, 400); return el;
+    };
+    borda('topo'); if (pn.querySelector('.rod')) borda('rod');
+  }
   let reposAlcas = null;
   if (opcoes.editavel) reposAlcas = alcasDeTamanho(pn, cfgBase, cfg, opcoes.mudou, {
     titulo: pn.querySelector('.topo .loja'), hora: pn.querySelector('.hora'), logo: pn.querySelector('.logo'),
-    promo: promoEl, lista: listaEl, rod: pn.querySelector('.rod') });
+    promo: promoEl, lista: listaEl, rod: pn.querySelector('.rod') }, encaixar);
 
   return { parar(){ clearInterval(relogio); clearInterval(trocaFrase); clearInterval(trocaMsg); anim?.parar(); reposAlcas?.parar(); } };
 }
@@ -568,12 +627,12 @@ const TAMANHOS = {
 };
 export const CHAVES_TAMANHO = Object.values(TAMANHOS).map(t => t.chave).concat('fotoTam');
 
-function alcasDeTamanho(pn, cfgBase, cfg, mudou, alvos){
+function alcasDeTamanho(pn, cfgBase, cfg, mudou, alvos, encaixarTopo){
   const alcas = [];
   const aplicar = {
     titulo: v => pn.style.setProperty('--tt', v / 100),
-    hora: v => { alvos.hora.style.fontSize = `calc(min(3.6cqh,4cqw) * ${v / 100})`; },
-    logo: v => { alvos.logo.style.width = v + '%'; },
+    hora: v => { alvos.hora.style.fontSize = `calc(min(3.6cqh,4cqw) * ${v / 100})`; cfgBase.topoAuto = cfg.topoAuto = true; pn.classList.add('topoAuto'); encaixarTopo?.(); },
+    logo: v => { alvos.logo.style.width = v + '%'; cfgBase.topoAuto = cfg.topoAuto = true; pn.classList.add('topoAuto'); encaixarTopo?.(); },
     promo: v => pn.style.setProperty('--pt', v / 100),
     lista: (v, v0) => alvos.lista.style.setProperty('--lf', v / v0),   // ao soltar, redesenha com o tamanho certo
     rod: v => pn.style.setProperty('--rt', v / 100),
