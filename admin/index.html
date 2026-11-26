@@ -100,7 +100,7 @@ $('btnEntrar').onclick = async () => {
   if (!r.ok){ $('erroEntrar').textContent = r.erro; return; }
   token = r.token; sessionStorage.setItem('admin-token', token); $('senhaAdmin').value = ''; carregar();
 };
-$('senhaAdmin').onkeydown = e => e.key === 'Enter' && $('btnEntrar').click();
+$('senhaAdmin').onkeydown = e => { if (e.key === 'Enter') $('btnEntrar').click(); };
 
 async function carregar(){
   const r = await api('admin-listar');
