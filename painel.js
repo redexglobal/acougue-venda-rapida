@@ -160,7 +160,7 @@ const CSS = `
 .pn .trilho.lado .li{margin:0;padding:2cqh 2.4cqh;flex-direction:column;align-items:flex-start;min-width:28cqw}
 .pn .rod{position:absolute;left:0;right:0;bottom:0;height:var(--ra,7cqh);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:calc(min(2.8cqh,2.9cqw) * var(--rt,1));gap:3cqw;flex-wrap:wrap;text-align:center;padding:0 2cqw;line-height:1.2}
 .pn .logo{position:absolute;z-index:3;cursor:default;touch-action:none}
-.pn .logo.topo-l img{max-height:min(9cqh,calc(var(--ta,13cqh) - var(--ly,4cqh) - .4cqh))}
+.pn .logo.topo-l img{max-height:min(9cqh,calc(var(--ta,13cqh) - var(--ly,4cqh) - .4cqh));width:auto;max-width:100%}
 .pn.topoAuto .logo.topo-l img{max-height:calc(var(--ta,13cqh) - var(--ly,4cqh) - .4cqh);width:auto;max-width:100%}
 .pn .logo img{width:100%;height:auto;display:block;filter:drop-shadow(0 .6cqh 1.4cqh rgba(0,0,0,.35))}
 .pn.editavel .li,.pn.editavel .promo,.pn.editavel .topo .loja,.pn.editavel .rod,.pn.editavel .nv-faixa{cursor:pointer}.pn.editavel .li:hover{outline:.3cqh solid #f2b630!important}
