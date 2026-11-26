@@ -25,7 +25,7 @@
   summary{cursor:pointer;font:800 15px Archivo,sans-serif;padding:10px 0;list-style:none;display:flex;justify-content:space-between}
   summary::after{content:'+';color:var(--s)}details[open] summary::after{content:'–'}
   label{display:block;font-size:13px;color:var(--s);margin:10px 0 4px}
-  input[type=text],input[type=number],select,textarea{width:100%;background:#120f0e;border:1px solid var(--l);color:var(--t);border-radius:9px;padding:9px 10px;font:inherit}
+  input[type=text],input[type=number],input[type=password],input[type=email],input[type=tel],input:not([type]),select,textarea{width:100%;background:#120f0e;border:1px solid var(--l);color:var(--t);border-radius:9px;padding:9px 10px;font:inherit}
   input[type=range]{width:100%}
   .lado{display:grid;grid-template-columns:1fr 1fr;gap:8px}
   .grupo{display:flex;flex-wrap:wrap;gap:6px}
@@ -76,7 +76,7 @@
   <h2 style="margin:0 0 8px;font:900 19px Archivo,sans-serif">Entrar</h2>
   <p class="estado" style="margin:0 0 6px">Com a sua conta, os preços ficam guardados na nuvem e a TV atualiza sozinha.</p>
   <label for="cUsuario">Usuário</label><input type="text" id="cUsuario" autocomplete="username">
-  <label for="cSenha">Senha</label><input type="password" id="cSenha" autocomplete="current-password">
+  <label for="cSenha">Senha</label><div style="display:flex;gap:6px"><input type="password" id="cSenha" autocomplete="current-password" style="flex:1"><button type="button" id="cVer" aria-label="Mostrar a senha" style="white-space:nowrap">Mostrar</button></div>
   <p class="alerta" id="cErro" role="alert"></p>
   <div class="grupo"><button class="prim" type="button" id="cEntrar">Entrar</button><button type="button" onclick="this.closest('dialog').close()">Cancelar</button></div>
   <p class="estado" style="margin-top:10px">Ainda não tem conta? <a href="https://wa.me/5562984924326?text=Quero%20assinar%20o%20painel%20de%20pre%C3%A7os" target="_blank" rel="noopener" style="color:#ffb199">Fale com a Kairós</a>.</p>
@@ -470,6 +470,9 @@ function salvarNuvem(){
 }
 function botaoConta(){ $('btnConta').textContent = conta.token ? 'Sair da conta' : 'Entrar na minha conta'; if (!conta.token) faixa(null); }
 $('btnConta').onclick = () => { if (conta.token){ conta.token = ''; conta.dados = null; localStorage.removeItem('dono-token'); botaoConta(); toast('Você saiu. O painel continua salvo neste aparelho.'); } else { $('cErro').textContent = ''; $('dEntrar').showModal(); $('cUsuario').focus(); } };
+$('cVer').onclick = () => { const e = $('cSenha'), ver = e.type === 'password'; e.type = ver ? 'text' : 'password'; $('cVer').textContent = ver ? 'Ocultar' : 'Mostrar'; e.focus(); };
+$('cSenha').addEventListener('keydown', e => { if (e.key === 'Enter') $('cEntrar').click(); });
+$('cUsuario').addEventListener('keydown', e => { if (e.key === 'Enter') $('cSenha').focus(); });
 $('cEntrar').onclick = async () => {
   const r = await apiConta('entrar', { usuario: $('cUsuario').value, senha: $('cSenha').value });
   if (!r.ok){ $('cErro').textContent = r.status === 503 ? 'O sistema de contas está sendo ligado. Tente mais tarde.' : (r.erro || 'Não deu certo.'); return; }
