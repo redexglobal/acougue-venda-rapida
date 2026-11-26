@@ -43,13 +43,13 @@ const tela = document.getElementById('tela'), aviso = document.getElementById('a
 let atual = null, assinatura = '';
 
 // de onde vem a configuração: 1) ?loja= na nuvem  2) #c= no link  3) o que o editor salvou neste aparelho
-const q = new URLSearchParams(location.search), conta = q.get('conta'), tela = q.get('tela') || '1';
+const q = new URLSearchParams(location.search), conta = q.get('conta'), numTela = q.get('tela') || '1';
 let faixaConta = null, ultimaBoa = null, versao = 0, rapido = false;
 // 24/11/2026: TV de cliente pagante (?conta=): preços da nuvem + situação do pagamento
 async function ler(){
   if (conta){
     try {
-      const r = await fetch(`/api/conta?acao=tv&id=${encodeURIComponent(conta)}&tela=${encodeURIComponent(tela)}${ultimaBoa ? '&desde=' + versao : ''}`, { cache: 'no-store' });
+      const r = await fetch(`/api/conta?acao=tv&id=${encodeURIComponent(conta)}&tela=${encodeURIComponent(numTela)}${ultimaBoa ? '&desde=' + versao : ''}`, { cache: 'no-store' });
       const j = await r.json();
       if (r.status === 503){ mostrarAviso('O sistema está sendo ligado. Volte em instantes.'); return null; }
       if (!r.ok){ mostrarAviso(j.erro || 'Painel não encontrado. Confira o link com a Kairós.'); return null; }
