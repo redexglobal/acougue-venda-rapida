@@ -160,6 +160,7 @@ const CSS = `
 .pn .logo{position:absolute;z-index:3;cursor:default;touch-action:none}
 .pn .logo.topo-l img{max-height:min(9cqh,calc(13cqh - var(--ly,4cqh)));width:auto;max-width:100%}
 .pn .logo img{width:100%;height:auto;display:block;filter:drop-shadow(0 .6cqh 1.4cqh rgba(0,0,0,.35))}
+.pn.editavel .li,.pn.editavel .promo,.pn.editavel .topo .loja,.pn.editavel .rod,.pn.editavel .nv-faixa{cursor:pointer}.pn.editavel .li:hover{outline:.3cqh solid #f2b630!important}
 .pn.editavel .hora{cursor:grab;outline:.3cqh dashed rgba(255,255,255,.45);outline-offset:.4cqh;border-radius:.6cqh}
 .pn.editavel .logo{cursor:grab;outline:.3cqh dashed rgba(255,255,255,.55);outline-offset:.4cqh}
 .pn .div{position:absolute;z-index:4;background:rgba(255,255,255,.0)}
@@ -380,7 +381,7 @@ export function desenhar(alvo, cfgBase, opcoes = {}){
     const seloDe = it => { const k = it.selo || (it.of ? 'oferta' : ''); if (!k) return ''; const z = SELOS[k] || { txt: String(k).toUpperCase().slice(0, 22) };
       const bg = z.bg || cor.destaque, fg = z.fg || (contraste(cor.destaque, '#000000') > contraste(cor.destaque, '#ffffff') ? '#000' : '#fff');
       return `<span class="selo" style="background:${bg};color:${fg};${z.borda ? `box-shadow:0 0 0 .12em ${z.borda} inset;` : ''}">${esc(z.txt)}</span>`; };
-    const linha = it => `<div class="li${it.of || it.selo ? ' of' : ''}${it.esg ? ' esg' : ''}${it.desc ? ' combo' : ''}" style="font-size:calc(${fs}cqh * var(--lf,1));background:rgba(255,255,255,.05);outline-color:${(SELOS[it.selo]?.bg) || cor.destaque}">
+    const linha = it => `<div${opcoes.editavel ? ` data-n="${esc(it.n)}" title="Toque para editar ${esc(it.n)}"` : ''} class="li${it.of || it.selo ? ' of' : ''}${it.esg ? ' esg' : ''}${it.desc ? ' combo' : ''}" style="font-size:calc(${fs}cqh * var(--lf,1));background:rgba(255,255,255,.05);outline-color:${(SELOS[it.selo]?.bg) || cor.destaque}">
         <span class="esq">${cfg.fotosItens && it.foto ? `<img class="ft" src="${it.foto}" alt="">` : ''}<span class="nmw"><span class="nm">${esc(it.n)}</span>${seloDe(it)}${it.desc ? `<span class="desc">${esc(it.desc)}</span>` : ''}</span></span><span class="dots"></span><span class="pp" style="color:${cor.preco}">${!it.esg && it.de > it.p ? `<s style="font-size:.55em;opacity:.7;margin-right:.4em">de R$ ${brl(it.de)}</s>` : ''}${it.esg ? 'esgotado' : (it.de > it.p ? 'por ' : '') + 'R$ ' + brl(it.p)}<small>/${esc(it.u || 'kg')}</small></span></div>`;
     const itens = (cfg.itens || []).filter(i => i.n && !i.oculto);   // oculto = o dono tirou da TV sem apagar
     // 26/11/2026: logo da loja passando no meio das carnes

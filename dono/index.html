@@ -61,6 +61,22 @@
   @media print{body{background:#fff;color:#000}header,aside,.area,#toast{display:none}#impressao{display:block!important}}
   #impressao{display:none;font-family:Archivo,sans-serif;padding:20px}
   #impressao h2{font-size:30px;margin:0 0 4px}#impressao table td{border-bottom:1px solid #ccc;padding:8px;font-size:20px}#impressao td.p{text-align:right;font-weight:900}
+
+  /* 26/11/2026: menu lateral: um assunto por vez; engrenagem abre tudo */
+  main{grid-template-columns:minmax(380px,520px) 1fr}
+  aside.comMenu{display:grid;grid-template-columns:86px 1fr;gap:10px;align-items:start}
+  .menuLat{position:sticky;top:70px;display:flex;flex-direction:column;gap:4px;max-height:calc(100vh - 86px);overflow:auto}
+  .menuLat button{display:flex;flex-direction:column;align-items:center;gap:3px;padding:8px 4px;font-size:12px;font-weight:700;line-height:1.15;text-align:center;border-radius:10px;background:#171311}
+  .menuLat button svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:1.8}
+  .menuLat button[aria-current="true"]{background:var(--b);border-color:var(--b);color:#fff}
+  .menuLat .eng{margin-bottom:6px;background:#120f0e}
+  .menuLat .eng[aria-pressed="true"]{border-color:var(--o);color:var(--o)}
+  .secoes{display:flex;flex-direction:column;gap:12px;min-width:0}
+  aside.umPorVez .secoes>details:not(.ativa){display:none}
+  aside.umPorVez .secoes>details>summary{pointer-events:none}
+  aside.umPorVez .secoes>details>summary::after{content:''}
+  .it.foco{outline:3px solid #f2b630;outline-offset:2px}
+  @media (max-width:900px){aside.comMenu{grid-template-columns:1fr}.menuLat{position:static;flex-direction:row;overflow-x:auto;max-height:none}.menuLat button{min-width:74px}}
 </style>
 </head>
 <body>
@@ -74,9 +90,16 @@
 </header>
 
 <div id="faixaConta" role="status" hidden style="margin:12px 16px 0;padding:10px 14px;border-radius:12px;font-weight:600"></div>
+<dialog id="dKit" style="background:#1e1a18;color:#f6efe6;border:1px solid #372f2b;border-radius:14px;max-width:760px;width:94vw">
+  <h2 style="margin:0 0 4px;font:900 20px Archivo,sans-serif">Kits e combos prontos</h2>
+  <p style="margin:0 0 10px;font-size:13px;color:#c9b8ab">Toque num modelo. Ele entra na tabela com nome, o que vem no kit, foto e um preço sugerido pelos seus preços (cerca de 7% de desconto). Depois é só ajustar.</p>
+  <label style="margin:0 0 10px;color:#f6efe6"><input type="checkbox" id="kPromo"> Também colocar como promoção da semana (foto grande na TV)</label>
+  <div id="kGrade" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;max-height:60vh;overflow:auto"></div>
+  <div style="margin-top:10px;text-align:right"><button type="button" id="kFecha">Fechar</button></div>
+</dialog>
 <dialog id="dFoto" style="background:#1e1a18;color:#f6efe6;border:1px solid #372f2b;border-radius:14px;max-width:640px;width:94vw">
-  <div style="display:flex;gap:12px;align-items:center;margin-bottom:10px"><div id="dfAtual" style="width:64px;height:64px;border-radius:10px;background:#120f0e center/cover;display:grid;place-items:center;font-size:11px;color:#a99"></div><div><h2 style="margin:0;font:900 19px Archivo,sans-serif">Foto de <span id="dfNome"></span></h2><p style="margin:2px 0 0;font-size:13px;color:#c9b8ab">Toque numa foto da galeria, envie a sua ou deixe sem foto.</p></div></div>
-  <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px"><label class="btn prim" style="margin:0;cursor:pointer">Enviar foto minha<input type="file" id="dfArq" accept="image/*" hidden></label><button type="button" id="dfTira">Deixar sem foto</button><button type="button" id="dfFecha">Fechar</button></div>
+  <div style="display:flex;gap:12px;align-items:center;margin-bottom:10px"><div id="dfAtual" style="width:64px;height:64px;border-radius:10px;background:#120f0e center/cover;display:grid;place-items:center;font-size:11px;color:#a99"></div><div><h2 style="margin:0;font:900 19px Archivo,sans-serif">Foto de <span id="dfNome"></span></h2><p style="margin:2px 0 0;font-size:13px;color:#c9b8ab">Toque numa foto para usar. ✕ esconde ou exclui da galeria. "+ Adicionar foto nova" guarda a sua.</p></div></div>
+  <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px"><label class="btn prim" id="dfArqL" style="margin:0;cursor:pointer">Enviar foto minha<input type="file" id="dfArq" accept="image/*" hidden></label><button type="button" id="dfTira">Deixar sem foto</button><button type="button" id="dfVer" hidden></button><button type="button" id="dfFecha">Fechar</button></div>
   <div id="dfGrade" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:6px;max-height:56vh;overflow:auto"></div>
 </dialog>
 <dialog id="dEntrar" style="background:#1e1a18;color:#f6efe6;border:1px solid #372f2b;border-radius:14px;max-width:380px;width:92vw">
@@ -90,7 +113,7 @@
 </dialog>
 <main>
 <aside aria-label="Ajustes do painel">
-  <details open id="rapida"><summary>Escolha rápida</summary>
+  <details open id="rapida"><summary>Formato e movimento</summary>
     <p class="estado" style="margin:0 0 4px">Tudo o que você mudar aqui aparece na prévia e na TV na hora.</p>
     <label>Formato da tela</label><div class="grupo" id="rFormato"></div>
     <label>Colunas de preços</label><div class="grupo" id="rColunas"><button type="button" data-v="1">1 coluna</button><button type="button" data-v="2">2 colunas</button><button type="button" data-v="3">3 colunas</button></div>
@@ -103,17 +126,23 @@
       <div id="rCarnesLista" style="max-height:260px;overflow:auto;display:grid;grid-template-columns:1fr 1fr;gap:2px 10px;font-size:14px"></div>
       <p class="estado" style="margin:6px 0 0">Desmarcada sai da TV, mas continua guardada na tabela de preços.</p>
     </div>
-    <label for="rHora">Jeito de escrever a hora</label><select id="rHora"></select>
+    </details>
+  <details id="secHora"><summary>Hora e frases bíblicas</summary>
+<label for="rHora">Jeito de escrever a hora</label><select id="rHora"></select>
     <label style="margin-top:12px"><input type="checkbox" id="rFrasesOn"> Frases bíblicas passando embaixo da hora</label>
     <div id="rFrasesBox">
       <div id="rFrases" style="display:flex;flex-direction:column;gap:3px;font-size:13px;max-height:200px;overflow:auto"></div>
       <label for="rFrasesMinhas">Suas frases (uma por linha)</label><textarea id="rFrasesMinhas" rows="3" maxlength="900" style="width:100%;background:#120f0e;border:1px solid var(--l);color:var(--t);border-radius:8px;padding:8px;font:14px Inter,sans-serif"></textarea>
       <label for="rFrasesTempo">Trocar a frase a cada</label><select id="rFrasesTempo"><option value="8">8 segundos</option><option value="12">12 segundos</option><option value="20">20 segundos</option><option value="30">30 segundos</option><option value="60">1 minuto</option></select>
     </div>
-    <label style="margin-top:12px"><input type="checkbox" id="rLogoOn"> Logo passando no meio das carnes</label>
+    </details>
+  <details id="secLogoLista"><summary>Logo no meio das carnes</summary>
+<label style="margin-top:12px"><input type="checkbox" id="rLogoOn"> Logo passando no meio das carnes</label>
     <div class="lado"><div><label for="rLogoCada">Aparece a cada</label><select id="rLogoCada"><option value="4">4 carnes</option><option value="6">6 carnes</option><option value="8">8 carnes</option><option value="12">12 carnes</option></select></div><div><label for="rLogoArq">Outra logo para a lista</label><input type="file" id="rLogoArq" accept="image/*"></div></div>
     <p class="estado" id="rLogoInfo" style="margin:4px 0 0"></p>
-    <label style="margin-top:14px"><input type="checkbox" id="rNatalOn"> <b>Painel de Natal</b> (vale em qualquer modelo)</label>
+    </details>
+  <details id="secNatal"><summary>Natal</summary>
+<label style="margin-top:14px"><input type="checkbox" id="rNatalOn"> <b>Painel de Natal</b> (vale em qualquer modelo)</label>
     <div id="rNatalBox">
       <label>Enfeites</label><div class="grupo" id="rEnfeites"><button type="button" data-k="neve">Neve caindo</button><button type="button" data-k="luzes">Pisca-pisca no topo</button><button type="button" data-k="enfeites">Bolas penduradas</button><button type="button" data-k="estrelas">Estrelinhas</button><button type="button" data-k="borda">Borda de bengala</button><button type="button" data-k="faixa">Faixa com mensagem</button></div>
       <label for="rNatalMsg">Mensagem para o cliente (separe várias com | )</label><input type="text" id="rNatalMsg" maxlength="220" list="rNatalSug" placeholder="Feliz Natal! Obrigado pela confiança de todo o ano.">
@@ -121,7 +150,9 @@
       <label>Cor da faixa</label><div class="grupo" id="rNatalCor"><button type="button" data-v="#b3261e">Vermelho</button><button type="button" data-v="#1f6b35">Verde</button><button type="button" data-v="#8a6a12">Dourado</button><button type="button" data-v="#141414">Preto</button></div>
       <div class="grupo" style="margin-top:8px"><button type="button" id="rNatalCores">Pôr cores de Natal no painel</button><button type="button" id="rNatalVolta">Voltar as cores de antes</button></div>
     </div>
-    <label style="margin-top:14px">Fotos prontas para a promoção (toque para usar)</label>
+    </details>
+  <details id="secFotosPromo"><summary>Fotos da promoção</summary>
+<label style="margin-top:14px">Fotos prontas para a promoção (toque para usar)</label>
     <div id="rFotosPromo" style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px"></div>
   </details>
   <details open><summary>Modelo e acabamento</summary>
@@ -136,9 +167,17 @@
 
   <details open><summary>Tabela de preços</summary>
     <p class="estado" style="margin:0 0 8px">Arraste pela alça ⋮⋮ para mudar a ordem. ★ = oferta, Ø = esgotado.</p>
+    <div style="background:#171311;border:1px solid var(--l);border-radius:12px;padding:10px;margin-bottom:10px">
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap"><b style="font:800 14px Archivo,sans-serif">Fotos dos cortes</b><span class="estado" id="fcInfo"></span></div>
+      <label style="margin:6px 0"><input type="checkbox" id="fcMostrar"> Mostrar as fotos na TV</label>
+      <label for="fcTam" style="margin:4px 0">Tamanho das fotos na TV</label><input type="range" id="fcTam" min="60" max="220" step="10">
+      <p class="estado" style="margin:6px 0">Toque na foto para trocar (galeria ou foto nova). ✕ tira a foto do corte.</p>
+      <div id="fcGrade" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(68px,1fr));gap:6px;max-height:300px;overflow:auto"></div>
+      <div class="grupo" style="margin-top:8px"><button type="button" id="fcGaleria">Organizar galeria (adicionar / excluir fotos)</button></div>
+    </div>
     <div class="itens" id="itens"></div>
     <div class="grupo" style="margin-top:8px">
-      <button type="button" id="btnNovo">+ Corte</button><button type="button" id="btnCombo">+ Combo</button>
+      <button type="button" id="btnNovo">+ Corte</button><button type="button" id="btnCombo" class="prim">+ Kit / Combo pronto</button>
       <button type="button" id="btnImprimir">Imprimir tabela</button>
     </div>
     <label for="bibCat">Adicionar da biblioteca (102 cortes)</label>
@@ -292,7 +331,7 @@ const mudou = () => { salvar(); previa(); };
 
 // ---------- tabela de preços ----------
 const brlIn = v => Number(v || 0).toFixed(2);
-function itens(){ setTimeout(() => typeof semana === 'function' && semana());
+function itens(){ setTimeout(() => { typeof semana === 'function' && semana(); typeof fotosCortes === 'function' && fotosCortes(); });
   const box = $('itens'); box.innerHTML = '';
   cfg.itens.forEach((it, i) => {
     const d = document.createElement('div'); d.className = 'it'; d.dataset.i = i;
@@ -307,7 +346,7 @@ function itens(){ setTimeout(() => typeof semana === 'function' && semana());
       <input type="number" class="de" step="0.01" min="0" inputmode="decimal" placeholder="de R$" title="Preço antigo: aparece riscado (de/por)" aria-label="Preço antigo de ${it.n} (de/por)" value="${it.de || ''}">
       <button type="button" class="btn fc${it.foto ? ' tem' : ''}" title="Escolher, trocar ou tirar a foto" aria-label="Foto de ${it.n}" style="${it.foto ? `background:url('${it.foto}') left center/26px 100% no-repeat;padding-left:28px` : ''}">${it.foto ? 'Trocar' : 'Foto'}</button>
       <span></span><select class="sl" aria-label="Selo de destaque de ${it.n}"><option value="">Sem selo</option>${Object.entries(SELOS).map(([k, z]) => `<option value="${k}"${(it.selo || (it.of ? 'oferta' : '')) === k ? ' selected' : ''}>${z.txt}</option>`).join('')}</select>
-      <input type="text" class="ds" maxlength="60" placeholder="o que vem no combo (opcional)" aria-label="Descrição de ${it.n}" value="${(it.desc || '').replace(/"/g, '&quot;')}">`;
+      <input type="text" class="ds" maxlength="90" placeholder="o que vem no combo (opcional)" aria-label="Descrição de ${it.n}" value="${(it.desc || '').replace(/"/g, '&quot;')}">`;
     const [alca, nome, preco, un, of, es, rem, , cat, de, fc, , sl, ds] = d.children;
     sl.onchange = () => { it.selo = sl.value || undefined; it.of = !!sl.value; of.setAttribute('aria-pressed', it.of); mudou(); };
     ds.oninput = () => { it.desc = ds.value; mudou(); };
@@ -339,7 +378,36 @@ function arrastar(e, linha, i){
   };
   addEventListener('pointermove', sobre); addEventListener('pointerup', fim, { once: true });
 }
-$('btnCombo').onclick = () => { cfg.itens.push({ n: 'Combo churrasco', c: 'Kits e combos', p: 0, u: 'un', of: true, selo: 'combo', desc: 'Picanha 1 kg · linguiça 1 kg · carvão', esg: false }); cfg.agruparCategoria = true; itens(); mudou(); $('itens').lastChild.querySelector('input').select(); toast('Combo criado: escreva o nome, o preço e o que vem nele.'); };
+// 26/11/2026: kits e combos prontos: o dono escolhe o modelo e só ajusta nome, preço e foto
+const KITS = [
+  { n: 'Kit Churrasco', d: 'Picanha 1 kg · Toscana 1 kg · Coxinha da asa 1 kg', c: [['picanha', 1], ['linguiça toscana', 1], ['coxinha da asa', 1]], f: 'ancho-cru', p: 159.9 },
+  { n: 'Kit Churrasco Econômico', d: 'Costela 2 kg · Toscana 1 kg · Coxa e sobrecoxa 1 kg', c: [['costela', 2], ['linguiça toscana', 1], ['coxa e sobrecoxa', 1]], f: 'linguica-crua', p: 99.9 },
+  { n: 'Kit Semana Família', d: 'Moída 1 kg · Bisteca 1 kg · Filé de frango 1 kg · Toscana 1 kg', c: [['patinho', 1], ['bisteca', 1], ['filé de frango', 1], ['linguiça toscana', 1]], f: 'moida-crua', p: 109.9 },
+  { n: 'Kit Bife da Semana', d: 'Contrafilé 1 kg · Alcatra 1 kg · Coxão mole 1 kg', c: [['contrafilé', 1], ['alcatra', 1], ['coxão mole', 1]], f: 'contrafile-cru', p: 139.9 },
+  { n: 'Combo Frango', d: 'Coxa e sobrecoxa 2 kg · Asa 1 kg · Filé de frango 1 kg', c: [['coxa e sobrecoxa', 2], ['asa', 1], ['filé de frango', 1]], f: 'coxa-frango', p: 69.9 },
+  { n: 'Kit Feijoada', d: 'Costelinha 1 kg · Pé · Orelha · Bacon · Calabresa', c: [['costelinha', 1], ['pé suíno', .5], ['orelha suína', .5], ['bacon', .3], ['calabresa', .5]], f: 'costelinha-suina', p: 79.9 },
+  { n: 'Kit em branco', d: 'Escreva aqui o que vem no kit', c: [], f: null, p: 0 },
+];
+function precoKit(k){
+  if (!k.c.length) return k.p; let t = 0;
+  for (const [nome, q] of k.c){ const it = cfg.itens.find(i => i.n.toLowerCase() === nome) || cfg.itens.find(i => i.n.toLowerCase().startsWith(nome)); if (!it || !it.p) return k.p; t += it.p * q; }
+  return Math.max(1, Math.floor(t * .93)) + .9;   // ~7% de desconto, final ,90
+}
+function abrirKits(){
+  $('kGrade').innerHTML = KITS.map((k, n) => `<button type="button" data-k="${n}" style="text-align:left;padding:0;border-radius:12px;overflow:hidden;background:#171311;display:flex;flex-direction:column"><span style="display:block;aspect-ratio:3/2;width:100%;${k.f ? `background:url('${fotoGrande(k.f)}') center/cover` : 'background:#120f0e'}"></span><span style="padding:8px"><b style="display:block;font:800 15px Archivo,sans-serif">${k.n}</b><span style="display:block;font-size:12px;color:#c9b8ab;margin:3px 0">${k.d}</span>${k.p ? `<span style="color:#ffd27a;font-weight:800">sugerido R$ ${precoKit(k).toFixed(2).replace('.', ',')}</span>` : ''}</span></button>`).join('');
+  $('dKit').showModal();
+}
+$('kGrade').onclick = e => {
+  const b = e.target.closest('button'); if (!b) return; const k = KITS[+b.dataset.k], p = precoKit(k);
+  const it = { n: k.n, c: 'Kits e combos', p, u: 'un', of: false, selo: 'combo', desc: k.d, esg: false, ...(k.f ? { foto: fotoPequena(k.f) } : {}) };
+  cfg.itens.push(it); cfg.agruparCategoria = true; if (k.f) cfg.fotosItens = true;
+  if ($('kPromo').checked) cfg.promo = { ...(cfg.promo || {}), ativa: true, titulo: 'Combo da semana', item: k.n, preco: p, unidade: 'un', validade: k.d, ...(k.f ? { foto: fotoGrande(k.f) } : {}) };
+  $('dKit').close(); acab(); itens(); mudou();
+  setTimeout(() => { const r = $('itens').lastChild; r?.scrollIntoView({ block: 'center', behavior: 'smooth' }); r?.querySelector('input')?.select(); }, 80);
+  toast(p ? `${k.n} criado com preço sugerido de R$ ${p.toFixed(2).replace('.', ',')}. Confira o preço, o nome e a foto.` : 'Kit criado: escreva o nome, o preço e o que vem nele.');
+};
+$('kFecha').onclick = () => $('dKit').close();
+$('btnCombo').onclick = abrirKits;
 $('btnNovo').onclick = () => { cfg.itens.push({ n: 'Novo corte', c: 'Bovinos', p: 0, u: 'kg', of: false, esg: false }); itens(); mudou(); $('itens').lastChild.querySelector('input').select(); };
 $('btnReaj').onclick = () => {
   const pct = parseFloat($('reaj').value.replace(',', '.')); if (!pct) return;
@@ -380,8 +448,9 @@ grupo('orient', { paisagem: 'Deitada (16:9)', retrato: 'Em pé (9:16)' }, 'orien
 liga('vel', e => e.value = cfg.velocidade, e => cfg.velocidade = +e.value);
 liga('fonte', e => e.value = cfg.tamFonte, e => cfg.tamFonte = +e.value);
 ['tituloTam', 'promoTam', 'fotoTam', 'rodTam'].forEach(k => liga(k, e => e.value = cfg[k] || 100, e => cfg[k] = +e.value));
+liga('fcTam', e => e.value = cfg.fotoTam || 100, e => { cfg.fotoTam = +e.value; $('fotoTam').value = e.value; if (!cfg.fotosItens){ cfg.fotosItens = true; acab(); } });
 // a seta da prévia muda o cfg direto: os controles do lado acompanham
-function sincTam(){ const m = { fonte: 'tamFonte', tituloTam: 'tituloTam', promoTam: 'promoTam', fotoTam: 'fotoTam', rodTam: 'rodTam', logoTam: 'logoTam', horaTam: 'horaTam' };
+function sincTam(){ const m = { fcTam: 'fotoTam', fonte: 'tamFonte', tituloTam: 'tituloTam', promoTam: 'promoTam', fotoTam: 'fotoTam', rodTam: 'rodTam', logoTam: 'logoTam', horaTam: 'horaTam' };
   Object.entries(m).forEach(([id, k]) => { const e = $(id); if (e) e.value = cfg[k] ?? (k === 'logoTam' ? 14 : 100); }); }
 // tocar na promoção da prévia abre a escolha da foto
 $('previa').addEventListener('click', e => { if (e.target.closest('.alca-tam')) return; if (e.target.closest('.promo .foto, .promo .semfoto')) $('promoFoto').click(); });
@@ -647,21 +716,54 @@ try { const a = sessionStorage.getItem('dono-aviso'); if (a){ sessionStorage.rem
   b.style.cssText = `aspect-ratio:1;padding:0;border-radius:8px;background:url(${f.so ? fotoGrande(f.id) : fotoPequena(f.id)}) center/cover`;
   b.onclick = () => { cfg.promo.foto = fotoGrande(f.id); mudou(); toast('Foto da promoção trocada.'); }; $('promoProntas').append(b); });
 // 26/11/2026: escolher a foto de cada corte (galeria pronta, foto própria ou sem foto)
-let fotoDe = null;
-function escolherFoto(it){
-  fotoDe = it; $('dfNome').textContent = it.n;
-  $('dfAtual').style.backgroundImage = it.foto ? `url('${it.foto}')` : 'none'; $('dfAtual').textContent = it.foto ? '' : 'sem foto';
-  $('dfTira').hidden = !it.foto;
-  const sug = fotoPara(it.n, it.c);
-  const lista = FOTOS.filter(f => FOTOS_HQ.includes(f.id)).sort((a, b) => (fotoPequena(b.id) === sug) - (fotoPequena(a.id) === sug));
-  $('dfGrade').innerHTML = lista.map(f => `<button type="button" data-id="${f.id}" title="${f.nome}" aria-label="Usar foto: ${f.nome}" style="position:relative;padding:0;aspect-ratio:1;border-radius:9px;background:url('${fotoPequena(f.id)}') center/cover;${fotoPequena(f.id) === it.foto ? 'outline:3px solid var(--o);' : ''}">${fotoPequena(f.id) === sug ? '<span style="position:absolute;left:3px;top:3px;background:#f2b630;color:#111;font-size:10px;font-weight:800;padding:1px 5px;border-radius:5px">indicada</span>' : ''}<span style="position:absolute;left:0;right:0;bottom:0;background:rgba(0,0,0,.65);color:#fff;font-size:11px;padding:2px 3px;border-radius:0 0 9px 9px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${f.nome}</span></button>`).join('');
-  $('dFoto').showModal();
+let fotoDe = null, verEscondidas = false;
+// galeria: fotos prontas (alta resolução) que o dono não escondeu + as fotos que ele mesmo enviou (cfg.galeria)
+const escondidas = () => cfg.fotosEscondidas || [];
+function tile(src, nome, attrs, marcada, extra){ return `<div style="position:relative"><button type="button" ${attrs} title="${nome}" aria-label="Usar foto: ${nome}" style="display:block;width:100%;padding:0;aspect-ratio:1;border-radius:9px;background:url('${src}') center/cover;${marcada ? 'outline:3px solid var(--o);' : ''}"><span style="position:absolute;left:0;right:0;bottom:0;background:rgba(0,0,0,.65);color:#fff;font-size:11px;padding:2px 3px;border-radius:0 0 9px 9px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${nome}</span></button>${extra || ''}</div>`; }
+const xBtn = (attrs, rot, tit) => `<button type="button" ${attrs} title="${tit}" aria-label="${tit}" style="position:absolute;right:3px;top:3px;width:24px;height:24px;padding:0;border-radius:50%;background:rgba(0,0,0,.75);color:#fff;font-size:13px;line-height:1;border:1px solid rgba(255,255,255,.5)">${rot}</button>`;
+function gradeFotos(){
+  const it = fotoDe, sug = it ? fotoPara(it.n, it.c) : null, esc = escondidas();
+  const minhas = (cfg.galeria || []).map((g, k) => tile(g.src, g.n || 'Minha foto', `data-g="${k}"`, it?.foto === g.src, xBtn(`data-gx="${k}"`, '✕', 'Excluir esta foto da galeria')));
+  const prontas = FOTOS.filter(f => FOTOS_HQ.includes(f.id) && (verEscondidas ? esc.includes(f.id) : !esc.includes(f.id)))
+    .sort((a, b) => (fotoPequena(b.id) === sug) - (fotoPequena(a.id) === sug))
+    .map(f => tile(fotoPequena(f.id), (fotoPequena(f.id) === sug ? '★ ' : '') + f.nome, `data-id="${f.id}"`, it?.foto === fotoPequena(f.id),
+      verEscondidas ? xBtn(`data-volta="${f.id}"`, '↺', 'Voltar esta foto para a galeria') : xBtn(`data-esc="${f.id}"`, '✕', 'Esconder esta foto da galeria')));
+  $('dfGrade').innerHTML = (verEscondidas ? '' : `<label style="margin:0;display:grid;place-items:center;aspect-ratio:1;border:2px dashed var(--o);border-radius:9px;cursor:pointer;color:var(--o);font-weight:800;text-align:center;font-size:13px">+ Adicionar foto nova<input type="file" accept="image/*" hidden data-nova></label>` + minhas.join('')) + prontas.join('');
+  $('dfVer').textContent = verEscondidas ? 'Voltar para a galeria' : (esc.length ? `Ver fotos escondidas (${esc.length})` : '');
+  $('dfVer').hidden = !verEscondidas && !esc.length;
 }
+function escolherFoto(it){
+  fotoDe = it; verEscondidas = false; $('dfNome').textContent = it ? it.n : 'galeria';
+  $('dfAtual').style.backgroundImage = it?.foto ? `url('${it.foto}')` : 'none'; $('dfAtual').textContent = it?.foto ? '' : (it ? 'sem foto' : '');
+  $('dfTira').hidden = !it?.foto; $('dfArqL').hidden = !it;
+  gradeFotos(); $('dFoto').showModal();
+}
+async function fotoNova(f){ const src = await reduzirImagem(f, 240, .85); cfg.galeria = [...(cfg.galeria || []), { src, n: fotoDe?.n || 'Minha foto' }].slice(-24); return src; }
 function fotoPronta(){ if (!cfg.fotosItens){ cfg.fotosItens = true; acab(); } itens(); mudou(); $('dFoto').close(); }
-$('dfGrade').onclick = e => { const b = e.target.closest('button'); if (!b || !fotoDe) return; fotoDe.foto = fotoPequena(b.dataset.id); fotoPronta(); toast(`Foto de ${fotoDe.n} trocada.`); };
-$('dfArq').onchange = async e => { const f = e.target.files[0]; e.target.value = ''; if (!f || !fotoDe) return; try { fotoDe.foto = await reduzirImagem(f, 200, .82); fotoPronta(); toast(`Sua foto entrou em ${fotoDe.n}.`); } catch (er) { toast(er.message); } };
+$('dfGrade').onclick = e => {
+  const b = e.target.closest('button'); if (!b) return;
+  if (b.dataset.esc){ cfg.fotosEscondidas = [...escondidas(), b.dataset.esc]; mudou(); gradeFotos(); toast('Foto escondida da galeria.'); return; }
+  if (b.dataset.volta){ cfg.fotosEscondidas = escondidas().filter(x => x !== b.dataset.volta); mudou(); gradeFotos(); toast('Foto de volta na galeria.'); return; }
+  if (b.dataset.gx){ const g = cfg.galeria[+b.dataset.gx]; cfg.galeria.splice(+b.dataset.gx, 1); cfg.itens.forEach(i => { if (i.foto === g.src) delete i.foto; }); itens(); mudou(); gradeFotos(); toast('Foto excluída.'); return; }
+  if (!fotoDe) return;
+  if (b.dataset.g) fotoDe.foto = cfg.galeria[+b.dataset.g].src; else if (b.dataset.id) fotoDe.foto = fotoPequena(b.dataset.id); else return;
+  fotoPronta(); toast(`Foto de ${fotoDe.n} trocada.`);
+};
+$('dfGrade').onchange = async e => { if (!e.target.matches('[data-nova]')) return; const f = e.target.files[0]; if (!f) return; try { const src = await fotoNova(f); if (fotoDe){ fotoDe.foto = src; fotoPronta(); toast(`Foto nova em ${fotoDe.n}.`); } else { mudou(); gradeFotos(); toast('Foto adicionada na galeria.'); } } catch (er) { toast(er.message); } };
+$('dfArq').onchange = async e => { const f = e.target.files[0]; e.target.value = ''; if (!f || !fotoDe) return; try { fotoDe.foto = await fotoNova(f); fotoPronta(); toast(`Sua foto entrou em ${fotoDe.n}.`); } catch (er) { toast(er.message); } };
+$('dfVer').onclick = () => { verEscondidas = !verEscondidas; gradeFotos(); };
 $('dfTira').onclick = () => { if (!fotoDe) return; delete fotoDe.foto; itens(); mudou(); $('dFoto').close(); toast(`${fotoDe.n} ficou sem foto.`); };
 $('dfFecha').onclick = () => $('dFoto').close();
+// 26/11/2026: fotos dos cortes no mesmo lugar das miniaturas (tabela de preços)
+function fotosCortes(){
+  const box = $('fcGrade'); if (!box) return;
+  box.innerHTML = cfg.itens.map((it, k) => it.n ? `<div style="position:relative"><button type="button" data-k="${k}" title="Trocar a foto de ${it.n}" style="display:block;width:100%;padding:0;aspect-ratio:1;border-radius:9px;${it.foto ? `background:url('${it.foto}') center/cover` : 'background:#120f0e;border:2px dashed #5a4a40'};${it.oculto ? 'opacity:.4' : ''}">${it.foto ? '' : '<span style="color:var(--o);font-weight:800;font-size:20px">+</span>'}<span style="position:absolute;left:0;right:0;bottom:0;background:rgba(0,0,0,.7);color:#fff;font-size:11px;padding:2px 3px;border-radius:0 0 9px 9px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${it.n.replace(/</g, '&lt;')}</span></button>${it.foto ? xBtn(`data-x="${k}"`, '✕', 'Tirar a foto de ' + it.n.replace(/"/g, '')) : ''}</div>` : '').join('');
+  $('fcMostrar').checked = !!cfg.fotosItens; $('fcInfo').textContent = `${cfg.itens.filter(i => i.foto).length} de ${cfg.itens.length} com foto`;
+}
+$('fcGrade').onclick = e => { const b = e.target.closest('button'); if (!b) return; if (b.dataset.x){ delete cfg.itens[+b.dataset.x].foto; itens(); mudou(); return; } const it = cfg.itens[+b.dataset.k]; if (it) escolherFoto(it); };
+$('fcMostrar').onchange = e => { cfg.fotosItens = e.target.checked; acab(); mudou(); };
+$('fcGaleria').onclick = () => escolherFoto(null);
+fotosCortes();
 $('tFotosTrocar').onclick = () => { let n = 0; cfg.itens.forEach(it => { if (it.foto && it.foto.startsWith('data:')) return; const f = fotoPara(it.n, it.c); if (f && f !== it.foto){ it.foto = f; n++; } }); cfg.fotosItens = true; acab(); itens(); mudou(); toast(n ? `${n} foto(s) atualizadas. As fotos que você mesmo enviou ficaram.` : 'Todas já estão com a foto indicada.'); };
 $('tFotosTodas').onclick = () => { const n = cfg.itens.filter(i => i.foto).length; if (!n) return toast('Nenhum corte tem foto.'); cfg.itens.forEach(i => delete i.foto); itens(); mudou(); toast(`Fotos tiradas de ${n} corte(s). Para voltar: "Pôr fotos prontas nos cortes".`); };
 $('tFotosAuto').onclick = () => { let n = 0; cfg.itens.forEach(it => { if (!it.foto){ const f = fotoPara(it.n, it.c); if (f){ it.foto = f; n++; } } }); cfg.fotosItens = true; acab(); itens(); mudou(); toast(n ? `${n} corte(s) ganharam foto pronta. Os que ficaram sem foto você coloca a sua.` : 'Nenhum corte novo com foto pronta parecida.'); };
@@ -699,6 +801,75 @@ $('semanaLimpa').onclick = () => { const d = diaPrevia; cfg.itens.forEach(it => 
 itens(); previa();
 addEventListener('resize', () => previa());
 semana();
+
+// ---------- 26/11/2026: menu lateral (um assunto por vez) + clique na prévia abre o que mexe naquilo ----------
+(function menuLateral(){
+  const aside = document.querySelector('aside'); const ds = [...aside.querySelectorAll(':scope > details')];
+  const nomeDe = d => d.querySelector('summary').textContent.trim();
+  const ach = t => ds.find(d => nomeDe(d).startsWith(t));
+  // juntar blocos que são do mesmo assunto
+  const junta = (de, para) => { if (!de || !para) return; [...de.childNodes].filter(n => n.nodeName !== 'SUMMARY').forEach(n => para.append(n)); de.remove(); };
+  junta(ach('Logo no meio'), ach('Logo e identidade')); junta(ach('Fotos da promo'), ach('Promoção da semana'));
+  const I = p => `<svg viewBox="0 0 24 24" aria-hidden="true">${p}</svg>`;
+  const MENU = [
+    ['Formato e movimento', 'Formato', I('<rect x="3" y="4" width="18" height="13" rx="2"/><path d="M8 21h8M12 17v4"/>')],
+    ['Tabela de preços', 'Preços', I('<path d="M4 6h16M4 12h16M4 18h10"/>')],
+    ['Promoção da semana', 'Promoção', I('<path d="M3 12l9-9 9 9-9 9z"/><circle cx="12" cy="12" r="2"/>')],
+    ['Natal', 'Natal', I('<path d="M12 3l5 8h-3l4 6H6l4-6H7z"/><path d="M12 17v4"/>')],
+    ['Hora e frases', 'Hora e frases', I('<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>')],
+    ['Logo e identidade', 'Logo e nome', I('<rect x="4" y="4" width="16" height="16" rx="4"/><path d="M8 15l3-3 2 2 3-4"/>')],
+    ['Modelo e acabamento', 'Visual', I('<path d="M4 20l4-1 11-11-3-3L5 16z"/>')],
+    ['Cores', 'Cores', I('<circle cx="12" cy="12" r="9"/><circle cx="9" cy="9" r="1.5"/><circle cx="15" cy="9" r="1.5"/><circle cx="9" cy="15" r="1.5"/>')],
+    ['Layout e movimento', 'Tamanhos', I('<path d="M4 9V4h5M20 15v5h-5M4 4l7 7M20 20l-7-7"/>')],
+    ['Horário e rodapé', 'Horário e rodapé', I('<path d="M3 17h18M3 21h18"/><rect x="5" y="4" width="14" height="9" rx="2"/>')],
+    ['Painel da semana', 'Semana', I('<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/>')],
+    ['Fila de senhas', 'Senhas', I('<path d="M5 4h14v16l-3-2-2 2-2-2-2 2-2-2-3 2z"/>')],
+    ['Cópia de segurança', 'Backup', I('<path d="M12 4v11M7 10l5 5 5-5M4 20h16"/>')],
+  ];
+  const nav = document.createElement('nav'); nav.className = 'menuLat'; nav.setAttribute('aria-label', 'Assuntos do painel');
+  const caixa = document.createElement('div'); caixa.className = 'secoes';
+  const eng = document.createElement('button'); eng.type = 'button'; eng.className = 'eng'; eng.title = 'Abrir todos os menus de uma vez'; eng.setAttribute('aria-pressed', 'false');
+  eng.innerHTML = I('<circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M4.9 19.1L7 17M17 7l2.1-2.1"/>') + 'Ver tudo';
+  nav.append(eng);
+  const sec = {};
+  MENU.forEach(([ini, rot, ic]) => { const d = ach(ini); if (!d) return; const b = document.createElement('button'); b.type = 'button'; b.innerHTML = ic + rot; b.onclick = () => abrirSecao(d); nav.append(b); sec[ini] = d; d._btn = b; });
+  ds.filter(d => d.isConnected && !d._btn).forEach(d => { const b = document.createElement('button'); b.type = 'button'; b.textContent = nomeDe(d); b.onclick = () => abrirSecao(d); nav.append(b); d._btn = b; });
+  [...aside.querySelectorAll(':scope > details')].forEach(d => caixa.append(d));
+  aside.append(nav, caixa); aside.classList.add('comMenu');
+  let tudo = false; try { tudo = localStorage.getItem('dono-menu-tudo') === '1'; } catch {}
+  function aplicar(){ aside.classList.toggle('umPorVez', !tudo); eng.setAttribute('aria-pressed', tudo); eng.lastChild.textContent = tudo ? 'Um por vez' : 'Ver tudo'; }
+  window.abrirSecao = function(d, rolar = true){
+    if (typeof d === 'string') d = sec[d] || ach(d); if (!d) return;
+    caixa.querySelectorAll(':scope > details').forEach(x => { x.classList.toggle('ativa', x === d); x._btn?.setAttribute('aria-current', x === d); });
+    d.open = true; try { localStorage.setItem('dono-secao', nomeDe(d)); } catch {}
+    if (rolar) (tudo ? d : aside).scrollIntoView({ block: 'start', behavior: 'smooth' });
+  };
+  eng.onclick = () => { tudo = !tudo; try { localStorage.setItem('dono-menu-tudo', tudo ? '1' : '0'); } catch {} if (tudo) caixa.querySelectorAll(':scope > details').forEach(x => x.open = true); aplicar(); };
+  aplicar();
+  let ini = null; try { ini = localStorage.getItem('dono-secao'); } catch {}
+  abrirSecao((ini && ach(ini)) || sec['Formato e movimento'] || caixa.firstElementChild, false);
+  // clique na prévia: abre do lado esquerdo o que mexe naquilo
+  $('previa').addEventListener('click', e => {
+    if (e.target.closest('.alca-tam, .div')) return;
+    const li = e.target.closest('.li[data-n]');
+    if (li){
+      const k = cfg.itens.findIndex(i => i.n === li.dataset.n); if (k < 0) return;
+      abrirSecao('Tabela de preços', false);
+      const r = $('itens').children[k]; if (!r) return;
+      document.querySelectorAll('.it.foco').forEach(x => x.classList.remove('foco'));
+      r.classList.add('foco'); r.scrollIntoView({ block: 'center', behavior: 'smooth' });
+      setTimeout(() => { const n = r.querySelector('input[type=text]'); n?.focus(); n?.select(); }, 350);
+      setTimeout(() => r.classList.remove('foco'), 4000);
+      toast(`Editando: ${li.dataset.n}. Nome, preço, foto, oferta e selo estão aqui do lado.`);
+      return;
+    }
+    if (e.target.closest('.promo')) return abrirSecao('Promoção da semana');
+    if (e.target.closest('.nv-faixa')) return abrirSecao('Natal');
+    if (e.target.closest('.topo .loja, .topo .sub')) return abrirSecao('Logo e identidade');
+    if (e.target.closest('.rod')) return abrirSecao('Horário e rodapé');
+    if (e.target.closest('.logo')) return abrirSecao('Logo e identidade');
+  });
+})();
 </script>
 </body>
 </html>
